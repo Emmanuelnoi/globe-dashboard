@@ -1,14 +1,19 @@
 {
-  "name": "global-dashboard",
+  "name": "3d-global-dashboard",
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "eslint .",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "typecheck": "tsc --noEmit --skipLibCheck || true",
+    "clean": "rimraf dist",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "prepare": "husky install"
   },
   "prettier": {
@@ -33,23 +38,27 @@
     "postcss": "^8.5.6",
     "rxjs": "~7.8.0",
     "tailwindcss": "^4.1.11",
+    "three": "^0.179.1",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-eslint/eslint-plugin": "^20.1.1",
+    "@angular-eslint/builder": "20.1.1",
     "@angular/build": "^20.1.5",
     "@angular/cli": "^20.1.5",
     "@angular/compiler-cli": "^20.1.0",
     "@eslint/css": "^0.10.0",
-    "@eslint/js": "^9.33.0",
+    "@eslint/js": "^9.29.0",
     "@eslint/json": "^0.13.1",
     "@eslint/markdown": "^7.1.0",
     "@types/jasmine": "~5.1.0",
-    "eslint": "^9.33.0",
+    "@types/three": "^0.179.0",
+    "angular-eslint": "20.1.1",
+    "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.3.0",
+    "husky": "^9.1.7",
     "jasmine-core": "~5.8.0",
     "jiti": "^2.5.1",
     "karma": "~6.4.0",
@@ -57,11 +66,12 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "ng-packagr": "^20.1.0",
     "prettier": "3.6.2",
     "pretty-quick": "^4.2.2",
     "simple-git-hooks": "^2.13.1",
     "typescript": "~5.8.2",
-    "typescript-eslint": "^8.39.1"
+    "typescript-eslint": "8.34.1"
   },
   "lint-staged": {
     "*.js": "eslint --cache --fix"
