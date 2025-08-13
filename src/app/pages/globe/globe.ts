@@ -9,7 +9,11 @@ import {
 } from '@angular/core';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { getStarfield } from '@lib/utils';
+import {
+  getStarfield,
+  loadGeoJSON,
+  createInteractiveCountries,
+} from '@lib/utils';
 
 @Component({
   selector: 'app-globe',
@@ -43,28 +47,39 @@ export class Globe implements AfterViewInit, OnDestroy {
   private camera!: THREE.PerspectiveCamera;
   private scene!: THREE.Scene;
   private renderer!: THREE.WebGLRenderer;
-  private mesh!: THREE.Mesh;
   private animationId?: number;
   private controls!: OrbitControls;
+
+  // 3D object
+  private sphere!: THREE.LineSegments;
   private starfield!: THREE.Points;
+  private countries!: THREE.Group;
 
   ngAfterViewInit(): void {
+    // 1. Scene
     const width = this.rendererContainer.nativeElement.clientWidth;
     const height = this.rendererContainer.nativeElement.clientHeight;
 
+    // Add fog for atmospheric effeect
+    this.scene = new THREE.Scene();
+    this.scene.fog = new THREE.FogExp2(0x000000, 1);
+
     // Camera
-    this.camera = new THREE.PerspectiveCamera(75, width / height, 1, 100);
+    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 100);
     this.camera.position.z = 5;
 
     // Scene
     this.scene = new THREE.Scene();
 
-    // sphere with edges
-    const geometry = new THREE.SphereGeometry();
-    const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff });
-    const edges = new THREE.EdgesGeometry(geometry);
-    const line = new THREE.LineSegments(edges, lineMat);
-    this.scene.add(line);
+    const geometry = new THREE.SphereGeometry(2);
+    const lineMat = new THREE.LineBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.2,
+    });
+    const edges = new THREE.EdgesGeometry(geometry, 1);
+    this.sphere = new THREE.LineSegments(edges, lineMat);
+    this.scene.add(this.sphere);
 
     // Starfield background
     this.starfield = getStarfield({ numStars: 1000 });
@@ -83,6 +98,17 @@ export class Globe implements AfterViewInit, OnDestroy {
     // Start animation
     this.animate = this.animate.bind(this);
     this.renderer.setAnimationLoop(this.animate);
+
+    this.loadAllData();
+  }
+
+  private async loadAllData(): Promise<void> {
+    // Load countries data (essential for map functionality)
+    const countriesData = await loadGeoJSON('/data/countries-50m.geojson');
+
+    // Create countries layer (bottom layer)
+    const countriesObject = createInteractiveCountries(countriesData, 2);
+    this.scene.add(countriesObject);
   }
 
   private animate(): void {
