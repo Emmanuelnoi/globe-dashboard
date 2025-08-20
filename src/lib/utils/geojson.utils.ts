@@ -157,17 +157,19 @@ class CountryMaterials {
 
   // Shared material instances to reduce memory usage
   public normal = {
-    fill: new THREE.MeshBasicMaterial({
-      color: 0xededed,
+    // fill: new THREE.MeshBasicMaterial({
+    //   color: 0x00ff00,
+    //   // color: 0xffffff,
+    //   transparent: false,
+    //   opacity: 1,
+    //   // side: THREE.DoubleSide,
+    //   fog: false,
+    // }),
+    border: new THREE.LineBasicMaterial({
+      color: 0xff0000,
+      // color: 0x888888,
       transparent: true,
       opacity: 0.9,
-      side: THREE.DoubleSide,
-      fog: true,
-    }),
-    border: new THREE.LineBasicMaterial({
-      color: 0x888888,
-      transparent: true,
-      opacity: 0.8,
       fog: true,
     }),
   };
@@ -285,16 +287,16 @@ function createPolygonMeshes(
   const meshes: THREE.Mesh[] = [];
 
   // Create filled geometry at exact radius for accurate raycasting
-  const fillGeometry = createFilledPolygonGeometry(coords, radius);
-  if (fillGeometry) {
-    // Use shared material instance instead of cloning for better performance
-    const fillMesh = new THREE.Mesh(
-      fillGeometry,
-      COUNTRY_MATERIALS.normal.fill,
-    );
-    fillMesh.userData = { name, type: 'fill', isCountryMesh: true };
-    meshes.push(fillMesh);
-  }
+  // const fillGeometry = createFilledPolygonGeometry(coords, radius);
+  // if (fillGeometry) {
+  //   // Use shared material instance instead of cloning for better performance
+  //   const fillMesh = new THREE.Mesh(
+  //     fillGeometry,
+  //     COUNTRY_MATERIALS.normal.fill,
+  //   );
+  //   fillMesh.userData = { name, type: 'fill', isCountryMesh: true };
+  //   meshes.push(fillMesh);
+  // }
 
   // Create border outline at the same radius as fill for consistent interaction
   const points = createPolygonGeometry(coords, radius);

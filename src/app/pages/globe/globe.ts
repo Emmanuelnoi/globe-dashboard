@@ -11,6 +11,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import {
   getStarfield,
+  getFresnelMat,
   loadGeoJSON,
   createInteractiveCountries,
 } from '@lib/utils';
@@ -49,11 +50,13 @@ export class Globe implements AfterViewInit, OnDestroy {
   private renderer!: THREE.WebGLRenderer;
   private animationId?: number;
   private controls!: OrbitControls;
+  private fresnelMat = getFresnelMat();
 
   // 3D object
   private sphere!: THREE.LineSegments;
   private starfield!: THREE.Points;
   private countries!: THREE.Group;
+  private loader!: THREE.TextureLoader;
 
   ngAfterViewInit(): void {
     // 1. Scene
@@ -71,19 +74,40 @@ export class Globe implements AfterViewInit, OnDestroy {
     // Scene
     this.scene = new THREE.Scene();
 
-    const geometry = new THREE.SphereGeometry(2);
-    const lineMat = new THREE.LineBasicMaterial({
-      color: 0xffffff,
-      transparent: true,
-      opacity: 0.2,
-    });
-    const edges = new THREE.EdgesGeometry(geometry, 1);
-    this.sphere = new THREE.LineSegments(edges, lineMat);
-    this.scene.add(this.sphere);
+    this.loader = new THREE.TextureLoader();
+    const geometry = new THREE.SphereGeometry(2, 64, 64);
+    const texture = this.loader.load('/textures/earthspec1k.jpg');
+    // const texture = this.loader.load('/textures/earthbump1k.jpg')
+    const material = new THREE.MeshStandardMaterial({ map: texture });
+    const earthMesh = new THREE.Mesh(geometry, material);
+    this.scene.add(earthMesh);
+
+    // optional
+    // const lineMat = new THREE.LineBasicMaterial({
+    //   color: 0x1b1b1b,
+    //   transparent: true,
+    //   opacity: 0.2,
+    // });
+    // const edges = new THREE.EdgesGeometry(geometry, 1);
+    // this.sphere = new THREE.LineSegments(edges, lineMat);
+    // this.scene.add(this.sphere);
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    this.scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 5, 5);
+    this.scene.add(directionalLight);
 
     // Starfield background
     this.starfield = getStarfield({ numStars: 1000 });
     this.scene.add(this.starfield);
+
+    // add atmosphere
+    const glowMesh = new THREE.Mesh(geometry, this.fresnelMat);
+    glowMesh.scale.setScalar(1);
+    this.scene.add(glowMesh);
 
     // Renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
