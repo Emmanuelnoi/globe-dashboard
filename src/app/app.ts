@@ -1,10 +1,11 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Globe } from './pages/globe/globe';
+import { Sidebar } from './pages/sidebar/sidebar';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Globe],
+  imports: [RouterOutlet, Globe, Sidebar],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

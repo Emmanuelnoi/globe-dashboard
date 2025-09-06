@@ -157,17 +157,9 @@ class CountryMaterials {
 
   // Shared material instances to reduce memory usage
   public normal = {
-    // fill: new THREE.MeshBasicMaterial({
-    //   color: 0x00ff00,
-    //   // color: 0xffffff,
-    //   transparent: false,
-    //   opacity: 1,
-    //   // side: THREE.DoubleSide,
-    //   fog: false,
-    // }),
     border: new THREE.LineBasicMaterial({
-      color: 0xff0000,
-      // color: 0x888888,
+      color: 0x9fc5e8,
+      // color: 0x6fa8dc,
       transparent: true,
       opacity: 0.9,
       fog: true,

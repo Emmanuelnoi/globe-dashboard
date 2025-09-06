@@ -42,6 +42,7 @@ import {
   ],
 })
 export class Globe implements AfterViewInit, OnDestroy {
+  @ViewChild('canvas') private canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('rendererContainer', { static: true })
   private rendererContainer!: ElementRef<HTMLDivElement>;
 
@@ -76,21 +77,15 @@ export class Globe implements AfterViewInit, OnDestroy {
 
     this.loader = new THREE.TextureLoader();
     const geometry = new THREE.SphereGeometry(2, 64, 64);
-    const texture = this.loader.load('/textures/earthspec1k.jpg');
-    // const texture = this.loader.load('/textures/earthbump1k.jpg')
-    const material = new THREE.MeshStandardMaterial({ map: texture });
+    const texture = this.loader.load('/textures/earthspec1k-m.png');
+    const material = new THREE.MeshStandardMaterial({
+      map: texture,
+      transparent: true,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
     const earthMesh = new THREE.Mesh(geometry, material);
     this.scene.add(earthMesh);
-
-    // optional
-    // const lineMat = new THREE.LineBasicMaterial({
-    //   color: 0x1b1b1b,
-    //   transparent: true,
-    //   opacity: 0.2,
-    // });
-    // const edges = new THREE.EdgesGeometry(geometry, 1);
-    // this.sphere = new THREE.LineSegments(edges, lineMat);
-    // this.scene.add(this.sphere);
 
     // Lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -104,7 +99,7 @@ export class Globe implements AfterViewInit, OnDestroy {
     this.starfield = getStarfield({ numStars: 1000 });
     this.scene.add(this.starfield);
 
-    // add atmosphere
+    // add Atmosphere Glow
     const glowMesh = new THREE.Mesh(geometry, this.fresnelMat);
     glowMesh.scale.setScalar(1);
     this.scene.add(glowMesh);
@@ -115,9 +110,14 @@ export class Globe implements AfterViewInit, OnDestroy {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.rendererContainer.nativeElement.appendChild(this.renderer.domElement);
 
-    // Add OrbitControls
+    // // Add OrbitControls
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true; // smooth movement
+
+    // restrict zoom in/out
+    this.controls.minDistance = 2.5; // close enough to see details
+    this.controls.maxDistance = 8; // far enough to see the whole globe + glow
+    this.controls.zoomSpeed = 0.5; // slower zoom
 
     // Start animation
     this.animate = this.animate.bind(this);
