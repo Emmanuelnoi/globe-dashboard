@@ -17,6 +17,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IconComponent } from '@lib/index';
+import { TableKeyboardDirective } from '@lib/directives/table-keyboard.directive';
 
 interface Item {
   id: string;
@@ -27,7 +28,7 @@ interface Item {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, TableKeyboardDirective],
   template: `
     <aside
       class="sidebar"
@@ -54,15 +55,26 @@ interface Item {
       </header>
 
       <nav class="glass-card" role="navigation" aria-label="Main sidebar">
-        <ul #menu class="menu" role="menu" (keydown)="onKeydown($event)">
+        <ul
+          #menu
+          class="menu"
+          role="menu"
+          tabindex="0"
+          [appTableKeyboard]="items.length"
+          [(focusedIndex)]="focusedIndexValue"
+          (navigate)="focusItem($event)"
+          (activate)="activate($event)"
+          (pointerdown)="menu.focus()"
+          [attr.aria-activedescendant]="'menuitem-' + focusedIndex()"
+        >
           @for (item of items; let i = $index; track item.id) {
             <li
               class="menu-item"
               role="menuitem"
-              [attr.tabindex]="i === focusedIndex() ? 0 : -1"
+              id="menuitem-{{ i }}"
+              tabindex="-1"
               [class.active]="item.id === selectedId()"
               (click)="activate(i)"
-              (focus)="onItemFocus(i)"
               [attr.aria-current]="item.id === selectedId() ? 'page' : null"
               [attr.aria-label]="item.label"
             >
@@ -198,7 +210,7 @@ interface Item {
 
       /* ---------------- menu & items ---------------- */
       .menu {
-        position: relative; /* fix: ensure stacking context */
+        position: relative; 
         list-style: none;
         padding: 6px;
         margin: 0;
@@ -238,7 +250,7 @@ interface Item {
         filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.35));
       }
 
-      /* ensure lucide/app-icon fills the icon box and removes baseline whitespace */
+      
       .menu-item .icon app-icon,
       .menu-item .icon app-icon lucide-icon,
       .menu-item .icon app-icon svg {
@@ -291,8 +303,7 @@ interface Item {
         -webkit-backdrop-filter: blur(10px) saturate(1.15);
         pointer-events: none;
         overflow: hidden;
-        z-index: 0; /* below icon/label but above background */
-      }
+        z-index: 0; 
 
       /* collapse mode: make icon the positioning anchor and center a circular pill on that icon */
       .sidebar.collapsed .menu-item {
@@ -442,9 +453,15 @@ export class Sidebar implements AfterViewInit {
   collapsed: WritableSignal<boolean> = signal(false);
   focusedIndex: WritableSignal<number> = signal(0);
 
-  // optional: small tunables as signals
-  iconSize: WritableSignal<number> = signal(20); // px
-  pillGap: WritableSignal<number> = signal(12); // px
+  public get focusedIndexValue(): number {
+    return this.focusedIndex();
+  }
+  public set focusedIndexValue(v: number) {
+    this.focusedIndex.set(v);
+  }
+
+  iconSize: WritableSignal<number> = signal(20);
+  pillGap: WritableSignal<number> = signal(12);
 
   // derived computed value (example)
   selectedIndex = computed(() =>
@@ -464,8 +481,6 @@ export class Sidebar implements AfterViewInit {
     // set initial focusedIndex from selectedId
     const idx = this.selectedIndex();
     this.focusedIndex.set(idx >= 0 ? idx : 0);
-    // If you need to focus the selected element after initial render:
-    // setTimeout(() => this.focusItem(this.focusedIndex()), 0);
   }
 
   // --- actions: update signals ---
@@ -474,12 +489,11 @@ export class Sidebar implements AfterViewInit {
 
     // when expanding, restore focus after DOM updates:
     if (!this.collapsed()) {
-      // queueFocus after microtask to ensure DOM updated
-      queueMicrotask(() => this.focusItem(this.focusedIndex()));
+      queueMicrotask(() => this.menuRef?.nativeElement?.focus());
     }
   }
 
-  activate(index: number): void {
+  public activate(index: number): void {
     const it = this.items[index];
     if (!it) return;
     this.selectedId.set(it.id);
@@ -494,50 +508,9 @@ export class Sidebar implements AfterViewInit {
     this.focusedIndex.set(index);
   }
 
-  private focusItem(index: number): void {
-    const items = this.menuItems?.toArray() ?? [];
-    if (index < 0 || index >= items.length) return;
-
-    const el = items[index].nativeElement as HTMLElement | null;
-    if (!el) return;
-
-    // Schedule focus after DOM updates (safe & predictable)
-    queueMicrotask(() => {
-      if (typeof el.focus === 'function') {
-        el.focus();
-      }
-    });
-  }
-
-  onKeydown(event: KeyboardEvent): void {
-    const max = this.items.length - 1;
-    const key = event.key;
-    if (['ArrowDown', 'ArrowUp', 'Home', 'End', 'Enter', ' '].includes(key)) {
-      event.preventDefault();
-    }
-
-    switch (key) {
-      case 'ArrowDown':
-        this.focusedIndex.update((i) => (i + 1 > max ? 0 : i + 1));
-        this.focusItem(this.focusedIndex());
-        break;
-      case 'ArrowUp':
-        this.focusedIndex.update((i) => (i - 1 < 0 ? max : i - 1));
-        this.focusItem(this.focusedIndex());
-        break;
-      case 'Home':
-        this.focusedIndex.set(0);
-        this.focusItem(0);
-        break;
-      case 'End':
-        this.focusedIndex.set(max);
-        this.focusItem(max);
-        break;
-      case 'Enter':
-      case ' ':
-        this.activate(this.focusedIndex());
-        break;
-    }
+  public focusItem(index: number): void {
+    if (index < 0 || index >= this.items.length) return;
+    this.focusedIndex.set(index);
   }
 
   trackById(_i: number, it: Item): string {
