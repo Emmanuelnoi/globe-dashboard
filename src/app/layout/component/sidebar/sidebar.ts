@@ -74,6 +74,7 @@ interface Item {
               id="menuitem-{{ i }}"
               tabindex="-1"
               [class.active]="item.id === selectedId()"
+              [class.focused]="i === focusedIndex()"
               (click)="activate(i)"
               [attr.aria-current]="item.id === selectedId() ? 'page' : null"
               [attr.aria-label]="item.label"
@@ -121,7 +122,11 @@ interface Item {
 
       /* ---------------- layout ---------------- */
       .sidebar {
+        position: fixed;
+        top: 16px;
+        left: 16px;
         width: var(--sidebar-width);
+        z-index: 100;
         transition:
           width 220ms ease,
           transform 200ms ease;
@@ -169,8 +174,7 @@ interface Item {
         overflow: visible;
         border-radius: 14px;
         padding: 18px;
-        flex: 1 1 auto;
-        min-height: 240px;
+        flex: 0 0 auto;
         backdrop-filter: blur(14px) saturate(1.25);
         -webkit-backdrop-filter: blur(14px) saturate(1.25);
         background: linear-gradient(
@@ -178,7 +182,7 @@ interface Item {
           rgba(255, 255, 255, 0.06),
           rgba(255, 255, 255, 0.02)
         );
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.04);
         box-shadow:
           0 18px 40px rgba(0, 0, 0, 0.5),
           inset 0 1px 0 rgba(255, 255, 255, 0.02);
@@ -210,7 +214,7 @@ interface Item {
 
       /* ---------------- menu & items ---------------- */
       .menu {
-        position: relative; 
+        position: relative;
         list-style: none;
         padding: 6px;
         margin: 0;
@@ -250,7 +254,6 @@ interface Item {
         filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.35));
       }
 
-      
       .menu-item .icon app-icon,
       .menu-item .icon app-icon lucide-icon,
       .menu-item .icon app-icon svg {
@@ -277,8 +280,101 @@ interface Item {
         transform: translateY(-2px);
       }
 
+      /* Complete override for all states in collapsed mode */
+      .sidebar.collapsed .menu-item,
+      .sidebar.collapsed .menu-item:hover,
+      .sidebar.collapsed .menu-item:focus,
+      .sidebar.collapsed .menu-item:focus-visible,
+      .sidebar.collapsed .menu-item:active,
+      .sidebar.collapsed .menu-item.focused,
+      .sidebar.collapsed .menu-item.active {
+        outline: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        transform: none !important;
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+      }
+
+      /* Override hover transform for collapsed mode */
+      .sidebar.collapsed .menu-item:hover {
+        transform: none !important;
+      }
+
+      /* Remove any outline from child elements in collapsed mode */
+      .sidebar.collapsed .menu-item *,
+      .sidebar.collapsed .menu-item *:hover,
+      .sidebar.collapsed .menu-item *:focus,
+      .sidebar.collapsed .menu-item *:focus-visible,
+      .sidebar.collapsed .menu-item *:active {
+        outline: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+      }
+
+      /* Prevent text selection on the entire collapsed menu */
+      .sidebar.collapsed .menu {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+      }
+
+      /* Nuclear option: prevent selection on EVERYTHING in collapsed sidebar */
+      .sidebar.collapsed,
+      .sidebar.collapsed * {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+        outline: none !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+
       .menu-item.active {
         color: white;
+      }
+
+      /* Focus styles for expanded mode only */
+      .sidebar:not(.collapsed) .menu-item.focused {
+        outline: 1px solid rgba(156, 163, 175, 0.8);
+        outline-offset: 2px;
+        border-radius: 10px;
+      }
+
+      /* Only allow custom focus indicator for collapsed menu */
+      .sidebar.collapsed .menu-item.focused {
+        position: relative;
+      }
+
+      .sidebar.collapsed .menu-item.focused::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: calc(var(--icon-size) + var(--pill-gap) + 8px);
+        height: calc(var(--icon-size) + var(--pill-gap) + 8px);
+        border: 1px solid rgba(156, 163, 175, 0.8);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 15;
       }
 
       /* default pill for expanded mode: inset inside the li */
@@ -303,7 +399,8 @@ interface Item {
         -webkit-backdrop-filter: blur(10px) saturate(1.15);
         pointer-events: none;
         overflow: hidden;
-        z-index: 0; 
+        z-index: 0;
+      }
 
       /* collapse mode: make icon the positioning anchor and center a circular pill on that icon */
       .sidebar.collapsed .menu-item {
@@ -346,6 +443,12 @@ interface Item {
         pointer-events: none;
         overflow: hidden;
         z-index: 8;
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+        -webkit-tap-highlight-color: transparent !important;
       }
 
       /* sheen + sparkle */
@@ -364,6 +467,11 @@ interface Item {
         animation: sheen 2500ms linear infinite;
         mix-blend-mode: overlay;
         opacity: 0.9;
+        pointer-events: none;
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
       }
       .active-pill::after {
         content: '';
@@ -381,6 +489,11 @@ interface Item {
         );
         box-shadow: 0 6px 18px rgba(100, 110, 255, 0.25);
         animation: float 2800ms ease-in-out infinite;
+        pointer-events: none;
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        -ms-user-select: none !important;
+        user-select: none !important;
       }
 
       @keyframes sheen {
@@ -438,9 +551,9 @@ export class Sidebar implements AfterViewInit {
 
   /** navigation items */
   items: Item[] = [
-    { id: 'country comparison', label: 'Country Comparison', icon: 'earth' },
-    { id: 'game quiz', label: 'Game Quiz', icon: 'joystick' },
-    { id: 'bird migration', label: 'Bird Migration', icon: 'bird' },
+    { id: 'country comparison', label: 'Country Comparison', icon: 'globe' },
+    { id: 'game quiz', label: 'Game Quiz', icon: 'gamepad' },
+    { id: 'bird migration', label: 'Bird Migration', icon: 'plane' },
     {
       id: 'crop & cuisine mapper',
       label: 'Crop & Cuisine Mapper',

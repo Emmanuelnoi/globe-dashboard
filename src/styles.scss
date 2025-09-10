@@ -1,2 +1,66 @@
 /* You can add global styles to this file, and also import other style files */
-@import "tailwindcss";
+@use "tailwindcss";
+
+/* Global CSS Reset and Dark Theme */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: #1e1e2e;
+  color: #f8fafc;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    sans-serif;
+}
+
+/* Ensure root element takes full space */
+app-root {
+  display: block;
+  width: 100%;
+  height: 100vh;
+}
+
+/* Custom scrollbar for components that need it */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Loading and error states should appear on top */
+.loading-overlay,
+.error-boundary-container {
+  z-index: 9999;
+}

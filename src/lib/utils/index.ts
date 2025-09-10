@@ -1,4 +1,4 @@
-export { default as getStarfield } from './starfield.utils';
+export { getStarfield } from './starfield.utils';
 export { getFresnelMat } from './getFresnelMat.utils';
 export {
   latLonToVector3,

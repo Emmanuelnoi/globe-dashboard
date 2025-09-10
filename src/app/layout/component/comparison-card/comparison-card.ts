@@ -39,7 +39,7 @@ type CountryRow = {
               type="search"
               placeholder="Search countries..."
               [value]="searchTerm"
-              (input)="onSearch($any($event.target).value)"
+              (input)="onSearch($event)"
               aria-label="Search countries"
             />
             <button
@@ -664,8 +664,9 @@ export class ComparisonCard implements AfterViewInit {
     );
   }
 
-  onSearch(value: string): void {
-    this.searchTerm = value;
+  onSearch(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.searchTerm = target.value;
     this.focusedIndex = 0;
   }
 

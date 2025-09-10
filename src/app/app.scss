@@ -1,0 +1,52 @@
+// App component styles
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+// Global app layout
+.app-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  background: #1e1e2e;
+}
+
+// Ensure proper z-index stacking
+app-globe {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  height: 100vh;
+}
+
+app-comparison-card {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+// Loading overlay should be on top
+app-loading {
+  z-index: 9999;
+}
+
+// Error boundary should be on top
+app-error-boundary {
+  z-index: 9999;
+}

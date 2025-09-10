@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import { Color, ShaderMaterial, AdditiveBlending } from 'three';
 
 // An interface to define the shape of the function's optional parameter object.
 interface FresnelMatProps {
@@ -9,15 +9,15 @@ interface FresnelMatProps {
 /**
  * Creates a THREE.js ShaderMaterial with a Fresnel effect.
  * @param {FresnelMatProps} props - The properties for the Fresnel material.
- * @returns {THREE.ShaderMaterial} - The created shader material.
+ * @returns {ShaderMaterial} - The created shader material.
  */
 function getFresnelMat({
   rimHex = 0x0088ff,
   facingHex = 0x000000,
-}: FresnelMatProps = {}): THREE.ShaderMaterial {
+}: FresnelMatProps = {}): ShaderMaterial {
   const uniforms = {
-    color1: { value: new THREE.Color(rimHex) },
-    color2: { value: new THREE.Color(facingHex) },
+    color1: { value: new Color(rimHex) },
+    color2: { value: new Color(facingHex) },
     fresnelBias: { value: 0.1 },
     fresnelScale: { value: 0.7 },
     fresnelPower: { value: 3.0 },
@@ -56,12 +56,12 @@ function getFresnelMat({
     }
   `;
 
-  const fresnelMat = new THREE.ShaderMaterial({
+  const fresnelMat = new ShaderMaterial({
     uniforms: uniforms,
     vertexShader: vs,
     fragmentShader: fs,
     transparent: true,
-    blending: THREE.AdditiveBlending,
+    blending: AdditiveBlending,
     // wireframe: true,
   });
 

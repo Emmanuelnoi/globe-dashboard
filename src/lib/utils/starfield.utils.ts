@@ -1,8 +1,16 @@
-import * as THREE from 'three';
+import {
+  Vector3,
+  Color,
+  BufferGeometry,
+  Float32BufferAttribute,
+  PointsMaterial,
+  Points,
+  Texture,
+} from 'three';
 
 interface StarfieldOptions {
   numStars?: number;
-  sprite?: THREE.Texture;
+  sprite?: Texture;
 }
 
 /**
@@ -10,7 +18,7 @@ interface StarfieldOptions {
  * @param options Configuration options for the starfield
  * @returns THREE.Points object representing the starfield
  */
-export default function getStarfield({
+export function getStarfield({
   numStars = 500,
   sprite,
 }: StarfieldOptions = {}) {
@@ -29,7 +37,7 @@ export default function getStarfield({
     let z = radius * Math.cos(phi);
 
     return {
-      pos: new THREE.Vector3(x, y, z),
+      pos: new Vector3(x, y, z),
       hue: 0.6, // radius * 0.02 + 0.5
       minDist: radius,
     };
@@ -45,25 +53,26 @@ export default function getStarfield({
     let p = randomSpherePoint();
     const { pos, hue } = p;
     positions.push(p);
-    col = new THREE.Color().setHSL(hue, 0.2, Math.random());
+    col = new Color().setHSL(hue, 0.2, Math.random());
     verts.push(pos.x, pos.y, pos.z);
     colors.push(col.r, col.g, col.b);
   }
 
   // Create geometry
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  const geo = new BufferGeometry();
+  geo.setAttribute('position', new Float32BufferAttribute(verts, 3));
+  geo.setAttribute('color', new Float32BufferAttribute(colors, 3));
 
   // Create material
-  const mat = new THREE.PointsMaterial({
+  const mat = new PointsMaterial({
     size: 0.2,
     vertexColors: true,
+    transparent: true,
     fog: false,
     // map: sprite,
   });
 
   // Create points
-  const points = new THREE.Points(geo, mat);
+  const points = new Points(geo, mat);
   return points;
 }

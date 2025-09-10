@@ -1,23 +1,20 @@
 import { Component, Input } from '@angular/core';
-import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-icon',
   standalone: true,
-  imports: [LucideAngularModule],
   template: `
-    <lucide-icon
-      [name]="name"
-      [size]="size"
-      [attr.width]="size"
-      [attr.height]="size"
+    <span
       class="icon"
+      [style.width.px]="size"
+      [style.height.px]="size"
+      [style.font-size.px]="size * 0.8"
       [class.solid]="variant === 'solid'"
       role="img"
-      [attr.aria-label]="ariaLabel || null"
+      [attr.aria-label]="ariaLabel || name"
       [attr.aria-hidden]="ariaLabel ? null : 'true'"
-      focusable="false"
-    ></lucide-icon>
+      >{{ getIconText() }}</span
+    >
   `,
   styles: [
     `
@@ -26,18 +23,12 @@ import { LucideAngularModule } from 'lucide-angular';
         line-height: 0;
       }
       .icon {
-        display: inline-block;
-        vertical-align: middle;
-        stroke: currentColor;
-        fill: none;
-        transition:
-          fill 0.2,
-          stroke 0.2;
-      }
-      /* Solid variant overrides stroke with fill */
-      .icon.solid {
-        stroke: none;
-        fill: currentColor;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: currentColor;
+        font-family: monospace;
+        font-weight: bold;
       }
     `,
   ],
@@ -47,4 +38,15 @@ export class IconComponent {
   @Input() size = 20;
   @Input() ariaLabel?: string;
   @Input() variant: 'outline' | 'solid' = 'outline';
+
+  getIconText(): string {
+    const iconMap: Record<string, string> = {
+      globe: '🌍',
+      gamepad: '🎮',
+      plane: '🐦',
+      map: '🗺️',
+      menu: '☰',
+    };
+    return iconMap[this.name] || '■';
+  }
 }
