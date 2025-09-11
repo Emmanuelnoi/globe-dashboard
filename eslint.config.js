@@ -5,7 +5,7 @@ import js from "@eslint/js";
 export default [
   js.configs.recommended,
   {
-    files: ["src/**/*.ts", "src/**/*.tsx"],
+    files: ["src/**/*.ts", "src/**/*.tsx", "scripts/**/*.ts"],
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {

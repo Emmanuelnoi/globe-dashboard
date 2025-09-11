@@ -1,6 +1,5 @@
 import {
   ApplicationConfig,
-  importProvidersFrom,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
   ErrorHandler,

@@ -25,7 +25,10 @@
     "clean": "rimraf dist",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "data:fetch": "npx tsx scripts/fetch-country-data-robust.ts",
+    "data:update": "npm run data:fetch && npm run format",
+    "prebuild": "npm run data:fetch"
   },
   "prettier": {
     "overrides": [

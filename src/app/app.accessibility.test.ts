@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { App } from './app';
 
 describe('App Accessibility', () => {
-  let component: App;
+  let _component: App;
   let fixture: ComponentFixture<App>;
 
   beforeEach(async () => {
@@ -11,7 +11,7 @@ describe('App Accessibility', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(App);
-    component = fixture.componentInstance;
+    _component = fixture.componentInstance;
   });
 
   it('should have proper ARIA landmarks', () => {

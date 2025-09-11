@@ -18,9 +18,11 @@ import {
 import { CommonModule } from '@angular/common';
 import { IconComponent } from '@lib/index';
 import { TableKeyboardDirective } from '@lib/directives/table-keyboard.directive';
+import { NavigationStateService } from '../../../core/services/navigation-state.service';
+import { type ViewMode } from '../../../core/types/navigation.types';
 
 interface Item {
-  id: string;
+  id: ViewMode;
   label: string;
   icon: string;
 }
@@ -548,21 +550,13 @@ interface Item {
 export class Sidebar implements AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
   private hostRef = inject(ElementRef<HTMLElement>);
+  private navigationService = inject(NavigationStateService);
 
-  /** navigation items */
-  items: Item[] = [
-    { id: 'country comparison', label: 'Country Comparison', icon: 'globe' },
-    { id: 'game quiz', label: 'Game Quiz', icon: 'gamepad' },
-    { id: 'bird migration', label: 'Bird Migration', icon: 'plane' },
-    {
-      id: 'crop & cuisine mapper',
-      label: 'Crop & Cuisine Mapper',
-      icon: 'map',
-    },
-  ];
+  /** navigation items from service */
+  items: Item[] = this.navigationService.navigationItems;
 
   // --- Signals (reactive state) ---
-  selectedId: WritableSignal<string | null> = signal(this.items[0]?.id ?? null);
+  selectedId = computed(() => this.navigationService.currentView());
   collapsed: WritableSignal<boolean> = signal(false);
   focusedIndex: WritableSignal<number> = signal(0);
 
@@ -609,7 +603,9 @@ export class Sidebar implements AfterViewInit {
   public activate(index: number): void {
     const it = this.items[index];
     if (!it) return;
-    this.selectedId.set(it.id);
+
+    // Navigate to the selected view using the service
+    this.navigationService.navigateTo(it.id);
     this.focusedIndex.set(index);
     this.selectedChange.emit(it.id);
 
