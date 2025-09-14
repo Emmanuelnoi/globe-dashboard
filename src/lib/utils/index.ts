@@ -9,6 +9,17 @@ export {
   createInteractiveCountries,
   createCountryMesh,
   COUNTRY_MATERIALS,
+  // TopoJSON exports
+  loadTopoJSON,
+  lonLatToSphere,
+  createUnifiedBorderGeometry,
+  createCountrySelectionMeshes,
+  createInteractiveCountriesFromTopo,
+  disposeTopoJSONMeshes,
+  // Types
   type GeoJSONFeature,
   type GeoJSONFeatureCollection,
+  type TopoJSONTopology,
+  type TopoJSONRenderOptions,
+  type UnifiedBorderResult,
 } from './geojson.utils';

@@ -28,7 +28,9 @@
     "prepare": "husky install",
     "data:fetch": "npx tsx scripts/fetch-country-data-robust.ts",
     "data:update": "npm run data:fetch && npm run format",
-    "prebuild": "npm run data:fetch"
+    "geo:convert": "node scripts/geo/convert-geojson-to-topo.mjs",
+    "geo:convert:verbose": "node scripts/geo/convert-geojson-to-topo.mjs --verbose",
+    "prebuild": "npm run data:fetch && npm run geo:convert"
   },
   "prettier": {
     "overrides": [
@@ -46,6 +48,7 @@
     "@angular/forms": "^20.2.4",
     "@angular/router": "^20.2.4",
     "@tailwindcss/postcss": "^4.1.13",
+    "earcut": "^3.0.0",
     "lucide-angular": "^0.542.0",
     "postcss": "^8.5.6",
     "rxjs": "~7.8.2",
@@ -68,8 +71,10 @@
     "@eslint/json": "^0.13.2",
     "@eslint/markdown": "^7.2.0",
     "@playwright/test": "^1.55.0",
+    "@types/earcut": "^2.1.4",
     "@types/jasmine": "~5.1.9",
     "@types/three": "^0.179.0",
+    "@types/topojson-client": "^3.1.4",
     "@vitest/ui": "^3.2.4",
     "angular-eslint": "20.1.1",
     "autoprefixer": "^10.4.21",
@@ -90,6 +95,8 @@
     "prettier": "3.6.2",
     "pretty-quick": "^4.2.2",
     "simple-git-hooks": "^2.13.1",
+    "topojson-client": "^3.1.0",
+    "topojson-server": "^3.0.1",
     "typescript": "~5.8.3",
     "typescript-eslint": "8.34.1",
     "vite": "^7.1.5",

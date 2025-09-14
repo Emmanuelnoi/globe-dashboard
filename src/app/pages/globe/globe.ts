@@ -36,6 +36,10 @@ import {
   getFresnelMat,
   loadGeoJSON,
   createInteractiveCountries,
+  loadTopoJSON,
+  createInteractiveCountriesFromTopo,
+  disposeTopoJSONMeshes,
+  type TopoJSONRenderOptions,
 } from '@lib/utils';
 import { LoadingComponent } from '@/shared/components/loading/loading.component';
 import { ErrorBoundaryComponent } from '@/shared/components/error-boundary/error-boundary.component';
@@ -206,11 +210,20 @@ export class Globe implements AfterViewInit, OnDestroy {
   private controls!: OrbitControls;
   private fresnelMat = getFresnelMat();
 
-  // 3D object
+  // 3D objects
   private sphere!: LineSegments;
   private starfield!: Points;
   private countries!: Group;
   private loader!: TextureLoader;
+
+  // TopoJSON rendering configuration
+  private useTopoJSON = true; // Toggle between GeoJSON and TopoJSON
+  private renderingMode = signal<'geojson' | 'topojson'>('topojson');
+  private topoJSONOptions: TopoJSONRenderOptions = {
+    radius: 2,
+    borderOffset: 0.001, // Slight offset to prevent z-fighting
+    enableFillMeshes: true,
+  };
 
   async ngAfterViewInit(): Promise<void> {
     try {
@@ -300,7 +313,7 @@ export class Globe implements AfterViewInit, OnDestroy {
       this.loader = new TextureLoader();
 
       this.loader.load(
-        '/textures/earthspec1k-m.png',
+        '/textures/earthbump1k.jpg',
         (texture) => {
           try {
             const geometry = new SphereGeometry(2, 64, 64);
@@ -424,16 +437,84 @@ export class Globe implements AfterViewInit, OnDestroy {
   }
 
   private async loadAllData(): Promise<void> {
+    if (this.useTopoJSON) {
+      await this.loadTopoJSONData();
+    } else {
+      await this.loadGeoJSONData();
+    }
+  }
+
+  /**
+   * Load geographic data using optimized TopoJSON with unified borders
+   */
+  private async loadTopoJSONData(): Promise<void> {
     try {
+      console.log('🌍 Loading TopoJSON data with unified borders...');
+      this.renderingMode.set('topojson');
+
+      // Load TopoJSON topology with retry mechanism
+      const topology = await this.loadWithRetry(
+        () => loadTopoJSON('/data/world.topo.json'),
+        3,
+      );
+
+      // Create unified border visualization
+      const countriesObject = createInteractiveCountriesFromTopo(
+        topology,
+        this.topoJSONOptions,
+      );
+
+      // Store reference and add to scene
+      this.countries = countriesObject;
+      this.scene.add(countriesObject);
+
+      console.log(
+        `✅ TopoJSON loaded: ${countriesObject.userData['countryCount']} countries, ${countriesObject.userData['arcCount']} shared arcs`,
+      );
+    } catch (error) {
+      this.errorHandler.handleNetworkError(
+        error as Error,
+        '/data/world.topo.json',
+      );
+
+      console.warn('TopoJSON failed, falling back to GeoJSON...', error);
+
+      // Fallback to GeoJSON if TopoJSON fails
+      try {
+        await this.loadGeoJSONData();
+      } catch (fallbackError) {
+        console.warn(
+          'Both TopoJSON and GeoJSON failed, showing basic globe:',
+          fallbackError,
+        );
+      }
+    }
+  }
+
+  /**
+   * Load geographic data using traditional GeoJSON (fallback method)
+   */
+  private async loadGeoJSONData(): Promise<void> {
+    try {
+      console.log('🗺️ Loading GeoJSON data (fallback mode)...');
+      this.renderingMode.set('geojson');
+
       // Load countries data with timeout and retry
       const countriesData = await this.loadWithRetry(
         () => loadGeoJSON('/data/countries-50m.geojson'),
         3,
       );
 
-      // Create countries layer
+      // Create countries layer using traditional method
       const countriesObject = createInteractiveCountries(countriesData, 2);
+
+      // Store reference and add to scene
+      this.countries = countriesObject;
       this.scene.add(countriesObject);
+
+      console.log(
+        `✅ GeoJSON loaded: ${countriesData.features.length} countries`,
+      );
     } catch (error) {
       this.errorHandler.handleNetworkError(
         error as Error,
@@ -494,6 +575,55 @@ export class Globe implements AfterViewInit, OnDestroy {
     this.retryInitialization();
   }
 
+  /**
+   * Toggle between TopoJSON and GeoJSON rendering modes
+   * @param useTopoJSON Whether to use TopoJSON (true) or GeoJSON (false)
+   */
+  async toggleRenderingMode(useTopoJSON: boolean): Promise<void> {
+    if (this.useTopoJSON === useTopoJSON) return;
+
+    console.log(
+      `🔄 Switching rendering mode to ${useTopoJSON ? 'TopoJSON' : 'GeoJSON'}`,
+    );
+
+    this.useTopoJSON = useTopoJSON;
+    this.loadingMessage.set('Switching rendering mode...');
+    this.loadingProgress.set(50);
+    this.isLoading.set(true);
+
+    // Remove existing countries if present
+    if (this.countries) {
+      if (this.renderingMode() === 'topojson') {
+        disposeTopoJSONMeshes(this.countries);
+      }
+      this.scene.remove(this.countries);
+    }
+
+    try {
+      // Reload data with new rendering mode
+      await this.loadAllData();
+
+      this.loadingProgress.set(100);
+      setTimeout(() => {
+        this.isLoading.set(false);
+      }, 300);
+
+      console.log(
+        `✅ Successfully switched to ${useTopoJSON ? 'TopoJSON' : 'GeoJSON'} rendering`,
+      );
+    } catch (error) {
+      console.error('Failed to switch rendering mode:', error);
+      this.handleInitializationError(error);
+    }
+  }
+
+  /**
+   * Get current rendering mode
+   */
+  getCurrentRenderingMode(): 'geojson' | 'topojson' {
+    return this.renderingMode();
+  }
+
   retryInitialization(): void {
     console.log('Retrying globe initialization...');
 
@@ -518,6 +648,12 @@ export class Globe implements AfterViewInit, OnDestroy {
       // Stop animation
       if (this.animationId) {
         cancelAnimationFrame(this.animationId);
+      }
+
+      // Dispose of TopoJSON-specific meshes if present
+      if (this.countries && this.renderingMode() === 'topojson') {
+        console.log('🧹 Disposing TopoJSON meshes...');
+        disposeTopoJSONMeshes(this.countries);
       }
 
       // Dispose of renderer
