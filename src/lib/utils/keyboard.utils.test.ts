@@ -1,193 +1,117 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  isArrowKey,
-  isNavigationKey,
-  isActionKey,
-  getKeyboardDirection,
-  type KeyboardDirection,
-} from './keyboard.utils';
+import { describe, it, expect } from 'vitest';
+import { isNavKey, nextIndex, type NavKey } from './keyboard.utils';
 
 describe('Keyboard Utils', () => {
-  describe('isArrowKey', () => {
-    it('should identify arrow keys correctly', () => {
-      expect(isArrowKey('ArrowUp')).toBe(true);
-      expect(isArrowKey('ArrowDown')).toBe(true);
-      expect(isArrowKey('ArrowLeft')).toBe(true);
-      expect(isArrowKey('ArrowRight')).toBe(true);
-    });
-
-    it('should reject non-arrow keys', () => {
-      expect(isArrowKey('Enter')).toBe(false);
-      expect(isArrowKey('Space')).toBe(false);
-      expect(isArrowKey('Escape')).toBe(false);
-      expect(isArrowKey('a')).toBe(false);
-      expect(isArrowKey('Tab')).toBe(false);
-      expect(isArrowKey('')).toBe(false);
-    });
-
-    it('should handle case sensitivity', () => {
-      expect(isArrowKey('arrowup')).toBe(false);
-      expect(isArrowKey('ARROWUP')).toBe(false);
-      expect(isArrowKey('ArrowUP')).toBe(false);
-    });
-  });
-
-  describe('isNavigationKey', () => {
+  describe('isNavKey', () => {
     it('should identify navigation keys correctly', () => {
-      expect(isNavigationKey('Home')).toBe(true);
-      expect(isNavigationKey('End')).toBe(true);
-      expect(isNavigationKey('PageUp')).toBe(true);
-      expect(isNavigationKey('PageDown')).toBe(true);
-      expect(isNavigationKey('ArrowUp')).toBe(true);
-      expect(isNavigationKey('ArrowDown')).toBe(true);
-      expect(isNavigationKey('ArrowLeft')).toBe(true);
-      expect(isNavigationKey('ArrowRight')).toBe(true);
+      expect(isNavKey('ArrowUp')).toBe(true);
+      expect(isNavKey('ArrowDown')).toBe(true);
+      expect(isNavKey('Home')).toBe(true);
+      expect(isNavKey('End')).toBe(true);
+      expect(isNavKey('Enter')).toBe(true);
+      expect(isNavKey(' ')).toBe(true); // Space key
     });
 
     it('should reject non-navigation keys', () => {
-      expect(isNavigationKey('Enter')).toBe(false);
-      expect(isNavigationKey('Space')).toBe(false);
-      expect(isNavigationKey('Escape')).toBe(false);
-      expect(isNavigationKey('a')).toBe(false);
-      expect(isNavigationKey('Tab')).toBe(false);
-    });
-  });
-
-  describe('isActionKey', () => {
-    it('should identify action keys correctly', () => {
-      expect(isActionKey('Enter')).toBe(true);
-      expect(isActionKey(' ')).toBe(true); // Space character
-      expect(isActionKey('Space')).toBe(true); // Space key name
-    });
-
-    it('should reject non-action keys', () => {
-      expect(isActionKey('ArrowUp')).toBe(false);
-      expect(isActionKey('Home')).toBe(false);
-      expect(isActionKey('Escape')).toBe(false);
-      expect(isActionKey('a')).toBe(false);
-      expect(isActionKey('Tab')).toBe(false);
-      expect(isActionKey('')).toBe(false);
-    });
-  });
-
-  describe('getKeyboardDirection', () => {
-    it('should return correct directions for arrow keys', () => {
-      expect(getKeyboardDirection('ArrowUp')).toBe('up');
-      expect(getKeyboardDirection('ArrowDown')).toBe('down');
-      expect(getKeyboardDirection('ArrowLeft')).toBe('left');
-      expect(getKeyboardDirection('ArrowRight')).toBe('right');
-    });
-
-    it('should return correct directions for navigation keys', () => {
-      expect(getKeyboardDirection('Home')).toBe('home');
-      expect(getKeyboardDirection('End')).toBe('end');
-      expect(getKeyboardDirection('PageUp')).toBe('pageUp');
-      expect(getKeyboardDirection('PageDown')).toBe('pageDown');
-    });
-
-    it('should return null for non-navigation keys', () => {
-      expect(getKeyboardDirection('Enter')).toBe(null);
-      expect(getKeyboardDirection('Space')).toBe(null);
-      expect(getKeyboardDirection('Escape')).toBe(null);
-      expect(getKeyboardDirection('a')).toBe(null);
-      expect(getKeyboardDirection('Tab')).toBe(null);
-      expect(getKeyboardDirection('')).toBe(null);
+      expect(isNavKey('Escape')).toBe(false);
+      expect(isNavKey('Tab')).toBe(false);
+      expect(isNavKey('a')).toBe(false);
+      expect(isNavKey('1')).toBe(false);
+      expect(isNavKey('ArrowLeft')).toBe(false); // Not in the NavKey type
+      expect(isNavKey('ArrowRight')).toBe(false); // Not in the NavKey type
     });
 
     it('should handle edge cases', () => {
-      expect(getKeyboardDirection(undefined as unknown as string)).toBe(null);
-      expect(getKeyboardDirection(null as unknown as string)).toBe(null);
-      expect(getKeyboardDirection(123 as unknown as string)).toBe(null);
+      expect(isNavKey('')).toBe(false);
+      expect(isNavKey('  ')).toBe(false); // Multiple spaces
+      expect(isNavKey('enter')).toBe(false); // Case sensitive
+    });
+  });
+
+  describe('nextIndex', () => {
+    it('should handle ArrowDown navigation', () => {
+      expect(nextIndex(0, 'ArrowDown', 5)).toBe(1);
+      expect(nextIndex(3, 'ArrowDown', 5)).toBe(4);
+      expect(nextIndex(4, 'ArrowDown', 5)).toBe(0); // Wrap around
     });
 
-    it('should return proper KeyboardDirection type', () => {
-      const direction: KeyboardDirection | null =
-        getKeyboardDirection('ArrowUp');
-      expect(direction).toBe('up');
+    it('should handle ArrowUp navigation', () => {
+      expect(nextIndex(1, 'ArrowUp', 5)).toBe(0);
+      expect(nextIndex(4, 'ArrowUp', 5)).toBe(3);
+      expect(nextIndex(0, 'ArrowUp', 5)).toBe(4); // Wrap around
+    });
 
-      const validDirections: KeyboardDirection[] = [
-        'up',
-        'down',
-        'left',
-        'right',
-        'home',
-        'end',
-        'pageUp',
-        'pageDown',
-      ];
+    it('should handle Home navigation', () => {
+      expect(nextIndex(0, 'Home', 5)).toBe(0);
+      expect(nextIndex(3, 'Home', 5)).toBe(0);
+      expect(nextIndex(4, 'Home', 5)).toBe(0);
+    });
 
-      for (const key of [
-        'ArrowUp',
-        'ArrowDown',
-        'ArrowLeft',
-        'ArrowRight',
-        'Home',
-        'End',
-        'PageUp',
-        'PageDown',
-      ]) {
-        const result = getKeyboardDirection(key);
-        expect(validDirections.includes(result as KeyboardDirection)).toBe(
-          true,
-        );
-      }
+    it('should handle End navigation', () => {
+      expect(nextIndex(0, 'End', 5)).toBe(4);
+      expect(nextIndex(2, 'End', 5)).toBe(4);
+      expect(nextIndex(4, 'End', 5)).toBe(4);
+    });
+
+    it('should return current index for non-navigation keys', () => {
+      expect(nextIndex(2, 'Enter', 5)).toBe(2);
+      expect(nextIndex(2, ' ', 5)).toBe(2); // Space
+      expect(nextIndex(2, 'Tab', 5)).toBe(2);
+      expect(nextIndex(2, 'a', 5)).toBe(2);
+    });
+
+    it('should handle edge cases with length', () => {
+      expect(nextIndex(0, 'ArrowDown', 0)).toBe(-1); // Empty list
+      expect(nextIndex(0, 'ArrowDown', -1)).toBe(-1); // Invalid length
+      expect(nextIndex(0, 'ArrowDown', 1)).toBe(0); // Single item wraps to itself
+    });
+
+    it('should handle single item list', () => {
+      expect(nextIndex(0, 'ArrowDown', 1)).toBe(0);
+      expect(nextIndex(0, 'ArrowUp', 1)).toBe(0);
+      expect(nextIndex(0, 'Home', 1)).toBe(0);
+      expect(nextIndex(0, 'End', 1)).toBe(0);
+    });
+
+    it('should work with different list sizes', () => {
+      // 2-item list
+      expect(nextIndex(0, 'ArrowDown', 2)).toBe(1);
+      expect(nextIndex(1, 'ArrowDown', 2)).toBe(0);
+      expect(nextIndex(1, 'ArrowUp', 2)).toBe(0);
+      expect(nextIndex(0, 'ArrowUp', 2)).toBe(1);
+
+      // 10-item list
+      expect(nextIndex(8, 'ArrowDown', 10)).toBe(9);
+      expect(nextIndex(9, 'ArrowDown', 10)).toBe(0);
+      expect(nextIndex(0, 'ArrowUp', 10)).toBe(9);
+      expect(nextIndex(9, 'End', 10)).toBe(9);
     });
   });
 
   describe('Integration tests', () => {
-    it('should work together for keyboard event handling', () => {
-      const testKey = 'ArrowUp';
+    it('should work together for navigation scenarios', () => {
+      const keys: string[] = ['ArrowDown', 'ArrowUp', 'Home', 'End', 'Enter'];
 
-      expect(isArrowKey(testKey)).toBe(true);
-      expect(isNavigationKey(testKey)).toBe(true);
-      expect(isActionKey(testKey)).toBe(false);
-      expect(getKeyboardDirection(testKey)).toBe('up');
-    });
-
-    it('should handle Space key consistently', () => {
-      expect(isActionKey(' ')).toBe(true);
-      expect(isActionKey('Space')).toBe(true);
-      expect(isNavigationKey(' ')).toBe(false);
-      expect(isNavigationKey('Space')).toBe(false);
-      expect(getKeyboardDirection(' ')).toBe(null);
-      expect(getKeyboardDirection('Space')).toBe(null);
-    });
-
-    it('should provide comprehensive key categorization', () => {
-      const testKeys = [
-        'ArrowUp',
-        'ArrowDown',
-        'ArrowLeft',
-        'ArrowRight',
-        'Home',
-        'End',
-        'PageUp',
-        'PageDown',
-        'Enter',
-        ' ',
-        'Space',
-        'Escape',
-        'Tab',
-        'a',
-        'A',
-        '1',
-      ];
-
-      testKeys.forEach((key) => {
-        const isArrow = isArrowKey(key);
-        const isNav = isNavigationKey(key);
-        const isAction = isActionKey(key);
-        const direction = getKeyboardDirection(key);
-
-        // Each key should have at most one category
-        const categories = [isArrow, isNav, isAction].filter(Boolean).length;
-        expect(categories).toBeLessThanOrEqual(1);
-
-        // Direction should match navigation status
-        if (direction) {
-          expect(isNav).toBe(true);
-        }
+      keys.forEach((key) => {
+        expect(isNavKey(key)).toBe(true);
       });
+
+      // Simulate navigation in a 3-item list
+      let currentIndex = 0;
+      currentIndex = nextIndex(currentIndex, 'ArrowDown', 3); // 0 -> 1
+      expect(currentIndex).toBe(1);
+
+      currentIndex = nextIndex(currentIndex, 'ArrowDown', 3); // 1 -> 2
+      expect(currentIndex).toBe(2);
+
+      currentIndex = nextIndex(currentIndex, 'ArrowDown', 3); // 2 -> 0 (wrap)
+      expect(currentIndex).toBe(0);
+
+      currentIndex = nextIndex(currentIndex, 'End', 3); // 0 -> 2 (end)
+      expect(currentIndex).toBe(2);
+
+      currentIndex = nextIndex(currentIndex, 'Home', 3); // 2 -> 0 (home)
+      expect(currentIndex).toBe(0);
     });
   });
 });

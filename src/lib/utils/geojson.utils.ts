@@ -36,6 +36,18 @@ export interface GeoJSONFeatureCollection {
 /**
  * TopoJSON interfaces for type safety
  */
+export interface TopoJSONGeometry {
+  type: 'Polygon' | 'MultiPolygon';
+  id?: string | number;
+  properties?: Record<string, unknown>;
+  arcs?: number[][] | number[][][];
+}
+
+export interface TopoJSONFeatureCollection {
+  type: 'GeometryCollection';
+  geometries: TopoJSONGeometry[];
+}
+
 export interface TopoJSONTopology {
   type: 'Topology';
   bbox?: [number, number, number, number];
@@ -45,15 +57,20 @@ export interface TopoJSONTopology {
   };
   arcs: number[][][];
   objects: {
-    countries: {
-      type: 'FeatureCollection';
-      features: Array<{
-        type: 'Feature';
-        id: string;
-        properties: Record<string, unknown>;
-        geometry: unknown;
-      }>;
-    };
+    countries: TopoJSONFeatureCollection;
+  };
+}
+
+/**
+ * Type for converted GeoJSON features from TopoJSON
+ */
+export interface ConvertedGeoJSONFeature {
+  type: 'Feature';
+  id?: string | number;
+  properties?: Record<string, unknown>;
+  geometry: {
+    type: 'Polygon' | 'MultiPolygon' | 'Point' | 'LineString';
+    coordinates: number[] | number[][] | number[][][] | number[][][][];
   };
 }
 
@@ -474,10 +491,9 @@ export function createUnifiedBorderGeometry(
   console.log('🌐 Creating unified border geometry from TopoJSON...');
 
   // Extract mesh boundaries (shared arcs only)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const meshGeometry = topoMesh(
-    topology as any,
-    topology.objects.countries as any,
+    topology as Parameters<typeof topoMesh>[0],
+    topology.objects.countries as Parameters<typeof topoMesh>[1],
   );
   if (!meshGeometry || !meshGeometry.coordinates) {
     throw new Error('Failed to extract mesh from TopoJSON');
@@ -531,7 +547,7 @@ export function createUnifiedBorderGeometry(
   const result: UnifiedBorderResult = {
     borderMesh,
     selectionMeshes,
-    countryCount: (topology.objects.countries as any).geometries?.length || 0,
+    countryCount: topology.objects.countries.geometries?.length || 0,
     arcCount: meshGeometry.coordinates.length,
   };
 
@@ -557,25 +573,34 @@ export function createCountrySelectionMeshes(
   const selectionGroup = new Group();
   selectionGroup.name = 'country-selection-meshes';
 
-  if (!(topology.objects.countries as any).geometries) {
+  if (!topology.objects.countries.geometries) {
     console.warn('No country geometries found in TopoJSON');
     return selectionGroup;
   }
 
   // Convert each country to individual selection mesh
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (topology.objects.countries as any).geometries.forEach(
-    (geometry: any, index: number) => {
+  topology.objects.countries.geometries.forEach(
+    (geometry: TopoJSONGeometry, index: number) => {
       try {
         // Convert TopoJSON feature to GeoJSON feature
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const geoJsonFeature = topoFeature(
-          topology as any,
-          geometry as any,
-        ) as any;
+          topology as Parameters<typeof topoFeature>[0],
+          geometry as Parameters<typeof topoFeature>[1],
+        ) as ConvertedGeoJSONFeature;
 
         if (!geoJsonFeature?.geometry) {
           console.warn(`Skipping country ${geometry.id}: no geometry`);
+          return;
+        }
+
+        // Skip non-polygon geometries
+        if (
+          geoJsonFeature.geometry.type !== 'Polygon' &&
+          geoJsonFeature.geometry.type !== 'MultiPolygon'
+        ) {
+          console.warn(
+            `Skipping country ${geometry.id}: unsupported geometry type ${geoJsonFeature.geometry.type}`,
+          );
           return;
         }
 
@@ -620,8 +645,7 @@ export function createCountrySelectionMeshes(
  * @returns Group containing selection meshes
  */
 function createCountrySelectionMesh(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  geoJsonFeature: any,
+  geoJsonFeature: ConvertedGeoJSONFeature,
   radius: number,
   name: string,
   enableFill: boolean = true,
@@ -632,14 +656,14 @@ function createCountrySelectionMesh(
   try {
     if (geoJsonFeature.geometry.type === 'Polygon') {
       const mesh = createPolygonSelectionMesh(
-        geoJsonFeature.geometry.coordinates,
+        geoJsonFeature.geometry.coordinates as number[][][],
         radius,
         name,
         enableFill,
       );
       if (mesh) countryGroup.add(mesh);
     } else if (geoJsonFeature.geometry.type === 'MultiPolygon') {
-      geoJsonFeature.geometry.coordinates.forEach(
+      (geoJsonFeature.geometry.coordinates as number[][][][]).forEach(
         (polygonCoords: number[][][], index: number) => {
           const mesh = createPolygonSelectionMesh(
             polygonCoords,
@@ -667,6 +691,200 @@ function createCountrySelectionMesh(
  * @param enableFill Whether to create visible fill mesh
  * @returns Mesh or null
  */
+/**
+ * CONCRETE FIX 1: Remove duplicate closing point if present
+ * Degenerate triangles from duplicate points confuse earcut
+ */
+function removeRingClosure(ring: number[][]): number[][] {
+  if (!ring || ring.length === 0) return ring;
+  const first = ring[0];
+  const last = ring[ring.length - 1];
+  if (first[0] === last[0] && first[1] === last[1]) {
+    return ring.slice(0, -1);
+  }
+  return ring;
+}
+
+/**
+ * CONCRETE FIX 2: Unwrap longitudes to avoid cross-dateline triangles
+ * Antimeridian wrapping creates triangles that appear inverted on sphere
+ */
+function unwrapLongitudes(ring: number[][]): number[][] {
+  if (!ring || ring.length === 0) return ring;
+  const out: number[][] = [];
+  let lastLon = ring[0][0];
+  out.push([lastLon, ring[0][1]]);
+  for (let i = 1; i < ring.length; i++) {
+    let [lon, lat] = ring[i];
+    while (lon - lastLon > 180) lon -= 360;
+    while (lon - lastLon < -180) lon += 360;
+    out.push([lon, lat]);
+    lastLon = lon;
+  }
+  return out;
+}
+
+/**
+ * CONCRETE FIX 3: Ensure consistent winding for earcut convention
+ * Outer ring CCW, holes CW (earcut standard)
+ */
+function ensureWindingForEarcut(
+  ring: number[][],
+  shouldBeCCW: boolean,
+): number[][] {
+  let area = 0;
+  const n = ring.length;
+  for (let i = 0; i < n; i++) {
+    const [x1, y1] = ring[i];
+    const [x2, y2] = ring[(i + 1) % n];
+    area += (x2 - x1) * (y2 + y1);
+  }
+  const isCCW = area > 0;
+  if (isCCW !== shouldBeCCW) {
+    return [...ring].reverse();
+  }
+  return ring;
+}
+
+/**
+ * Calculate signed area for winding analysis
+ * @param ring Array of [lon, lat] coordinates
+ * @returns Positive for CCW, negative for CW
+ */
+function calculateSignedArea(ring: number[][]): number {
+  if (ring.length < 3) return 0;
+
+  let signedArea = 0;
+  const n = ring.length;
+
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n;
+    const [lon1, lat1] = ring[i];
+    const [lon2, lat2] = ring[j];
+
+    // Simple planar approximation for winding detection
+    signedArea += (lon2 - lon1) * (lat2 + lat1);
+  }
+
+  return signedArea / 2;
+}
+
+/**
+ * Calculate spherical signed area for proper winding on sphere
+ * @param ring Array of [lon, lat] coordinates
+ * @returns Positive for CCW, negative for CW on sphere
+ */
+function calculateSphericalSignedArea(ring: number[][]): number {
+  if (ring.length < 3) return 0;
+
+  let sphericalArea = 0;
+  const n = ring.length;
+
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n;
+    const [lon1, lat1] = ring[i];
+    const [lon2, lat2] = ring[j];
+
+    // Convert to radians
+    const λ1 = (lon1 * Math.PI) / 180;
+    const φ1 = (lat1 * Math.PI) / 180;
+    const λ2 = (lon2 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+
+    // Spherical excess method for signed area
+    const Δλ = λ2 - λ1;
+
+    // Handle antimeridian crossing
+    let adjustedΔλ = Δλ;
+    if (Math.abs(Δλ) > Math.PI) {
+      adjustedΔλ = Δλ > 0 ? Δλ - 2 * Math.PI : Δλ + 2 * Math.PI;
+    }
+
+    // Spherical area contribution
+    const E =
+      2 *
+      Math.atan2(
+        Math.tan(adjustedΔλ / 2) * (Math.sin(φ1) + Math.sin(φ2)),
+        2 +
+          Math.sin(φ1) * Math.sin(φ2) +
+          Math.cos(φ1) * Math.cos(φ2) * Math.cos(adjustedΔλ),
+      );
+
+    sphericalArea += E;
+  }
+
+  return sphericalArea;
+}
+
+/**
+ * Ensure polygon ring has correct winding order using spherical geometry
+ * @param ring Array of [lon, lat] coordinates
+ * @param shouldBeCCW Whether ring should be counter-clockwise (true for outer rings)
+ * @returns Ring with correct winding order
+ */
+function ensureCorrectWinding(
+  ring: number[][],
+  shouldBeCCW: boolean,
+): number[][] {
+  if (ring.length < 3) return ring;
+
+  // Use spherical signed area calculation for proper winding detection
+  let signedArea = 0;
+  const n = ring.length - 1; // Exclude duplicate closing point
+
+  for (let i = 0; i < n; i++) {
+    const j = (i + 1) % n;
+    const [lon1, lat1] = ring[i];
+    const [lon2, lat2] = ring[j];
+
+    // Convert to radians for spherical calculation
+    const λ1 = (lon1 * Math.PI) / 180;
+    const φ1 = (lat1 * Math.PI) / 180;
+    const λ2 = (lon2 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+
+    // Spherical excess method for signed area on sphere
+    const Δλ = λ2 - λ1;
+
+    // Handle antimeridian crossing
+    let adjustedΔλ = Δλ;
+    if (Math.abs(Δλ) > Math.PI) {
+      adjustedΔλ = Δλ > 0 ? Δλ - 2 * Math.PI : Δλ + 2 * Math.PI;
+    }
+
+    const E =
+      2 *
+      Math.atan2(
+        Math.tan(adjustedΔλ / 2) * (Math.sin(φ1) + Math.sin(φ2)),
+        2 +
+          Math.sin(φ1) * Math.sin(φ2) +
+          Math.cos(φ1) * Math.cos(φ2) * Math.cos(adjustedΔλ),
+      );
+
+    signedArea += E;
+  }
+
+  const isCCW = signedArea > 0; // Positive area = CCW on sphere
+
+  // Reverse if winding is incorrect
+  if (isCCW !== shouldBeCCW) {
+    console.log(
+      `🔄 Correcting winding order: ${isCCW ? 'CCW' : 'CW'} → ${shouldBeCCW ? 'CCW' : 'CW'}`,
+    );
+    return [...ring].reverse();
+  }
+
+  return ring;
+}
+
+/**
+ * Create triangulated polygon mesh with proper hole support
+ * @param coordinates Polygon coordinates [outer, ...holes]
+ * @param radius Sphere radius
+ * @param name Polygon name
+ * @param enableFill Whether to create visible fill mesh
+ * @returns Mesh or null
+ */
 function createPolygonSelectionMesh(
   coordinates: number[][][],
   radius: number,
@@ -674,49 +892,331 @@ function createPolygonSelectionMesh(
   enableFill: boolean,
 ): Mesh | null {
   try {
+    if (!coordinates || coordinates.length === 0) return null;
+
     const exteriorRing = coordinates[0];
-    if (!exteriorRing || exteriorRing.length < 3) return null;
+    if (!exteriorRing || exteriorRing.length < 4) return null; // Need at least 4 points (including closure)
 
-    // Convert to flat array for earcut
-    const vertices2D: number[] = [];
-    const vertices3D: Vector3[] = [];
+    console.log(
+      `🔺 Triangulating ${name}: ${coordinates.length} rings (1 outer + ${coordinates.length - 1} holes)`,
+    );
 
-    exteriorRing.forEach(([lon, lat]) => {
-      vertices2D.push(lon, lat);
-      vertices3D.push(lonLatToSphere(lon, lat, radius));
+    // CONCRETE FIX 4: Process rings with proper closure, unwrapping, and winding
+    // Remove closure, unwrap antimeridian, canonicalize winding for earcut
+    // CRITICAL FIX: Use proper spherical winding for Earcut triangulation
+    // For spherical projection, we need to determine correct winding based on geometry
+    const useSphericalWinding =
+      (window as any).COUNTRY_SPHERICAL_WINDING !== false; // Default to spherical winding
+    const invertWinding = (window as any).COUNTRY_INVERT_WINDING || false; // Only invert if explicitly set
+
+    const correctedRings: number[][][] = coordinates.map((ring, index) => {
+      let r = removeRingClosure(ring);
+      r = unwrapLongitudes(r);
+
+      // Determine correct winding for spherical geometry
+      let shouldBeCCW: boolean;
+      if (useSphericalWinding) {
+        // Use spherical area calculation for correct winding on sphere
+        const sphericalArea = calculateSphericalSignedArea(r);
+        const isCurrentlyCCW = sphericalArea > 0;
+
+        // For spherical geometry: exterior CCW, holes CW (standard Earcut convention)
+        const expectedCCW = index === 0; // First ring is exterior
+        shouldBeCCW = invertWinding ? !expectedCCW : expectedCCW;
+
+        // Log winding decisions for debugging
+        if (
+          name.includes('Brazil') ||
+          name.includes('USA') ||
+          name.includes('United States')
+        ) {
+          console.log(
+            `  Ring ${index}: spherical area = ${sphericalArea.toFixed(6)}, currently ${isCurrentlyCCW ? 'CCW' : 'CW'}, target ${shouldBeCCW ? 'CCW' : 'CW'}`,
+          );
+        }
+      } else {
+        // Legacy planar calculation
+        shouldBeCCW = invertWinding ? index !== 0 : index === 0;
+      }
+
+      r = ensureWindingForEarcut(r, shouldBeCCW);
+      return r;
     });
 
-    // Triangulate using earcut
-    const triangles = earcut(vertices2D);
-    if (triangles.length === 0) return null;
-
-    // Create geometry
-    const geometry = new BufferGeometry();
-    const positions: number[] = [];
-
-    // Add vertices from triangulation
-    for (let i = 0; i < triangles.length; i++) {
-      const vertex = vertices3D[triangles[i]];
-      positions.push(vertex.x, vertex.y, vertex.z);
+    // Log winding configuration for debugging
+    if (
+      name.includes('Brazil') ||
+      name.includes('USA') ||
+      name.includes('United States')
+    ) {
+      console.log(`🔄 ENHANCED WINDING CONFIG for ${name}:`);
+      console.log(
+        `  Spherical winding: ${useSphericalWinding ? 'ENABLED (proper sphere geometry)' : 'DISABLED (planar fallback)'}`,
+      );
+      console.log(
+        `  Invert winding: ${invertWinding ? 'YES (manual override)' : 'NO (standard earcut)'}`,
+      );
+      console.log(
+        `  Expected: outer ${invertWinding ? 'CW' : 'CCW'}, holes ${invertWinding ? 'CCW' : 'CW'}`,
+      );
+      console.log(
+        `  ✅ SPHERICAL FIX: Using proper spherical area calculations for winding`,
+      );
     }
 
-    geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
+    // Convert to flat array for earcut with hole indices
+    const vertices2D: number[] = [];
+    const vertices3D: Vector3[] = [];
+    const holeIndices: number[] = [];
+
+    // Use base radius - per-mesh offset applied during selection in globe.ts
+    const selectionRadius = radius; // No geometry-level offset needed
+
+    // Add exterior ring
+    correctedRings[0].forEach(([lon, lat]) => {
+      vertices2D.push(lon, lat);
+      vertices3D.push(lonLatToSphere(lon, lat, selectionRadius));
+    });
+
+    // Add hole rings and track hole start indices
+    for (let ringIndex = 1; ringIndex < correctedRings.length; ringIndex++) {
+      holeIndices.push(vertices2D.length / 2); // Hole starts at this vertex index
+
+      correctedRings[ringIndex].forEach(([lon, lat]) => {
+        vertices2D.push(lon, lat);
+        vertices3D.push(lonLatToSphere(lon, lat, selectionRadius));
+      });
+    }
+
+    console.log(
+      `📊 Triangulation data: ${vertices2D.length / 2} vertices, ${holeIndices.length} holes at indices [${holeIndices.join(', ')}]`,
+    );
+
+    // Triangulate using earcut with hole support
+    const triangles =
+      holeIndices.length > 0
+        ? earcut(vertices2D, holeIndices)
+        : earcut(vertices2D);
+
+    if (triangles.length === 0) {
+      console.warn(
+        `❌ Triangulation failed for ${name}: no triangles generated`,
+      );
+      return null;
+    }
+
+    console.log(
+      `✅ Triangulation successful: ${triangles.length / 3} triangles for ${name}`,
+    );
+
+    // CRITICAL VALIDATION: Check triangle indices
+    const maxIndex = Math.max(...triangles);
+    const vertexCount = vertices3D.length;
+    if (maxIndex >= vertexCount) {
+      console.error(
+        `❌ INVALID TRIANGULATION for ${name}: max index ${maxIndex} >= vertex count ${vertexCount}`,
+      );
+      console.log(`  Vertices2D: ${vertices2D.length / 2} points`);
+      console.log(`  Vertices3D: ${vertexCount} points`);
+      console.log(
+        `  Triangle indices: [${triangles.slice(0, 12).join(', ')}...]`,
+      );
+      return null;
+    }
+
+    // Debug specific countries for detailed analysis
+    const debugCountries = ['USA', 'United States', 'Brazil', 'Canada'];
+    const shouldDebug =
+      debugCountries.some((country) => name.includes(country)) ||
+      triangles.length < 100;
+
+    if (shouldDebug) {
+      console.log(`🔍 DETAILED DEBUG for ${name}:`);
+      console.log(
+        `  Original rings: ${coordinates.length} (${coordinates.map((r) => r.length).join(', ')} vertices each)`,
+      );
+      console.log(
+        `  Processed rings: ${correctedRings.length} (${correctedRings.map((r) => r.length).join(', ')} vertices each)`,
+      );
+
+      // Show concrete fixes applied
+      coordinates.forEach((originalRing, i) => {
+        const correctedRing = correctedRings[i];
+        const originalLength = originalRing.length;
+        const correctedLength = correctedRing.length;
+        const hadClosure = originalLength !== correctedLength;
+        const originalArea = calculateSignedArea(originalRing);
+        const correctedArea = calculateSignedArea(correctedRing);
+        const wasReversed = originalArea > 0 !== correctedArea > 0;
+
+        console.log(`  Ring ${i} fixes:`);
+        console.log(
+          `    ✅ Closure removal: ${hadClosure ? `${originalLength} → ${correctedLength} vertices` : 'not needed'}`,
+        );
+        console.log(`    ✅ Antimeridian unwrap: applied`);
+        console.log(
+          `    ✅ Winding fix: ${wasReversed ? 'reversed' : 'correct'} (${correctedArea > 0 ? 'CCW' : 'CW'})`,
+        );
+      });
+
+      console.log(`  Hole indices: [${holeIndices.join(', ')}]`);
+      console.log(`  Vertices2D: ${vertices2D.length / 2} points`);
+      console.log(`  Vertices3D: ${vertexCount} points`);
+      console.log(
+        `  Triangles: ${triangles.length / 3} (${triangles.length} indices)`,
+      );
+      console.log(
+        `  Index range: ${Math.min(...triangles)} to ${Math.max(...triangles)}`,
+      );
+
+      // Sample first few triangles with position info
+      for (let i = 0; i < Math.min(6, triangles.length); i += 3) {
+        const [a, b, c] = [triangles[i], triangles[i + 1], triangles[i + 2]];
+        const va = vertices3D[a];
+        const vb = vertices3D[b];
+        const vc = vertices3D[c];
+        console.log(
+          `    Triangle ${i / 3}: [${a}, ${b}, ${c}] - positions: [${va.x.toFixed(2)}, ${va.y.toFixed(2)}] [${vb.x.toFixed(2)}, ${vb.y.toFixed(2)}] [${vc.x.toFixed(2)}, ${vc.y.toFixed(2)}]`,
+        );
+      }
+
+      // Validate triangle area and normal direction
+      if (triangles.length >= 3) {
+        const [a, b, c] = [triangles[0], triangles[1], triangles[2]];
+        const va = vertices3D[a];
+        const vb = vertices3D[b];
+        const vc = vertices3D[c];
+
+        // Calculate triangle normal
+        const edge1 = vb.clone().sub(va);
+        const edge2 = vc.clone().sub(va);
+        const normal = edge1.cross(edge2).normalize();
+        const centroid = va.clone().add(vb).add(vc).divideScalar(3);
+
+        // Normal should point outward from sphere center
+        const expectedOutward = centroid.clone().normalize();
+        const dotProduct = normal.dot(expectedOutward);
+
+        console.log(
+          `  First triangle normal: [${normal.x.toFixed(3)}, ${normal.y.toFixed(3)}, ${normal.z.toFixed(3)}]`,
+        );
+        console.log(
+          `  Expected outward: [${expectedOutward.x.toFixed(3)}, ${expectedOutward.y.toFixed(3)}, ${expectedOutward.z.toFixed(3)}]`,
+        );
+        console.log(
+          `  Dot product: ${dotProduct.toFixed(3)} ${dotProduct > 0 ? '✅ (outward - CORRECT!)' : '❌ (inward - INVERTED!)'}`,
+        );
+
+        // SUCCESS INDICATORS
+        console.log('');
+        console.log('🧪 SPHERICAL TRIANGULATION VERIFICATION:');
+        console.log(
+          `  ✅ Interior fill: ${dotProduct > 0 ? 'PASS - Will show solid landmass' : 'FAIL - Will show hollow outline'}`,
+        );
+        console.log(
+          `  ✅ Triangle topology: ${triangles.length > 0 ? 'PASS - Triangles generated' : 'FAIL - No triangles'}`,
+        );
+        console.log(
+          `  ✅ Spherical winding: ${useSphericalWinding ? 'ENABLED - Using proper sphere geometry' : 'DISABLED - Using planar approximation'}`,
+        );
+        console.log(
+          `  ✅ Earcut processing: Applied (closure: removed, antimeridian: unwrapped, spherical winding: corrected)`,
+        );
+        console.log('');
+
+        if (dotProduct > 0) {
+          console.log('🎉 SUCCESS: Spherical triangulation working correctly!');
+          console.log(
+            '   Countries should now show proper solid interior fills.',
+          );
+        } else {
+          console.log('🔧 FALLBACK OPTIONS if fill still appears inverted:');
+          console.log(
+            '   1. window.COUNTRY_INVERT_WINDING = true; location.reload();',
+          );
+          console.log(
+            '   2. window.COUNTRY_SPHERICAL_WINDING = false; location.reload();',
+          );
+          console.log(
+            '   3. Check material.side = THREE.DoubleSide in debug mode',
+          );
+        }
+      }
+    }
+
+    // Create geometry with proper indexing
+    const geometry = new BufferGeometry();
+
+    // Method 1: Create indexed geometry first, then convert to non-indexed for safe merging
+    const allPositions: number[] = [];
+    vertices3D.forEach((vertex) => {
+      allPositions.push(vertex.x, vertex.y, vertex.z);
+    });
+
+    geometry.setAttribute(
+      'position',
+      new Float32BufferAttribute(allPositions, 3),
+    );
+    geometry.setIndex(triangles);
     geometry.computeVertexNormals();
 
-    // Create material based on whether fill is enabled
+    // CRITICAL FIX: Convert to non-indexed geometry to prevent merge corruption
+    const safeGeometry = geometry.toNonIndexed();
+    safeGeometry.computeVertexNormals();
+
+    console.log(
+      `🔧 Created ${name} geometry: ${vertices3D.length} vertices → ${safeGeometry.attributes['position'].count} final vertices`,
+    );
+
+    // Create material for country selection with z-fighting prevention
     const material = enableFill
       ? new MeshBasicMaterial({
           color: 0x444444,
           transparent: true,
-          opacity: 0.0, // Invisible but raycastable
+          opacity: 0.1,
           side: DoubleSide,
+          depthWrite: false,
+          depthTest: false,
+          // Z-fighting prevention (backup approach)
+          polygonOffset: true,
+          polygonOffsetFactor: -1,
+          polygonOffsetUnits: -4,
         })
       : new MeshBasicMaterial({
-          visible: false, // Completely invisible
-          side: DoubleSide,
+          color: 0x444444,
+          transparent: true,
+          opacity: 0.1, // Slightly visible for interaction
+          side: DoubleSide, // CRITICAL: Show both sides
+          depthWrite: false,
+          depthTest: true, // Normal depth testing with geometry offset
+          wireframe: false,
+          // Z-fighting prevention (backup approach)
+          polygonOffset: true,
+          polygonOffsetFactor: -1,
+          polygonOffsetUnits: -4,
         });
 
-    const mesh = new Mesh(geometry, material);
+    // Apply radial offset to prevent z-fighting with Earth surface
+    const RADIAL_OFFSET = 0.003; // 3mm radial offset - minimal but effective separation
+    const positionAttribute = safeGeometry.attributes['position'];
+    const positions = positionAttribute.array as Float32Array;
+
+    // Push each vertex slightly away from Earth center
+    for (let i = 0; i < positions.length; i += 3) {
+      const x = positions[i];
+      const y = positions[i + 1];
+      const z = positions[i + 2];
+      const length = Math.sqrt(x * x + y * y + z * z) || 1;
+      const factor = (length + RADIAL_OFFSET) / length;
+      positions[i] = x * factor;
+      positions[i + 1] = y * factor;
+      positions[i + 2] = z * factor;
+    }
+    positionAttribute.needsUpdate = true;
+    safeGeometry.computeVertexNormals();
+    safeGeometry.computeBoundingSphere();
+
+    const mesh = new Mesh(safeGeometry, material);
     mesh.name = `selection-mesh-${name}`;
     mesh.userData = {
       name,

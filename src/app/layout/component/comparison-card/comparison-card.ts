@@ -12,10 +12,11 @@ import {
 import { TableKeyboardDirective } from '@lib/directives/table-keyboard.directive';
 import { CountryDataService } from '../../../core/services/country-data.service';
 import { CountryDataRecord } from '../../../core/types/country-data.types';
+import { CountrySearch } from '../country-search/country-search';
 
 @Component({
   selector: 'app-comparison-card',
-  imports: [CommonModule, TableKeyboardDirective],
+  imports: [CommonModule, TableKeyboardDirective, CountrySearch],
   template: `
     <section class="cmp-card centered-card" aria-labelledby="cmp-title">
       <header class="cmp-header">
@@ -28,106 +29,97 @@ import { CountryDataRecord } from '../../../core/types/country-data.types';
             <strong>{{ countryDataService.selectedCountries().length }}</strong>
             selected
           </span>
-          <span
-            class="stats-item"
-            *ngIf="countryDataService.dataCompleteness() > 0"
-          >
-            <strong
-              >{{
-                (countryDataService.dataCompleteness() * 100).toFixed(1)
-              }}%</strong
-            >
-            data completeness
-          </span>
+          @if (countryDataService.dataCompleteness() > 0) {
+            <span class="stats-item">
+              <strong
+                >{{
+                  (countryDataService.dataCompleteness() * 100).toFixed(1)
+                }}%</strong
+              >
+              data completeness
+            </span>
+          }
         </div>
 
         <div class="controls" role="toolbar" aria-label="Table actions">
-          <!-- Search + Add -->
-          <div class="search-group" role="search">
-            <label class="sr-only" for="search-input">Search countries</label>
-            <input
-              id="search-input"
-              class="search"
-              type="search"
-              placeholder="Search countries..."
-              [value]="countryDataService.searchQuery()"
-              (input)="onSearch($event)"
-              aria-label="Search countries"
-            />
+          <!-- Country Search Component -->
+          <app-country-search [collapsed]="false"></app-country-search>
+
+          <!-- Action buttons grouped together -->
+          <div class="action-buttons">
             <button
               class="btn ghost"
               type="button"
-              (click)="showAddModal()"
-              aria-label="Add country"
-              [disabled]="availableCountries().length === 0"
+              (click)="showFilterModal()"
+              aria-label="Filter countries"
             >
-              Add Country
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M3 7h18M7 12h10M10 17h4"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  fill="none"
+                />
+              </svg>
+              Filter
+            </button>
+
+            <button
+              class="btn ghost"
+              type="button"
+              (click)="onClearAll()"
+              aria-label="Clear all filters"
+            >
+              Clear All
+            </button>
+
+            <button
+              class="btn primary"
+              type="button"
+              (click)="onExportCSV()"
+              aria-label="Export CSV"
+              [disabled]="!countryDataService.hasSelectedCountries()"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12 3v12"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  fill="none"
+                />
+                <path
+                  d="M8 11l4 4 4-4"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  fill="none"
+                />
+                <path
+                  d="M21 21H3"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  fill="none"
+                />
+              </svg>
+              <span>Export CSV</span>
             </button>
           </div>
-
-          <!-- Filter + Clear + Export -->
-          <button
-            class="btn ghost"
-            type="button"
-            (click)="showFilterModal()"
-            aria-label="Filter countries"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M3 7h18M7 12h10M10 17h4"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                fill="none"
-              />
-            </svg>
-            Filter
-          </button>
-
-          <button
-            class="btn ghost"
-            type="button"
-            (click)="onClearAll()"
-            aria-label="Clear all filters"
-          >
-            Clear All
-          </button>
-
-          <button
-            class="btn primary"
-            type="button"
-            (click)="onExportCSV()"
-            aria-label="Export CSV"
-            [disabled]="!countryDataService.hasSelectedCountries()"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M12 3v12"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                fill="none"
-              />
-              <path
-                d="M8 11l4 4 4-4"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                fill="none"
-              />
-              <path
-                d="M21 21H3"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                fill="none"
-              />
-            </svg>
-            <span>Export CSV</span>
-          </button>
         </div>
       </header>
 
@@ -165,143 +157,121 @@ import { CountryDataRecord } from '../../../core/types/country-data.types';
           </thead>
 
           <tbody role="rowgroup">
-            <tr
-              *ngFor="
-                let country of displayedCountries();
-                let i = index;
-                trackBy: trackByCode
-              "
-              #rowItem
-              role="row"
-              class="data-row"
-              [attr.data-code]="country.code"
-              [attr.tabindex]="i === focusedIndex() ? 0 : -1"
-              [attr.aria-selected]="isSelected(country.code)"
-              (click)="toggleRowSelection(i)"
-            >
-              <td role="cell" class="country-cell">
-                <a
-                  class="country-link"
-                  href="#"
-                  (click)="$event.preventDefault(); selectCountry(country.code)"
-                >
-                  <span class="country-name">{{ country.name }}</span>
-                </a>
-              </td>
-
-              <td role="cell">
-                <span class="code-pill">{{ country.code }}</span>
-              </td>
-
-              <td role="cell">{{ country.capital }}</td>
-              <td role="cell">
-                <span class="region-badge">{{ country.region }}</span>
-              </td>
-
-              <td role="cell">
-                <span class="gdp-value">{{
-                  country.gdpPerCapitaFormatted
-                }}</span>
-              </td>
-
-              <td role="cell">
-                <span class="hdi-value">{{ country.hdiFormatted }}</span>
-                <span
-                  *ngIf="country.hdiCategory"
-                  class="hdi-badge"
-                  [attr.data-category]="country.hdiCategory"
-                >
-                  {{ country.hdiCategory }}
-                </span>
-              </td>
-
-              <td role="cell" class="population-cell">
-                <strong>{{ country.populationFormatted }}</strong>
-              </td>
-
-              <td role="cell">
-                <span class="life-expectancy">{{
-                  country.lifeExpectancyFormatted
-                }}</span>
-              </td>
-
-              <td role="cell">
-                <span class="heart" aria-hidden="true">❤</span>
-                <span class="happiness-value">{{
-                  country.happinessFormatted
-                }}</span>
-              </td>
-
-              <td role="cell" class="actions-col">
-                <button
-                  class="icon-btn"
-                  [attr.aria-label]="'Remove ' + country.name"
-                  (click)="
-                    removeCountry(country.code); $event.stopPropagation()
-                  "
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
+            @for (
+              country of displayedCountries();
+              let i = $index;
+              track trackByCode(i, country)
+            ) {
+              <tr
+                #rowItem
+                role="row"
+                class="data-row"
+                [attr.data-code]="country.code"
+                [attr.tabindex]="i === focusedIndex() ? 0 : -1"
+                [attr.aria-selected]="isSelected(country.code)"
+                (click)="toggleRowSelection(i)"
+              >
+                <td role="cell" class="country-cell">
+                  <a
+                    class="country-link"
+                    href="#"
+                    (click)="
+                      $event.preventDefault(); selectCountry(country.code)
+                    "
                   >
-                    <path
-                      d="M3 6h18M8 6v12M16 6v12M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14"
-                      stroke="currentColor"
-                      stroke-width="1.25"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      fill="none"
-                    />
-                  </svg>
-                </button>
-              </td>
-            </tr>
+                    <span class="country-name">{{ country.name }}</span>
+                  </a>
+                </td>
+
+                <td role="cell">
+                  <span class="code-pill">{{ country.code }}</span>
+                </td>
+
+                <td role="cell">{{ country.capital }}</td>
+                <td role="cell">
+                  <span class="region-badge">{{ country.region }}</span>
+                </td>
+
+                <td role="cell">
+                  <span class="gdp-value">{{
+                    country.gdpPerCapitaFormatted
+                  }}</span>
+                </td>
+
+                <td role="cell">
+                  <span class="hdi-value">{{ country.hdiFormatted }}</span>
+                  @if (country.hdiCategory) {
+                    <span
+                      class="hdi-badge"
+                      [attr.data-category]="country.hdiCategory"
+                    >
+                      {{ country.hdiCategory }}
+                    </span>
+                  }
+                </td>
+
+                <td role="cell" class="population-cell">
+                  <strong>{{ country.populationFormatted }}</strong>
+                </td>
+
+                <td role="cell">
+                  <span class="life-expectancy">{{
+                    country.lifeExpectancyFormatted
+                  }}</span>
+                </td>
+
+                <td role="cell">
+                  <span class="heart" aria-hidden="true">❤</span>
+                  <span class="happiness-value">{{
+                    country.happinessFormatted
+                  }}</span>
+                </td>
+
+                <td role="cell" class="actions-col">
+                  <button
+                    class="icon-btn"
+                    [attr.aria-label]="'Remove ' + country.name"
+                    (click)="
+                      removeCountry(country.code); $event.stopPropagation()
+                    "
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M18 6L6 18M6 6l12 12"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        fill="none"
+                      />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            }
           </tbody>
         </table>
 
         <!-- Empty state -->
-        <div *ngIf="displayedCountries().length === 0" class="empty-state">
-          <div class="empty-content">
-            <h3>No countries selected</h3>
-            <p>Search and add countries to start comparing statistics.</p>
-            <button class="btn primary" type="button" (click)="showAddModal()">
-              Add Countries
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Add Country Modal (Simple overlay) -->
-      <div
-        *ngIf="showingAddModal()"
-        class="modal-overlay"
-        (click)="closeAddModal()"
-      >
-        <div class="modal-content" (click)="$event.stopPropagation()">
-          <header class="modal-header">
-            <h3>Add Countries</h3>
-            <button class="btn ghost" (click)="closeAddModal()">×</button>
-          </header>
-
-          <div class="modal-body">
-            <div class="quick-add-buttons">
-              <button
-                *ngFor="let country of topCountriesSample()"
-                class="country-quick-add"
-                (click)="addCountryQuick(country.code)"
-                [disabled]="isSelected(country.code)"
-              >
-                {{ country.name }}
-                <span class="country-region">{{ country.region }}</span>
-              </button>
+        @if (displayedCountries().length === 0) {
+          <div class="empty-state">
+            <div class="empty-content">
+              <h3>No countries selected</h3>
+              <p>
+                Use the search above to find and select countries for
+                comparison.
+              </p>
             </div>
           </div>
-        </div>
+        }
       </div>
     </section>
-  `,
+  `, // Updated template
   styles: [
     `
       :host {
@@ -395,13 +365,24 @@ import { CountryDataRecord } from '../../../core/types/country-data.types';
         display: flex;
         gap: 12px;
         align-items: center;
-        flex-wrap: wrap;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        min-height: 44px;
       }
 
-      .search-group {
+      .controls app-country-search {
+        flex: 1;
+        min-width: 280px;
+        max-width: 400px;
         display: flex;
-        gap: 10px;
         align-items: center;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-shrink: 0;
       }
 
       .btn {
@@ -782,16 +763,20 @@ import { CountryDataRecord } from '../../../core/types/country-data.types';
         }
 
         .controls {
+          flex-direction: column;
+          gap: 8px;
+          align-items: stretch;
+        }
+
+        .controls app-country-search {
+          max-width: none;
+          min-width: auto;
+        }
+
+        .action-buttons {
           justify-content: center;
-        }
-
-        .search-group {
-          flex: 1;
-        }
-
-        .search {
-          flex: 1;
-          min-width: 0;
+          flex-wrap: wrap;
+          gap: 6px;
         }
 
         .cmp-card.centered-card {
@@ -840,44 +825,13 @@ export class ComparisonCard implements AfterViewInit {
 
   // UI state signals
   readonly _focusedIndex = signal(0);
-  private readonly _showingAddModal = signal(false);
 
   readonly focusedIndex = this._focusedIndex.asReadonly();
-  readonly showingAddModal = this._showingAddModal.asReadonly();
 
   // Computed values
   readonly displayedCountries = computed(() =>
     this.countryDataService.selectedCountryData(),
   );
-
-  readonly availableCountries = computed(() =>
-    this.countryDataService
-      .filteredCountries()
-      .filter(
-        (country) =>
-          !this.countryDataService.selectedCountries().includes(country.code),
-      ),
-  );
-
-  readonly topCountriesSample = computed(() => {
-    const topCountries = this.countryDataService.getTopCountries();
-    const selected = new Set(this.countryDataService.selectedCountries());
-
-    // Mix of top countries from different categories
-    const sample = [
-      ...topCountries.byGDP.slice(0, 5),
-      ...topCountries.byPopulation.slice(0, 5),
-      ...topCountries.byHDI.slice(0, 5),
-      ...topCountries.byHappiness.slice(0, 5),
-    ];
-
-    // Remove duplicates and already selected countries
-    const unique = Array.from(
-      new Map(sample.map((c) => [c.code, c])).values(),
-    ).filter((c) => !selected.has(c.code));
-
-    return unique.slice(0, 12); // Show max 12 for quick add
-  });
 
   // DOM refs for keyboard focus
   @ViewChildren('rowItem', { read: ElementRef }) rowItems!: QueryList<
@@ -897,13 +851,6 @@ export class ComparisonCard implements AfterViewInit {
     }
 
     this.clampFocusedIndex();
-  }
-
-  // Search handling
-  onSearch(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    this.countryDataService.setSearchQuery(target.value);
-    this._focusedIndex.set(0);
   }
 
   // Country selection
@@ -932,21 +879,9 @@ export class ComparisonCard implements AfterViewInit {
   }
 
   // Modal handling
-  showAddModal(): void {
-    this._showingAddModal.set(true);
-  }
-
-  closeAddModal(): void {
-    this._showingAddModal.set(false);
-  }
-
   showFilterModal(): void {
     // TODO: Implement filter modal
     console.log('Filter modal not yet implemented');
-  }
-
-  addCountryQuick(code: string): void {
-    this.countryDataService.addToSelection([code]);
   }
 
   // Clear and export

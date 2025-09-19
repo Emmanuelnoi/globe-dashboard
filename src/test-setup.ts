@@ -8,19 +8,14 @@ import {
 } from '@angular/platform-browser-dynamic/testing';
 import { vi } from 'vitest';
 
-// Initialize Angular TestBed only if not already initialized
-try {
-  const testBed = getTestBed();
-  if (!testBed.platform) {
-    testBed.initTestEnvironment(
-      BrowserDynamicTestingModule,
-      platformBrowserDynamicTesting(),
-    );
-  }
-} catch (error) {
-  // TestBed already initialized, ignore
-  console.debug('TestBed already initialized');
-}
+// Initialize Angular TestBed with proper cleanup
+getTestBed().initTestEnvironment(
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting(),
+  {
+    teardown: { destroyAfterEach: true },
+  },
+);
 
 // Mock Angular component resource resolution for Vitest
 // This handles the issue with external templates and styles

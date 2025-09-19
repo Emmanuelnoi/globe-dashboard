@@ -1,0 +1,4240 @@
+{
+  "metadata": {
+    "generatedAt": "2025-09-15T08:23:19.804Z",
+    "totalCountries": 235,
+    "encoding": "24-bit RGB",
+    "format": "equirectangular"
+  },
+  "countries": {
+    "ZWE": {
+      "name": "Zimbabwe",
+      "index": 1,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 1,
+        "hex": "#000001",
+        "css": "rgb(0, 0, 1)"
+      },
+      "properties": {
+        "iso_a3": "ZWE",
+        "name_long": "Zimbabwe",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "ZMB": {
+      "name": "Zambia",
+      "index": 2,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 2,
+        "hex": "#000002",
+        "css": "rgb(0, 0, 2)"
+      },
+      "properties": {
+        "iso_a3": "ZMB",
+        "name_long": "Zambia",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "YEM": {
+      "name": "Yemen",
+      "index": 3,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 3,
+        "hex": "#000003",
+        "css": "rgb(0, 0, 3)"
+      },
+      "properties": {
+        "iso_a3": "YEM",
+        "name_long": "Yemen",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "VNM": {
+      "name": "Vietnam",
+      "index": 4,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 4,
+        "hex": "#000004",
+        "css": "rgb(0, 0, 4)"
+      },
+      "properties": {
+        "iso_a3": "VNM",
+        "name_long": "Vietnam",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "South-Eastern Asia"
+      }
+    },
+    "VEN": {
+      "name": "Venezuela",
+      "index": 5,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 5,
+        "hex": "#000005",
+        "css": "rgb(0, 0, 5)"
+      },
+      "properties": {
+        "iso_a3": "VEN",
+        "name_long": "Venezuela",
+        "continent": "South America",
+        "region": "Americas",
+        "subregion": "South America"
+      }
+    },
+    "VAT": {
+      "name": "Vatican",
+      "index": 6,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 6,
+        "hex": "#000006",
+        "css": "rgb(0, 0, 6)"
+      },
+      "properties": {
+        "iso_a3": "VAT",
+        "name_long": "Vatican",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "VUT": {
+      "name": "Vanuatu",
+      "index": 7,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 7,
+        "hex": "#000007",
+        "css": "rgb(0, 0, 7)"
+      },
+      "properties": {
+        "iso_a3": "VUT",
+        "name_long": "Vanuatu",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      }
+    },
+    "UZB": {
+      "name": "Uzbekistan",
+      "index": 8,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 8,
+        "hex": "#000008",
+        "css": "rgb(0, 0, 8)"
+      },
+      "properties": {
+        "iso_a3": "UZB",
+        "name_long": "Uzbekistan",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      }
+    },
+    "URY": {
+      "name": "Uruguay",
+      "index": 9,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 9,
+        "hex": "#000009",
+        "css": "rgb(0, 0, 9)"
+      },
+      "properties": {
+        "iso_a3": "URY",
+        "name_long": "Uruguay",
+        "continent": "South America",
+        "region": "Americas",
+        "subregion": "South America"
+      }
+    },
+    "FSM": {
+      "name": "Micronesia",
+      "index": 10,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 10,
+        "hex": "#00000a",
+        "css": "rgb(0, 0, 10)"
+      },
+      "properties": {
+        "iso_a3": "FSM",
+        "name_long": "Federated States of Micronesia",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      }
+    },
+    "MHL": {
+      "name": "Marshall Is.",
+      "index": 11,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 11,
+        "hex": "#00000b",
+        "css": "rgb(0, 0, 11)"
+      },
+      "properties": {
+        "iso_a3": "MHL",
+        "name_long": "Marshall Islands",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      }
+    },
+    "MNP": {
+      "name": "N. Mariana Is.",
+      "index": 12,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 12,
+        "hex": "#00000c",
+        "css": "rgb(0, 0, 12)"
+      },
+      "properties": {
+        "iso_a3": "MNP",
+        "name_long": "Northern Mariana Islands",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      }
+    },
+    "VIR": {
+      "name": "U.S. Virgin Is.",
+      "index": 13,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 13,
+        "hex": "#00000d",
+        "css": "rgb(0, 0, 13)"
+      },
+      "properties": {
+        "iso_a3": "VIR",
+        "name_long": "United States Virgin Islands",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "GUM": {
+      "name": "Guam",
+      "index": 14,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 14,
+        "hex": "#00000e",
+        "css": "rgb(0, 0, 14)"
+      },
+      "properties": {
+        "iso_a3": "GUM",
+        "name_long": "Guam",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      }
+    },
+    "ASM": {
+      "name": "American Samoa",
+      "index": 15,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 15,
+        "hex": "#00000f",
+        "css": "rgb(0, 0, 15)"
+      },
+      "properties": {
+        "iso_a3": "ASM",
+        "name_long": "American Samoa",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      }
+    },
+    "PRI": {
+      "name": "Puerto Rico",
+      "index": 16,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 16,
+        "hex": "#000010",
+        "css": "rgb(0, 0, 16)"
+      },
+      "properties": {
+        "iso_a3": "PRI",
+        "name_long": "Puerto Rico",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "USA": {
+      "name": "United States of America",
+      "index": 17,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 17,
+        "hex": "#000011",
+        "css": "rgb(0, 0, 17)"
+      },
+      "properties": {
+        "iso_a3": "USA",
+        "name_long": "United States",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Northern America"
+      }
+    },
+    "SGS": {
+      "name": "S. Geo. and the Is.",
+      "index": 18,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 18,
+        "hex": "#000012",
+        "css": "rgb(0, 0, 18)"
+      },
+      "properties": {
+        "iso_a3": "SGS",
+        "name_long": "South Georgia and the Islands",
+        "continent": "Seven seas (open ocean)",
+        "region": "Americas",
+        "subregion": "Seven seas (open ocean)"
+      }
+    },
+    "IOT": {
+      "name": "Br. Indian Ocean Ter.",
+      "index": 19,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 19,
+        "hex": "#000013",
+        "css": "rgb(0, 0, 19)"
+      },
+      "properties": {
+        "iso_a3": "IOT",
+        "name_long": "British Indian Ocean Territory",
+        "continent": "Seven seas (open ocean)",
+        "region": "Africa",
+        "subregion": "Seven seas (open ocean)"
+      }
+    },
+    "SHN": {
+      "name": "Saint Helena",
+      "index": 20,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 20,
+        "hex": "#000014",
+        "css": "rgb(0, 0, 20)"
+      },
+      "properties": {
+        "iso_a3": "SHN",
+        "name_long": "Saint Helena",
+        "continent": "Seven seas (open ocean)",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "PCN": {
+      "name": "Pitcairn Is.",
+      "index": 21,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 21,
+        "hex": "#000015",
+        "css": "rgb(0, 0, 21)"
+      },
+      "properties": {
+        "iso_a3": "PCN",
+        "name_long": "Pitcairn Islands",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      }
+    },
+    "AIA": {
+      "name": "Anguilla",
+      "index": 22,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 22,
+        "hex": "#000016",
+        "css": "rgb(0, 0, 22)"
+      },
+      "properties": {
+        "iso_a3": "AIA",
+        "name_long": "Anguilla",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "FLK": {
+      "name": "Falkland Is.",
+      "index": 23,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 23,
+        "hex": "#000017",
+        "css": "rgb(0, 0, 23)"
+      },
+      "properties": {
+        "iso_a3": "FLK",
+        "name_long": "Falkland Islands / Malvinas",
+        "continent": "South America",
+        "region": "Americas",
+        "subregion": "South America"
+      }
+    },
+    "CYM": {
+      "name": "Cayman Is.",
+      "index": 24,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 24,
+        "hex": "#000018",
+        "css": "rgb(0, 0, 24)"
+      },
+      "properties": {
+        "iso_a3": "CYM",
+        "name_long": "Cayman Islands",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "BMU": {
+      "name": "Bermuda",
+      "index": 25,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 25,
+        "hex": "#000019",
+        "css": "rgb(0, 0, 25)"
+      },
+      "properties": {
+        "iso_a3": "BMU",
+        "name_long": "Bermuda",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Northern America"
+      }
+    },
+    "VGB": {
+      "name": "British Virgin Is.",
+      "index": 26,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 26,
+        "hex": "#00001a",
+        "css": "rgb(0, 0, 26)"
+      },
+      "properties": {
+        "iso_a3": "VGB",
+        "name_long": "British Virgin Islands",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "TCA": {
+      "name": "Turks and Caicos Is.",
+      "index": 27,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 27,
+        "hex": "#00001b",
+        "css": "rgb(0, 0, 27)"
+      },
+      "properties": {
+        "iso_a3": "TCA",
+        "name_long": "Turks and Caicos Islands",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "MSR": {
+      "name": "Montserrat",
+      "index": 28,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 28,
+        "hex": "#00001c",
+        "css": "rgb(0, 0, 28)"
+      },
+      "properties": {
+        "iso_a3": "MSR",
+        "name_long": "Montserrat",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "JEY": {
+      "name": "Jersey",
+      "index": 29,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 29,
+        "hex": "#00001d",
+        "css": "rgb(0, 0, 29)"
+      },
+      "properties": {
+        "iso_a3": "JEY",
+        "name_long": "Jersey",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "GGY": {
+      "name": "Guernsey",
+      "index": 30,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 30,
+        "hex": "#00001e",
+        "css": "rgb(0, 0, 30)"
+      },
+      "properties": {
+        "iso_a3": "GGY",
+        "name_long": "Guernsey",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "IMN": {
+      "name": "Isle of Man",
+      "index": 31,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 31,
+        "hex": "#00001f",
+        "css": "rgb(0, 0, 31)"
+      },
+      "properties": {
+        "iso_a3": "IMN",
+        "name_long": "Isle of Man",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "GBR": {
+      "name": "United Kingdom",
+      "index": 32,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 32,
+        "hex": "#000020",
+        "css": "rgb(0, 0, 32)"
+      },
+      "properties": {
+        "iso_a3": "GBR",
+        "name_long": "United Kingdom",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "ARE": {
+      "name": "United Arab Emirates",
+      "index": 33,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 33,
+        "hex": "#000021",
+        "css": "rgb(0, 0, 33)"
+      },
+      "properties": {
+        "iso_a3": "ARE",
+        "name_long": "United Arab Emirates",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "UKR": {
+      "name": "Ukraine",
+      "index": 34,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 34,
+        "hex": "#000022",
+        "css": "rgb(0, 0, 34)"
+      },
+      "properties": {
+        "iso_a3": "UKR",
+        "name_long": "Ukraine",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      }
+    },
+    "UGA": {
+      "name": "Uganda",
+      "index": 35,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 35,
+        "hex": "#000023",
+        "css": "rgb(0, 0, 35)"
+      },
+      "properties": {
+        "iso_a3": "UGA",
+        "name_long": "Uganda",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "TKM": {
+      "name": "Turkmenistan",
+      "index": 36,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 36,
+        "hex": "#000024",
+        "css": "rgb(0, 0, 36)"
+      },
+      "properties": {
+        "iso_a3": "TKM",
+        "name_long": "Turkmenistan",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      }
+    },
+    "TUR": {
+      "name": "Turkey",
+      "index": 37,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 37,
+        "hex": "#000025",
+        "css": "rgb(0, 0, 37)"
+      },
+      "properties": {
+        "iso_a3": "TUR",
+        "name_long": "Turkey",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "TUN": {
+      "name": "Tunisia",
+      "index": 38,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 38,
+        "hex": "#000026",
+        "css": "rgb(0, 0, 38)"
+      },
+      "properties": {
+        "iso_a3": "TUN",
+        "name_long": "Tunisia",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      }
+    },
+    "TTO": {
+      "name": "Trinidad and Tobago",
+      "index": 39,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 39,
+        "hex": "#000027",
+        "css": "rgb(0, 0, 39)"
+      },
+      "properties": {
+        "iso_a3": "TTO",
+        "name_long": "Trinidad and Tobago",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "TON": {
+      "name": "Tonga",
+      "index": 40,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 40,
+        "hex": "#000028",
+        "css": "rgb(0, 0, 40)"
+      },
+      "properties": {
+        "iso_a3": "TON",
+        "name_long": "Tonga",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      }
+    },
+    "TGO": {
+      "name": "Togo",
+      "index": 41,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 41,
+        "hex": "#000029",
+        "css": "rgb(0, 0, 41)"
+      },
+      "properties": {
+        "iso_a3": "TGO",
+        "name_long": "Togo",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "TLS": {
+      "name": "Timor-Leste",
+      "index": 42,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 42,
+        "hex": "#00002a",
+        "css": "rgb(0, 0, 42)"
+      },
+      "properties": {
+        "iso_a3": "TLS",
+        "name_long": "Timor-Leste",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "South-Eastern Asia"
+      }
+    },
+    "THA": {
+      "name": "Thailand",
+      "index": 43,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 43,
+        "hex": "#00002b",
+        "css": "rgb(0, 0, 43)"
+      },
+      "properties": {
+        "iso_a3": "THA",
+        "name_long": "Thailand",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "South-Eastern Asia"
+      }
+    },
+    "TZA": {
+      "name": "Tanzania",
+      "index": 44,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 44,
+        "hex": "#00002c",
+        "css": "rgb(0, 0, 44)"
+      },
+      "properties": {
+        "iso_a3": "TZA",
+        "name_long": "Tanzania",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "TJK": {
+      "name": "Tajikistan",
+      "index": 45,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 45,
+        "hex": "#00002d",
+        "css": "rgb(0, 0, 45)"
+      },
+      "properties": {
+        "iso_a3": "TJK",
+        "name_long": "Tajikistan",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      }
+    },
+    "TWN": {
+      "name": "Taiwan",
+      "index": 46,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 46,
+        "hex": "#00002e",
+        "css": "rgb(0, 0, 46)"
+      },
+      "properties": {
+        "iso_a3": "TWN",
+        "name_long": "Taiwan",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      }
+    },
+    "SYR": {
+      "name": "Syria",
+      "index": 47,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 47,
+        "hex": "#00002f",
+        "css": "rgb(0, 0, 47)"
+      },
+      "properties": {
+        "iso_a3": "SYR",
+        "name_long": "Syria",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "CHE": {
+      "name": "Switzerland",
+      "index": 48,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 48,
+        "hex": "#000030",
+        "css": "rgb(0, 0, 48)"
+      },
+      "properties": {
+        "iso_a3": "CHE",
+        "name_long": "Switzerland",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      }
+    },
+    "SWE": {
+      "name": "Sweden",
+      "index": 49,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 49,
+        "hex": "#000031",
+        "css": "rgb(0, 0, 49)"
+      },
+      "properties": {
+        "iso_a3": "SWE",
+        "name_long": "Sweden",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "SWZ": {
+      "name": "eSwatini",
+      "index": 50,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 50,
+        "hex": "#000032",
+        "css": "rgb(0, 0, 50)"
+      },
+      "properties": {
+        "iso_a3": "SWZ",
+        "name_long": "Kingdom of eSwatini",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Southern Africa"
+      }
+    },
+    "SUR": {
+      "name": "Suriname",
+      "index": 51,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 51,
+        "hex": "#000033",
+        "css": "rgb(0, 0, 51)"
+      },
+      "properties": {
+        "iso_a3": "SUR",
+        "name_long": "Suriname",
+        "continent": "South America",
+        "region": "Americas",
+        "subregion": "South America"
+      }
+    },
+    "SSD": {
+      "name": "S. Sudan",
+      "index": 52,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 52,
+        "hex": "#000034",
+        "css": "rgb(0, 0, 52)"
+      },
+      "properties": {
+        "iso_a3": "SSD",
+        "name_long": "South Sudan",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "SDN": {
+      "name": "Sudan",
+      "index": 53,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 53,
+        "hex": "#000035",
+        "css": "rgb(0, 0, 53)"
+      },
+      "properties": {
+        "iso_a3": "SDN",
+        "name_long": "Sudan",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      }
+    },
+    "LKA": {
+      "name": "Sri Lanka",
+      "index": 54,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 54,
+        "hex": "#000036",
+        "css": "rgb(0, 0, 54)"
+      },
+      "properties": {
+        "iso_a3": "LKA",
+        "name_long": "Sri Lanka",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      }
+    },
+    "ESP": {
+      "name": "Spain",
+      "index": 55,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 55,
+        "hex": "#000037",
+        "css": "rgb(0, 0, 55)"
+      },
+      "properties": {
+        "iso_a3": "ESP",
+        "name_long": "Spain",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "KOR": {
+      "name": "South Korea",
+      "index": 56,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 56,
+        "hex": "#000038",
+        "css": "rgb(0, 0, 56)"
+      },
+      "properties": {
+        "iso_a3": "KOR",
+        "name_long": "Republic of Korea",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      }
+    },
+    "ZAF": {
+      "name": "South Africa",
+      "index": 57,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 57,
+        "hex": "#000039",
+        "css": "rgb(0, 0, 57)"
+      },
+      "properties": {
+        "iso_a3": "ZAF",
+        "name_long": "South Africa",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Southern Africa"
+      }
+    },
+    "SOM": {
+      "name": "Somalia",
+      "index": 58,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 58,
+        "hex": "#00003a",
+        "css": "rgb(0, 0, 58)"
+      },
+      "properties": {
+        "iso_a3": "SOM",
+        "name_long": "Somalia",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "-99": {
+      "name": "Somaliland",
+      "index": 59,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 59,
+        "hex": "#00003b",
+        "css": "rgb(0, 0, 59)"
+      },
+      "properties": {
+        "iso_a3": "-99",
+        "name_long": "Somaliland",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "SLB": {
+      "name": "Solomon Is.",
+      "index": 60,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 60,
+        "hex": "#00003c",
+        "css": "rgb(0, 0, 60)"
+      },
+      "properties": {
+        "iso_a3": "SLB",
+        "name_long": "Solomon Islands",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      }
+    },
+    "SVK": {
+      "name": "Slovakia",
+      "index": 61,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 61,
+        "hex": "#00003d",
+        "css": "rgb(0, 0, 61)"
+      },
+      "properties": {
+        "iso_a3": "SVK",
+        "name_long": "Slovakia",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      }
+    },
+    "SVN": {
+      "name": "Slovenia",
+      "index": 62,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 62,
+        "hex": "#00003e",
+        "css": "rgb(0, 0, 62)"
+      },
+      "properties": {
+        "iso_a3": "SVN",
+        "name_long": "Slovenia",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "SGP": {
+      "name": "Singapore",
+      "index": 63,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 63,
+        "hex": "#00003f",
+        "css": "rgb(0, 0, 63)"
+      },
+      "properties": {
+        "iso_a3": "SGP",
+        "name_long": "Singapore",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "South-Eastern Asia"
+      }
+    },
+    "SLE": {
+      "name": "Sierra Leone",
+      "index": 64,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 64,
+        "hex": "#000040",
+        "css": "rgb(0, 0, 64)"
+      },
+      "properties": {
+        "iso_a3": "SLE",
+        "name_long": "Sierra Leone",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "SYC": {
+      "name": "Seychelles",
+      "index": 65,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 65,
+        "hex": "#000041",
+        "css": "rgb(0, 0, 65)"
+      },
+      "properties": {
+        "iso_a3": "SYC",
+        "name_long": "Seychelles",
+        "continent": "Seven seas (open ocean)",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "SRB": {
+      "name": "Serbia",
+      "index": 66,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 66,
+        "hex": "#000042",
+        "css": "rgb(0, 0, 66)"
+      },
+      "properties": {
+        "iso_a3": "SRB",
+        "name_long": "Serbia",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "SEN": {
+      "name": "Senegal",
+      "index": 67,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 67,
+        "hex": "#000043",
+        "css": "rgb(0, 0, 67)"
+      },
+      "properties": {
+        "iso_a3": "SEN",
+        "name_long": "Senegal",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "SAU": {
+      "name": "Saudi Arabia",
+      "index": 68,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 68,
+        "hex": "#000044",
+        "css": "rgb(0, 0, 68)"
+      },
+      "properties": {
+        "iso_a3": "SAU",
+        "name_long": "Saudi Arabia",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "STP": {
+      "name": "São Tomé and Principe",
+      "index": 69,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 69,
+        "hex": "#000045",
+        "css": "rgb(0, 0, 69)"
+      },
+      "properties": {
+        "iso_a3": "STP",
+        "name_long": "São Tomé and Principe",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Middle Africa"
+      }
+    },
+    "SMR": {
+      "name": "San Marino",
+      "index": 70,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 70,
+        "hex": "#000046",
+        "css": "rgb(0, 0, 70)"
+      },
+      "properties": {
+        "iso_a3": "SMR",
+        "name_long": "San Marino",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "WSM": {
+      "name": "Samoa",
+      "index": 71,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 71,
+        "hex": "#000047",
+        "css": "rgb(0, 0, 71)"
+      },
+      "properties": {
+        "iso_a3": "WSM",
+        "name_long": "Samoa",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      }
+    },
+    "VCT": {
+      "name": "St. Vin. and Gren.",
+      "index": 72,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 72,
+        "hex": "#000048",
+        "css": "rgb(0, 0, 72)"
+      },
+      "properties": {
+        "iso_a3": "VCT",
+        "name_long": "Saint Vincent and the Grenadines",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "LCA": {
+      "name": "Saint Lucia",
+      "index": 73,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 73,
+        "hex": "#000049",
+        "css": "rgb(0, 0, 73)"
+      },
+      "properties": {
+        "iso_a3": "LCA",
+        "name_long": "Saint Lucia",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "KNA": {
+      "name": "St. Kitts and Nevis",
+      "index": 74,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 74,
+        "hex": "#00004a",
+        "css": "rgb(0, 0, 74)"
+      },
+      "properties": {
+        "iso_a3": "KNA",
+        "name_long": "Saint Kitts and Nevis",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "RWA": {
+      "name": "Rwanda",
+      "index": 75,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 75,
+        "hex": "#00004b",
+        "css": "rgb(0, 0, 75)"
+      },
+      "properties": {
+        "iso_a3": "RWA",
+        "name_long": "Rwanda",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "RUS": {
+      "name": "Russia",
+      "index": 76,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 76,
+        "hex": "#00004c",
+        "css": "rgb(0, 0, 76)"
+      },
+      "properties": {
+        "iso_a3": "RUS",
+        "name_long": "Russian Federation",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      }
+    },
+    "ROU": {
+      "name": "Romania",
+      "index": 77,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 77,
+        "hex": "#00004d",
+        "css": "rgb(0, 0, 77)"
+      },
+      "properties": {
+        "iso_a3": "ROU",
+        "name_long": "Romania",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      }
+    },
+    "QAT": {
+      "name": "Qatar",
+      "index": 78,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 78,
+        "hex": "#00004e",
+        "css": "rgb(0, 0, 78)"
+      },
+      "properties": {
+        "iso_a3": "QAT",
+        "name_long": "Qatar",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "PRT": {
+      "name": "Portugal",
+      "index": 79,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 79,
+        "hex": "#00004f",
+        "css": "rgb(0, 0, 79)"
+      },
+      "properties": {
+        "iso_a3": "PRT",
+        "name_long": "Portugal",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "POL": {
+      "name": "Poland",
+      "index": 80,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 80,
+        "hex": "#000050",
+        "css": "rgb(0, 0, 80)"
+      },
+      "properties": {
+        "iso_a3": "POL",
+        "name_long": "Poland",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      }
+    },
+    "PHL": {
+      "name": "Philippines",
+      "index": 81,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 81,
+        "hex": "#000051",
+        "css": "rgb(0, 0, 81)"
+      },
+      "properties": {
+        "iso_a3": "PHL",
+        "name_long": "Philippines",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "South-Eastern Asia"
+      }
+    },
+    "PER": {
+      "name": "Peru",
+      "index": 82,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 82,
+        "hex": "#000052",
+        "css": "rgb(0, 0, 82)"
+      },
+      "properties": {
+        "iso_a3": "PER",
+        "name_long": "Peru",
+        "continent": "South America",
+        "region": "Americas",
+        "subregion": "South America"
+      }
+    },
+    "PRY": {
+      "name": "Paraguay",
+      "index": 83,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 83,
+        "hex": "#000053",
+        "css": "rgb(0, 0, 83)"
+      },
+      "properties": {
+        "iso_a3": "PRY",
+        "name_long": "Paraguay",
+        "continent": "South America",
+        "region": "Americas",
+        "subregion": "South America"
+      }
+    },
+    "PNG": {
+      "name": "Papua New Guinea",
+      "index": 84,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 84,
+        "hex": "#000054",
+        "css": "rgb(0, 0, 84)"
+      },
+      "properties": {
+        "iso_a3": "PNG",
+        "name_long": "Papua New Guinea",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      }
+    },
+    "PAN": {
+      "name": "Panama",
+      "index": 85,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 85,
+        "hex": "#000055",
+        "css": "rgb(0, 0, 85)"
+      },
+      "properties": {
+        "iso_a3": "PAN",
+        "name_long": "Panama",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Central America"
+      }
+    },
+    "PLW": {
+      "name": "Palau",
+      "index": 86,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 86,
+        "hex": "#000056",
+        "css": "rgb(0, 0, 86)"
+      },
+      "properties": {
+        "iso_a3": "PLW",
+        "name_long": "Palau",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      }
+    },
+    "PAK": {
+      "name": "Pakistan",
+      "index": 87,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 87,
+        "hex": "#000057",
+        "css": "rgb(0, 0, 87)"
+      },
+      "properties": {
+        "iso_a3": "PAK",
+        "name_long": "Pakistan",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      }
+    },
+    "OMN": {
+      "name": "Oman",
+      "index": 88,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 88,
+        "hex": "#000058",
+        "css": "rgb(0, 0, 88)"
+      },
+      "properties": {
+        "iso_a3": "OMN",
+        "name_long": "Oman",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "PRK": {
+      "name": "North Korea",
+      "index": 89,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 89,
+        "hex": "#000059",
+        "css": "rgb(0, 0, 89)"
+      },
+      "properties": {
+        "iso_a3": "PRK",
+        "name_long": "Dem. Rep. Korea",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      }
+    },
+    "NGA": {
+      "name": "Nigeria",
+      "index": 90,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 90,
+        "hex": "#00005a",
+        "css": "rgb(0, 0, 90)"
+      },
+      "properties": {
+        "iso_a3": "NGA",
+        "name_long": "Nigeria",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "NER": {
+      "name": "Niger",
+      "index": 91,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 91,
+        "hex": "#00005b",
+        "css": "rgb(0, 0, 91)"
+      },
+      "properties": {
+        "iso_a3": "NER",
+        "name_long": "Niger",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "NIC": {
+      "name": "Nicaragua",
+      "index": 92,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 92,
+        "hex": "#00005c",
+        "css": "rgb(0, 0, 92)"
+      },
+      "properties": {
+        "iso_a3": "NIC",
+        "name_long": "Nicaragua",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Central America"
+      }
+    },
+    "NZL": {
+      "name": "New Zealand",
+      "index": 93,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 93,
+        "hex": "#00005d",
+        "css": "rgb(0, 0, 93)"
+      },
+      "properties": {
+        "iso_a3": "NZL",
+        "name_long": "New Zealand",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      }
+    },
+    "NIU": {
+      "name": "Niue",
+      "index": 94,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 94,
+        "hex": "#00005e",
+        "css": "rgb(0, 0, 94)"
+      },
+      "properties": {
+        "iso_a3": "NIU",
+        "name_long": "Niue",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      }
+    },
+    "COK": {
+      "name": "Cook Is.",
+      "index": 95,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 95,
+        "hex": "#00005f",
+        "css": "rgb(0, 0, 95)"
+      },
+      "properties": {
+        "iso_a3": "COK",
+        "name_long": "Cook Islands",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      }
+    },
+    "NLD": {
+      "name": "Netherlands",
+      "index": 96,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 96,
+        "hex": "#000060",
+        "css": "rgb(0, 0, 96)"
+      },
+      "properties": {
+        "iso_a3": "NLD",
+        "name_long": "Netherlands",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      }
+    },
+    "ABW": {
+      "name": "Aruba",
+      "index": 97,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 97,
+        "hex": "#000061",
+        "css": "rgb(0, 0, 97)"
+      },
+      "properties": {
+        "iso_a3": "ABW",
+        "name_long": "Aruba",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "CUW": {
+      "name": "Curaçao",
+      "index": 98,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 98,
+        "hex": "#000062",
+        "css": "rgb(0, 0, 98)"
+      },
+      "properties": {
+        "iso_a3": "CUW",
+        "name_long": "Curaçao",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "NPL": {
+      "name": "Nepal",
+      "index": 99,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 99,
+        "hex": "#000063",
+        "css": "rgb(0, 0, 99)"
+      },
+      "properties": {
+        "iso_a3": "NPL",
+        "name_long": "Nepal",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      }
+    },
+    "NRU": {
+      "name": "Nauru",
+      "index": 100,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 100,
+        "hex": "#000064",
+        "css": "rgb(0, 0, 100)"
+      },
+      "properties": {
+        "iso_a3": "NRU",
+        "name_long": "Nauru",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      }
+    },
+    "NAM": {
+      "name": "Namibia",
+      "index": 101,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 101,
+        "hex": "#000065",
+        "css": "rgb(0, 0, 101)"
+      },
+      "properties": {
+        "iso_a3": "NAM",
+        "name_long": "Namibia",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Southern Africa"
+      }
+    },
+    "MOZ": {
+      "name": "Mozambique",
+      "index": 102,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 102,
+        "hex": "#000066",
+        "css": "rgb(0, 0, 102)"
+      },
+      "properties": {
+        "iso_a3": "MOZ",
+        "name_long": "Mozambique",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "MAR": {
+      "name": "Morocco",
+      "index": 103,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 103,
+        "hex": "#000067",
+        "css": "rgb(0, 0, 103)"
+      },
+      "properties": {
+        "iso_a3": "MAR",
+        "name_long": "Morocco",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      }
+    },
+    "ESH": {
+      "name": "W. Sahara",
+      "index": 104,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 104,
+        "hex": "#000068",
+        "css": "rgb(0, 0, 104)"
+      },
+      "properties": {
+        "iso_a3": "ESH",
+        "name_long": "Western Sahara",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      }
+    },
+    "MNE": {
+      "name": "Montenegro",
+      "index": 105,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 105,
+        "hex": "#000069",
+        "css": "rgb(0, 0, 105)"
+      },
+      "properties": {
+        "iso_a3": "MNE",
+        "name_long": "Montenegro",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "MNG": {
+      "name": "Mongolia",
+      "index": 106,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 106,
+        "hex": "#00006a",
+        "css": "rgb(0, 0, 106)"
+      },
+      "properties": {
+        "iso_a3": "MNG",
+        "name_long": "Mongolia",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      }
+    },
+    "MDA": {
+      "name": "Moldova",
+      "index": 107,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 107,
+        "hex": "#00006b",
+        "css": "rgb(0, 0, 107)"
+      },
+      "properties": {
+        "iso_a3": "MDA",
+        "name_long": "Moldova",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      }
+    },
+    "MCO": {
+      "name": "Monaco",
+      "index": 108,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 108,
+        "hex": "#00006c",
+        "css": "rgb(0, 0, 108)"
+      },
+      "properties": {
+        "iso_a3": "MCO",
+        "name_long": "Monaco",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      }
+    },
+    "MEX": {
+      "name": "Mexico",
+      "index": 109,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 109,
+        "hex": "#00006d",
+        "css": "rgb(0, 0, 109)"
+      },
+      "properties": {
+        "iso_a3": "MEX",
+        "name_long": "Mexico",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Central America"
+      }
+    },
+    "MUS": {
+      "name": "Mauritius",
+      "index": 110,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 110,
+        "hex": "#00006e",
+        "css": "rgb(0, 0, 110)"
+      },
+      "properties": {
+        "iso_a3": "MUS",
+        "name_long": "Mauritius",
+        "continent": "Seven seas (open ocean)",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "MRT": {
+      "name": "Mauritania",
+      "index": 111,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 111,
+        "hex": "#00006f",
+        "css": "rgb(0, 0, 111)"
+      },
+      "properties": {
+        "iso_a3": "MRT",
+        "name_long": "Mauritania",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "MLT": {
+      "name": "Malta",
+      "index": 112,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 112,
+        "hex": "#000070",
+        "css": "rgb(0, 0, 112)"
+      },
+      "properties": {
+        "iso_a3": "MLT",
+        "name_long": "Malta",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "MLI": {
+      "name": "Mali",
+      "index": 113,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 113,
+        "hex": "#000071",
+        "css": "rgb(0, 0, 113)"
+      },
+      "properties": {
+        "iso_a3": "MLI",
+        "name_long": "Mali",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "MDV": {
+      "name": "Maldives",
+      "index": 114,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 114,
+        "hex": "#000072",
+        "css": "rgb(0, 0, 114)"
+      },
+      "properties": {
+        "iso_a3": "MDV",
+        "name_long": "Maldives",
+        "continent": "Seven seas (open ocean)",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      }
+    },
+    "MYS": {
+      "name": "Malaysia",
+      "index": 115,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 115,
+        "hex": "#000073",
+        "css": "rgb(0, 0, 115)"
+      },
+      "properties": {
+        "iso_a3": "MYS",
+        "name_long": "Malaysia",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "South-Eastern Asia"
+      }
+    },
+    "MWI": {
+      "name": "Malawi",
+      "index": 116,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 116,
+        "hex": "#000074",
+        "css": "rgb(0, 0, 116)"
+      },
+      "properties": {
+        "iso_a3": "MWI",
+        "name_long": "Malawi",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "MDG": {
+      "name": "Madagascar",
+      "index": 117,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 117,
+        "hex": "#000075",
+        "css": "rgb(0, 0, 117)"
+      },
+      "properties": {
+        "iso_a3": "MDG",
+        "name_long": "Madagascar",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "MKD": {
+      "name": "North Macedonia",
+      "index": 118,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 118,
+        "hex": "#000076",
+        "css": "rgb(0, 0, 118)"
+      },
+      "properties": {
+        "iso_a3": "MKD",
+        "name_long": "North Macedonia",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "LUX": {
+      "name": "Luxembourg",
+      "index": 119,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 119,
+        "hex": "#000077",
+        "css": "rgb(0, 0, 119)"
+      },
+      "properties": {
+        "iso_a3": "LUX",
+        "name_long": "Luxembourg",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      }
+    },
+    "LTU": {
+      "name": "Lithuania",
+      "index": 120,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 120,
+        "hex": "#000078",
+        "css": "rgb(0, 0, 120)"
+      },
+      "properties": {
+        "iso_a3": "LTU",
+        "name_long": "Lithuania",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "LIE": {
+      "name": "Liechtenstein",
+      "index": 121,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 121,
+        "hex": "#000079",
+        "css": "rgb(0, 0, 121)"
+      },
+      "properties": {
+        "iso_a3": "LIE",
+        "name_long": "Liechtenstein",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      }
+    },
+    "LBY": {
+      "name": "Libya",
+      "index": 122,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 122,
+        "hex": "#00007a",
+        "css": "rgb(0, 0, 122)"
+      },
+      "properties": {
+        "iso_a3": "LBY",
+        "name_long": "Libya",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      }
+    },
+    "LBR": {
+      "name": "Liberia",
+      "index": 123,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 123,
+        "hex": "#00007b",
+        "css": "rgb(0, 0, 123)"
+      },
+      "properties": {
+        "iso_a3": "LBR",
+        "name_long": "Liberia",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "LSO": {
+      "name": "Lesotho",
+      "index": 124,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 124,
+        "hex": "#00007c",
+        "css": "rgb(0, 0, 124)"
+      },
+      "properties": {
+        "iso_a3": "LSO",
+        "name_long": "Lesotho",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Southern Africa"
+      }
+    },
+    "LBN": {
+      "name": "Lebanon",
+      "index": 125,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 125,
+        "hex": "#00007d",
+        "css": "rgb(0, 0, 125)"
+      },
+      "properties": {
+        "iso_a3": "LBN",
+        "name_long": "Lebanon",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "LVA": {
+      "name": "Latvia",
+      "index": 126,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 126,
+        "hex": "#00007e",
+        "css": "rgb(0, 0, 126)"
+      },
+      "properties": {
+        "iso_a3": "LVA",
+        "name_long": "Latvia",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "LAO": {
+      "name": "Laos",
+      "index": 127,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 127,
+        "hex": "#00007f",
+        "css": "rgb(0, 0, 127)"
+      },
+      "properties": {
+        "iso_a3": "LAO",
+        "name_long": "Lao PDR",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "South-Eastern Asia"
+      }
+    },
+    "KGZ": {
+      "name": "Kyrgyzstan",
+      "index": 128,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 128,
+        "hex": "#000080",
+        "css": "rgb(0, 0, 128)"
+      },
+      "properties": {
+        "iso_a3": "KGZ",
+        "name_long": "Kyrgyzstan",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      }
+    },
+    "KWT": {
+      "name": "Kuwait",
+      "index": 129,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 129,
+        "hex": "#000081",
+        "css": "rgb(0, 0, 129)"
+      },
+      "properties": {
+        "iso_a3": "KWT",
+        "name_long": "Kuwait",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "KIR": {
+      "name": "Kiribati",
+      "index": 130,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 130,
+        "hex": "#000082",
+        "css": "rgb(0, 0, 130)"
+      },
+      "properties": {
+        "iso_a3": "KIR",
+        "name_long": "Kiribati",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Micronesia"
+      }
+    },
+    "KEN": {
+      "name": "Kenya",
+      "index": 131,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 131,
+        "hex": "#000083",
+        "css": "rgb(0, 0, 131)"
+      },
+      "properties": {
+        "iso_a3": "KEN",
+        "name_long": "Kenya",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "KAZ": {
+      "name": "Kazakhstan",
+      "index": 132,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 132,
+        "hex": "#000084",
+        "css": "rgb(0, 0, 132)"
+      },
+      "properties": {
+        "iso_a3": "KAZ",
+        "name_long": "Kazakhstan",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Central Asia"
+      }
+    },
+    "JOR": {
+      "name": "Jordan",
+      "index": 133,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 133,
+        "hex": "#000085",
+        "css": "rgb(0, 0, 133)"
+      },
+      "properties": {
+        "iso_a3": "JOR",
+        "name_long": "Jordan",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "JPN": {
+      "name": "Japan",
+      "index": 134,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 134,
+        "hex": "#000086",
+        "css": "rgb(0, 0, 134)"
+      },
+      "properties": {
+        "iso_a3": "JPN",
+        "name_long": "Japan",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      }
+    },
+    "JAM": {
+      "name": "Jamaica",
+      "index": 135,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 135,
+        "hex": "#000087",
+        "css": "rgb(0, 0, 135)"
+      },
+      "properties": {
+        "iso_a3": "JAM",
+        "name_long": "Jamaica",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "ITA": {
+      "name": "Italy",
+      "index": 136,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 136,
+        "hex": "#000088",
+        "css": "rgb(0, 0, 136)"
+      },
+      "properties": {
+        "iso_a3": "ITA",
+        "name_long": "Italy",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "ISR": {
+      "name": "Israel",
+      "index": 137,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 137,
+        "hex": "#000089",
+        "css": "rgb(0, 0, 137)"
+      },
+      "properties": {
+        "iso_a3": "ISR",
+        "name_long": "Israel",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "PSE": {
+      "name": "Palestine",
+      "index": 138,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 138,
+        "hex": "#00008a",
+        "css": "rgb(0, 0, 138)"
+      },
+      "properties": {
+        "iso_a3": "PSE",
+        "name_long": "Palestine",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "IRL": {
+      "name": "Ireland",
+      "index": 139,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 139,
+        "hex": "#00008b",
+        "css": "rgb(0, 0, 139)"
+      },
+      "properties": {
+        "iso_a3": "IRL",
+        "name_long": "Ireland",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "IRQ": {
+      "name": "Iraq",
+      "index": 140,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 140,
+        "hex": "#00008c",
+        "css": "rgb(0, 0, 140)"
+      },
+      "properties": {
+        "iso_a3": "IRQ",
+        "name_long": "Iraq",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "IRN": {
+      "name": "Iran",
+      "index": 141,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 141,
+        "hex": "#00008d",
+        "css": "rgb(0, 0, 141)"
+      },
+      "properties": {
+        "iso_a3": "IRN",
+        "name_long": "Iran",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      }
+    },
+    "IDN": {
+      "name": "Indonesia",
+      "index": 142,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 142,
+        "hex": "#00008e",
+        "css": "rgb(0, 0, 142)"
+      },
+      "properties": {
+        "iso_a3": "IDN",
+        "name_long": "Indonesia",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "South-Eastern Asia"
+      }
+    },
+    "IND": {
+      "name": "India",
+      "index": 143,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 143,
+        "hex": "#00008f",
+        "css": "rgb(0, 0, 143)"
+      },
+      "properties": {
+        "iso_a3": "IND",
+        "name_long": "India",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      }
+    },
+    "ISL": {
+      "name": "Iceland",
+      "index": 144,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 144,
+        "hex": "#000090",
+        "css": "rgb(0, 0, 144)"
+      },
+      "properties": {
+        "iso_a3": "ISL",
+        "name_long": "Iceland",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "HUN": {
+      "name": "Hungary",
+      "index": 145,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 145,
+        "hex": "#000091",
+        "css": "rgb(0, 0, 145)"
+      },
+      "properties": {
+        "iso_a3": "HUN",
+        "name_long": "Hungary",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      }
+    },
+    "HND": {
+      "name": "Honduras",
+      "index": 146,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 146,
+        "hex": "#000092",
+        "css": "rgb(0, 0, 146)"
+      },
+      "properties": {
+        "iso_a3": "HND",
+        "name_long": "Honduras",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Central America"
+      }
+    },
+    "HTI": {
+      "name": "Haiti",
+      "index": 147,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 147,
+        "hex": "#000093",
+        "css": "rgb(0, 0, 147)"
+      },
+      "properties": {
+        "iso_a3": "HTI",
+        "name_long": "Haiti",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "GUY": {
+      "name": "Guyana",
+      "index": 148,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 148,
+        "hex": "#000094",
+        "css": "rgb(0, 0, 148)"
+      },
+      "properties": {
+        "iso_a3": "GUY",
+        "name_long": "Guyana",
+        "continent": "South America",
+        "region": "Americas",
+        "subregion": "South America"
+      }
+    },
+    "GNB": {
+      "name": "Guinea-Bissau",
+      "index": 149,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 149,
+        "hex": "#000095",
+        "css": "rgb(0, 0, 149)"
+      },
+      "properties": {
+        "iso_a3": "GNB",
+        "name_long": "Guinea-Bissau",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "GIN": {
+      "name": "Guinea",
+      "index": 150,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 150,
+        "hex": "#000096",
+        "css": "rgb(0, 0, 150)"
+      },
+      "properties": {
+        "iso_a3": "GIN",
+        "name_long": "Guinea",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "GTM": {
+      "name": "Guatemala",
+      "index": 151,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 151,
+        "hex": "#000097",
+        "css": "rgb(0, 0, 151)"
+      },
+      "properties": {
+        "iso_a3": "GTM",
+        "name_long": "Guatemala",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Central America"
+      }
+    },
+    "GRD": {
+      "name": "Grenada",
+      "index": 152,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 152,
+        "hex": "#000098",
+        "css": "rgb(0, 0, 152)"
+      },
+      "properties": {
+        "iso_a3": "GRD",
+        "name_long": "Grenada",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "GRC": {
+      "name": "Greece",
+      "index": 153,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 153,
+        "hex": "#000099",
+        "css": "rgb(0, 0, 153)"
+      },
+      "properties": {
+        "iso_a3": "GRC",
+        "name_long": "Greece",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "GHA": {
+      "name": "Ghana",
+      "index": 154,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 154,
+        "hex": "#00009a",
+        "css": "rgb(0, 0, 154)"
+      },
+      "properties": {
+        "iso_a3": "GHA",
+        "name_long": "Ghana",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "DEU": {
+      "name": "Germany",
+      "index": 155,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 155,
+        "hex": "#00009b",
+        "css": "rgb(0, 0, 155)"
+      },
+      "properties": {
+        "iso_a3": "DEU",
+        "name_long": "Germany",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      }
+    },
+    "GEO": {
+      "name": "Georgia",
+      "index": 156,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 156,
+        "hex": "#00009c",
+        "css": "rgb(0, 0, 156)"
+      },
+      "properties": {
+        "iso_a3": "GEO",
+        "name_long": "Georgia",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "GMB": {
+      "name": "Gambia",
+      "index": 157,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 157,
+        "hex": "#00009d",
+        "css": "rgb(0, 0, 157)"
+      },
+      "properties": {
+        "iso_a3": "GMB",
+        "name_long": "The Gambia",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "GAB": {
+      "name": "Gabon",
+      "index": 158,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 158,
+        "hex": "#00009e",
+        "css": "rgb(0, 0, 158)"
+      },
+      "properties": {
+        "iso_a3": "GAB",
+        "name_long": "Gabon",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Middle Africa"
+      }
+    },
+    "SPM": {
+      "name": "St. Pierre and Miquelon",
+      "index": 159,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 159,
+        "hex": "#00009f",
+        "css": "rgb(0, 0, 159)"
+      },
+      "properties": {
+        "iso_a3": "SPM",
+        "name_long": "Saint Pierre and Miquelon",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Northern America"
+      }
+    },
+    "WLF": {
+      "name": "Wallis and Futuna Is.",
+      "index": 160,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 160,
+        "hex": "#0000a0",
+        "css": "rgb(0, 0, 160)"
+      },
+      "properties": {
+        "iso_a3": "WLF",
+        "name_long": "Wallis and Futuna Islands",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      }
+    },
+    "MAF": {
+      "name": "St-Martin",
+      "index": 161,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 161,
+        "hex": "#0000a1",
+        "css": "rgb(0, 0, 161)"
+      },
+      "properties": {
+        "iso_a3": "MAF",
+        "name_long": "Saint-Martin",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "BLM": {
+      "name": "St-Barthélemy",
+      "index": 162,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 162,
+        "hex": "#0000a2",
+        "css": "rgb(0, 0, 162)"
+      },
+      "properties": {
+        "iso_a3": "BLM",
+        "name_long": "Saint-Barthélemy",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "PYF": {
+      "name": "Fr. Polynesia",
+      "index": 163,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 163,
+        "hex": "#0000a3",
+        "css": "rgb(0, 0, 163)"
+      },
+      "properties": {
+        "iso_a3": "PYF",
+        "name_long": "French Polynesia",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      }
+    },
+    "NCL": {
+      "name": "New Caledonia",
+      "index": 164,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 164,
+        "hex": "#0000a4",
+        "css": "rgb(0, 0, 164)"
+      },
+      "properties": {
+        "iso_a3": "NCL",
+        "name_long": "New Caledonia",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      }
+    },
+    "ATF": {
+      "name": "Fr. S. Antarctic Lands",
+      "index": 165,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 165,
+        "hex": "#0000a5",
+        "css": "rgb(0, 0, 165)"
+      },
+      "properties": {
+        "iso_a3": "ATF",
+        "name_long": "French Southern and Antarctic Lands",
+        "continent": "Seven seas (open ocean)",
+        "region": "Africa",
+        "subregion": "Seven seas (open ocean)"
+      }
+    },
+    "ALA": {
+      "name": "Åland",
+      "index": 166,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 166,
+        "hex": "#0000a6",
+        "css": "rgb(0, 0, 166)"
+      },
+      "properties": {
+        "iso_a3": "ALA",
+        "name_long": "Åland Islands",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "FIN": {
+      "name": "Finland",
+      "index": 167,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 167,
+        "hex": "#0000a7",
+        "css": "rgb(0, 0, 167)"
+      },
+      "properties": {
+        "iso_a3": "FIN",
+        "name_long": "Finland",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "FJI": {
+      "name": "Fiji",
+      "index": 168,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 168,
+        "hex": "#0000a8",
+        "css": "rgb(0, 0, 168)"
+      },
+      "properties": {
+        "iso_a3": "FJI",
+        "name_long": "Fiji",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Melanesia"
+      }
+    },
+    "ETH": {
+      "name": "Ethiopia",
+      "index": 169,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 169,
+        "hex": "#0000a9",
+        "css": "rgb(0, 0, 169)"
+      },
+      "properties": {
+        "iso_a3": "ETH",
+        "name_long": "Ethiopia",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "EST": {
+      "name": "Estonia",
+      "index": 170,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 170,
+        "hex": "#0000aa",
+        "css": "rgb(0, 0, 170)"
+      },
+      "properties": {
+        "iso_a3": "EST",
+        "name_long": "Estonia",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "ERI": {
+      "name": "Eritrea",
+      "index": 171,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 171,
+        "hex": "#0000ab",
+        "css": "rgb(0, 0, 171)"
+      },
+      "properties": {
+        "iso_a3": "ERI",
+        "name_long": "Eritrea",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "GNQ": {
+      "name": "Eq. Guinea",
+      "index": 172,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 172,
+        "hex": "#0000ac",
+        "css": "rgb(0, 0, 172)"
+      },
+      "properties": {
+        "iso_a3": "GNQ",
+        "name_long": "Equatorial Guinea",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Middle Africa"
+      }
+    },
+    "SLV": {
+      "name": "El Salvador",
+      "index": 173,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 173,
+        "hex": "#0000ad",
+        "css": "rgb(0, 0, 173)"
+      },
+      "properties": {
+        "iso_a3": "SLV",
+        "name_long": "El Salvador",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Central America"
+      }
+    },
+    "EGY": {
+      "name": "Egypt",
+      "index": 174,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 174,
+        "hex": "#0000ae",
+        "css": "rgb(0, 0, 174)"
+      },
+      "properties": {
+        "iso_a3": "EGY",
+        "name_long": "Egypt",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      }
+    },
+    "ECU": {
+      "name": "Ecuador",
+      "index": 175,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 175,
+        "hex": "#0000af",
+        "css": "rgb(0, 0, 175)"
+      },
+      "properties": {
+        "iso_a3": "ECU",
+        "name_long": "Ecuador",
+        "continent": "South America",
+        "region": "Americas",
+        "subregion": "South America"
+      }
+    },
+    "DOM": {
+      "name": "Dominican Rep.",
+      "index": 176,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 176,
+        "hex": "#0000b0",
+        "css": "rgb(0, 0, 176)"
+      },
+      "properties": {
+        "iso_a3": "DOM",
+        "name_long": "Dominican Republic",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "DMA": {
+      "name": "Dominica",
+      "index": 177,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 177,
+        "hex": "#0000b1",
+        "css": "rgb(0, 0, 177)"
+      },
+      "properties": {
+        "iso_a3": "DMA",
+        "name_long": "Dominica",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "DJI": {
+      "name": "Djibouti",
+      "index": 178,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 178,
+        "hex": "#0000b2",
+        "css": "rgb(0, 0, 178)"
+      },
+      "properties": {
+        "iso_a3": "DJI",
+        "name_long": "Djibouti",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "GRL": {
+      "name": "Greenland",
+      "index": 179,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 179,
+        "hex": "#0000b3",
+        "css": "rgb(0, 0, 179)"
+      },
+      "properties": {
+        "iso_a3": "GRL",
+        "name_long": "Greenland",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Northern America"
+      }
+    },
+    "FRO": {
+      "name": "Faeroe Is.",
+      "index": 180,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 180,
+        "hex": "#0000b4",
+        "css": "rgb(0, 0, 180)"
+      },
+      "properties": {
+        "iso_a3": "FRO",
+        "name_long": "Faeroe Islands",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "DNK": {
+      "name": "Denmark",
+      "index": 181,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 181,
+        "hex": "#0000b5",
+        "css": "rgb(0, 0, 181)"
+      },
+      "properties": {
+        "iso_a3": "DNK",
+        "name_long": "Denmark",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Northern Europe"
+      }
+    },
+    "CZE": {
+      "name": "Czechia",
+      "index": 182,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 182,
+        "hex": "#0000b6",
+        "css": "rgb(0, 0, 182)"
+      },
+      "properties": {
+        "iso_a3": "CZE",
+        "name_long": "Czech Republic",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      }
+    },
+    "CYP": {
+      "name": "Cyprus",
+      "index": 183,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 183,
+        "hex": "#0000b7",
+        "css": "rgb(0, 0, 183)"
+      },
+      "properties": {
+        "iso_a3": "CYP",
+        "name_long": "Cyprus",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "CUB": {
+      "name": "Cuba",
+      "index": 184,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 184,
+        "hex": "#0000b8",
+        "css": "rgb(0, 0, 184)"
+      },
+      "properties": {
+        "iso_a3": "CUB",
+        "name_long": "Cuba",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "HRV": {
+      "name": "Croatia",
+      "index": 185,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 185,
+        "hex": "#0000b9",
+        "css": "rgb(0, 0, 185)"
+      },
+      "properties": {
+        "iso_a3": "HRV",
+        "name_long": "Croatia",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "CIV": {
+      "name": "Côte d'Ivoire",
+      "index": 186,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 186,
+        "hex": "#0000ba",
+        "css": "rgb(0, 0, 186)"
+      },
+      "properties": {
+        "iso_a3": "CIV",
+        "name_long": "Côte d'Ivoire",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "CRI": {
+      "name": "Costa Rica",
+      "index": 187,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 187,
+        "hex": "#0000bb",
+        "css": "rgb(0, 0, 187)"
+      },
+      "properties": {
+        "iso_a3": "CRI",
+        "name_long": "Costa Rica",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Central America"
+      }
+    },
+    "COD": {
+      "name": "Dem. Rep. Congo",
+      "index": 188,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 188,
+        "hex": "#0000bc",
+        "css": "rgb(0, 0, 188)"
+      },
+      "properties": {
+        "iso_a3": "COD",
+        "name_long": "Democratic Republic of the Congo",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Middle Africa"
+      }
+    },
+    "COG": {
+      "name": "Congo",
+      "index": 189,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 189,
+        "hex": "#0000bd",
+        "css": "rgb(0, 0, 189)"
+      },
+      "properties": {
+        "iso_a3": "COG",
+        "name_long": "Republic of the Congo",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Middle Africa"
+      }
+    },
+    "COM": {
+      "name": "Comoros",
+      "index": 190,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 190,
+        "hex": "#0000be",
+        "css": "rgb(0, 0, 190)"
+      },
+      "properties": {
+        "iso_a3": "COM",
+        "name_long": "Comoros",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "COL": {
+      "name": "Colombia",
+      "index": 191,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 191,
+        "hex": "#0000bf",
+        "css": "rgb(0, 0, 191)"
+      },
+      "properties": {
+        "iso_a3": "COL",
+        "name_long": "Colombia",
+        "continent": "South America",
+        "region": "Americas",
+        "subregion": "South America"
+      }
+    },
+    "CHN": {
+      "name": "China",
+      "index": 192,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 192,
+        "hex": "#0000c0",
+        "css": "rgb(0, 0, 192)"
+      },
+      "properties": {
+        "iso_a3": "CHN",
+        "name_long": "China",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      }
+    },
+    "MAC": {
+      "name": "Macao",
+      "index": 193,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 193,
+        "hex": "#0000c1",
+        "css": "rgb(0, 0, 193)"
+      },
+      "properties": {
+        "iso_a3": "MAC",
+        "name_long": "Macao",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      }
+    },
+    "HKG": {
+      "name": "Hong Kong",
+      "index": 194,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 194,
+        "hex": "#0000c2",
+        "css": "rgb(0, 0, 194)"
+      },
+      "properties": {
+        "iso_a3": "HKG",
+        "name_long": "Hong Kong",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Eastern Asia"
+      }
+    },
+    "CHL": {
+      "name": "Chile",
+      "index": 195,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 195,
+        "hex": "#0000c3",
+        "css": "rgb(0, 0, 195)"
+      },
+      "properties": {
+        "iso_a3": "CHL",
+        "name_long": "Chile",
+        "continent": "South America",
+        "region": "Americas",
+        "subregion": "South America"
+      }
+    },
+    "TCD": {
+      "name": "Chad",
+      "index": 196,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 196,
+        "hex": "#0000c4",
+        "css": "rgb(0, 0, 196)"
+      },
+      "properties": {
+        "iso_a3": "TCD",
+        "name_long": "Chad",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Middle Africa"
+      }
+    },
+    "CAF": {
+      "name": "Central African Rep.",
+      "index": 197,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 197,
+        "hex": "#0000c5",
+        "css": "rgb(0, 0, 197)"
+      },
+      "properties": {
+        "iso_a3": "CAF",
+        "name_long": "Central African Republic",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Middle Africa"
+      }
+    },
+    "CPV": {
+      "name": "Cabo Verde",
+      "index": 198,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 198,
+        "hex": "#0000c6",
+        "css": "rgb(0, 0, 198)"
+      },
+      "properties": {
+        "iso_a3": "CPV",
+        "name_long": "Republic of Cabo Verde",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "CAN": {
+      "name": "Canada",
+      "index": 199,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 199,
+        "hex": "#0000c7",
+        "css": "rgb(0, 0, 199)"
+      },
+      "properties": {
+        "iso_a3": "CAN",
+        "name_long": "Canada",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Northern America"
+      }
+    },
+    "CMR": {
+      "name": "Cameroon",
+      "index": 200,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 200,
+        "hex": "#0000c8",
+        "css": "rgb(0, 0, 200)"
+      },
+      "properties": {
+        "iso_a3": "CMR",
+        "name_long": "Cameroon",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Middle Africa"
+      }
+    },
+    "KHM": {
+      "name": "Cambodia",
+      "index": 201,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 201,
+        "hex": "#0000c9",
+        "css": "rgb(0, 0, 201)"
+      },
+      "properties": {
+        "iso_a3": "KHM",
+        "name_long": "Cambodia",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "South-Eastern Asia"
+      }
+    },
+    "MMR": {
+      "name": "Myanmar",
+      "index": 202,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 202,
+        "hex": "#0000ca",
+        "css": "rgb(0, 0, 202)"
+      },
+      "properties": {
+        "iso_a3": "MMR",
+        "name_long": "Myanmar",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "South-Eastern Asia"
+      }
+    },
+    "BDI": {
+      "name": "Burundi",
+      "index": 203,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 203,
+        "hex": "#0000cb",
+        "css": "rgb(0, 0, 203)"
+      },
+      "properties": {
+        "iso_a3": "BDI",
+        "name_long": "Burundi",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Eastern Africa"
+      }
+    },
+    "BFA": {
+      "name": "Burkina Faso",
+      "index": 204,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 204,
+        "hex": "#0000cc",
+        "css": "rgb(0, 0, 204)"
+      },
+      "properties": {
+        "iso_a3": "BFA",
+        "name_long": "Burkina Faso",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "BGR": {
+      "name": "Bulgaria",
+      "index": 205,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 205,
+        "hex": "#0000cd",
+        "css": "rgb(0, 0, 205)"
+      },
+      "properties": {
+        "iso_a3": "BGR",
+        "name_long": "Bulgaria",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      }
+    },
+    "BRN": {
+      "name": "Brunei",
+      "index": 206,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 206,
+        "hex": "#0000ce",
+        "css": "rgb(0, 0, 206)"
+      },
+      "properties": {
+        "iso_a3": "BRN",
+        "name_long": "Brunei Darussalam",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "South-Eastern Asia"
+      }
+    },
+    "BRA": {
+      "name": "Brazil",
+      "index": 207,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 207,
+        "hex": "#0000cf",
+        "css": "rgb(0, 0, 207)"
+      },
+      "properties": {
+        "iso_a3": "BRA",
+        "name_long": "Brazil",
+        "continent": "South America",
+        "region": "Americas",
+        "subregion": "South America"
+      }
+    },
+    "BWA": {
+      "name": "Botswana",
+      "index": 208,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 208,
+        "hex": "#0000d0",
+        "css": "rgb(0, 0, 208)"
+      },
+      "properties": {
+        "iso_a3": "BWA",
+        "name_long": "Botswana",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Southern Africa"
+      }
+    },
+    "BIH": {
+      "name": "Bosnia and Herz.",
+      "index": 209,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 209,
+        "hex": "#0000d1",
+        "css": "rgb(0, 0, 209)"
+      },
+      "properties": {
+        "iso_a3": "BIH",
+        "name_long": "Bosnia and Herzegovina",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "BOL": {
+      "name": "Bolivia",
+      "index": 210,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 210,
+        "hex": "#0000d2",
+        "css": "rgb(0, 0, 210)"
+      },
+      "properties": {
+        "iso_a3": "BOL",
+        "name_long": "Bolivia",
+        "continent": "South America",
+        "region": "Americas",
+        "subregion": "South America"
+      }
+    },
+    "BTN": {
+      "name": "Bhutan",
+      "index": 211,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 211,
+        "hex": "#0000d3",
+        "css": "rgb(0, 0, 211)"
+      },
+      "properties": {
+        "iso_a3": "BTN",
+        "name_long": "Bhutan",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      }
+    },
+    "BEN": {
+      "name": "Benin",
+      "index": 212,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 212,
+        "hex": "#0000d4",
+        "css": "rgb(0, 0, 212)"
+      },
+      "properties": {
+        "iso_a3": "BEN",
+        "name_long": "Benin",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Western Africa"
+      }
+    },
+    "BLZ": {
+      "name": "Belize",
+      "index": 213,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 213,
+        "hex": "#0000d5",
+        "css": "rgb(0, 0, 213)"
+      },
+      "properties": {
+        "iso_a3": "BLZ",
+        "name_long": "Belize",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Central America"
+      }
+    },
+    "BEL": {
+      "name": "Belgium",
+      "index": 214,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 214,
+        "hex": "#0000d6",
+        "css": "rgb(0, 0, 214)"
+      },
+      "properties": {
+        "iso_a3": "BEL",
+        "name_long": "Belgium",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      }
+    },
+    "BLR": {
+      "name": "Belarus",
+      "index": 215,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 215,
+        "hex": "#0000d7",
+        "css": "rgb(0, 0, 215)"
+      },
+      "properties": {
+        "iso_a3": "BLR",
+        "name_long": "Belarus",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Eastern Europe"
+      }
+    },
+    "BRB": {
+      "name": "Barbados",
+      "index": 216,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 216,
+        "hex": "#0000d8",
+        "css": "rgb(0, 0, 216)"
+      },
+      "properties": {
+        "iso_a3": "BRB",
+        "name_long": "Barbados",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "BGD": {
+      "name": "Bangladesh",
+      "index": 217,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 217,
+        "hex": "#0000d9",
+        "css": "rgb(0, 0, 217)"
+      },
+      "properties": {
+        "iso_a3": "BGD",
+        "name_long": "Bangladesh",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      }
+    },
+    "BHR": {
+      "name": "Bahrain",
+      "index": 218,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 218,
+        "hex": "#0000da",
+        "css": "rgb(0, 0, 218)"
+      },
+      "properties": {
+        "iso_a3": "BHR",
+        "name_long": "Bahrain",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "BHS": {
+      "name": "Bahamas",
+      "index": 219,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 219,
+        "hex": "#0000db",
+        "css": "rgb(0, 0, 219)"
+      },
+      "properties": {
+        "iso_a3": "BHS",
+        "name_long": "Bahamas",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "AZE": {
+      "name": "Azerbaijan",
+      "index": 220,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 220,
+        "hex": "#0000dc",
+        "css": "rgb(0, 0, 220)"
+      },
+      "properties": {
+        "iso_a3": "AZE",
+        "name_long": "Azerbaijan",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "AUT": {
+      "name": "Austria",
+      "index": 221,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 221,
+        "hex": "#0000dd",
+        "css": "rgb(0, 0, 221)"
+      },
+      "properties": {
+        "iso_a3": "AUT",
+        "name_long": "Austria",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Western Europe"
+      }
+    },
+    "AUS": {
+      "name": "Australia",
+      "index": 222,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 222,
+        "hex": "#0000de",
+        "css": "rgb(0, 0, 222)"
+      },
+      "properties": {
+        "iso_a3": "AUS",
+        "name_long": "Australia",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      }
+    },
+    "HMD": {
+      "name": "Heard I. and McDonald Is.",
+      "index": 223,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 223,
+        "hex": "#0000df",
+        "css": "rgb(0, 0, 223)"
+      },
+      "properties": {
+        "iso_a3": "HMD",
+        "name_long": "Heard I. and McDonald Islands",
+        "continent": "Seven seas (open ocean)",
+        "region": "Africa",
+        "subregion": "Seven seas (open ocean)"
+      }
+    },
+    "NFK": {
+      "name": "Norfolk Island",
+      "index": 224,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 224,
+        "hex": "#0000e0",
+        "css": "rgb(0, 0, 224)"
+      },
+      "properties": {
+        "iso_a3": "NFK",
+        "name_long": "Norfolk Island",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Australia and New Zealand"
+      }
+    },
+    "ARM": {
+      "name": "Armenia",
+      "index": 225,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 225,
+        "hex": "#0000e1",
+        "css": "rgb(0, 0, 225)"
+      },
+      "properties": {
+        "iso_a3": "ARM",
+        "name_long": "Armenia",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Western Asia"
+      }
+    },
+    "ARG": {
+      "name": "Argentina",
+      "index": 226,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 226,
+        "hex": "#0000e2",
+        "css": "rgb(0, 0, 226)"
+      },
+      "properties": {
+        "iso_a3": "ARG",
+        "name_long": "Argentina",
+        "continent": "South America",
+        "region": "Americas",
+        "subregion": "South America"
+      }
+    },
+    "ATG": {
+      "name": "Antigua and Barb.",
+      "index": 227,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 227,
+        "hex": "#0000e3",
+        "css": "rgb(0, 0, 227)"
+      },
+      "properties": {
+        "iso_a3": "ATG",
+        "name_long": "Antigua and Barbuda",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "AGO": {
+      "name": "Angola",
+      "index": 228,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 228,
+        "hex": "#0000e4",
+        "css": "rgb(0, 0, 228)"
+      },
+      "properties": {
+        "iso_a3": "AGO",
+        "name_long": "Angola",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Middle Africa"
+      }
+    },
+    "AND": {
+      "name": "Andorra",
+      "index": 229,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 229,
+        "hex": "#0000e5",
+        "css": "rgb(0, 0, 229)"
+      },
+      "properties": {
+        "iso_a3": "AND",
+        "name_long": "Andorra",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "DZA": {
+      "name": "Algeria",
+      "index": 230,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 230,
+        "hex": "#0000e6",
+        "css": "rgb(0, 0, 230)"
+      },
+      "properties": {
+        "iso_a3": "DZA",
+        "name_long": "Algeria",
+        "continent": "Africa",
+        "region": "Africa",
+        "subregion": "Northern Africa"
+      }
+    },
+    "ALB": {
+      "name": "Albania",
+      "index": 231,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 231,
+        "hex": "#0000e7",
+        "css": "rgb(0, 0, 231)"
+      },
+      "properties": {
+        "iso_a3": "ALB",
+        "name_long": "Albania",
+        "continent": "Europe",
+        "region": "Europe",
+        "subregion": "Southern Europe"
+      }
+    },
+    "AFG": {
+      "name": "Afghanistan",
+      "index": 232,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 232,
+        "hex": "#0000e8",
+        "css": "rgb(0, 0, 232)"
+      },
+      "properties": {
+        "iso_a3": "AFG",
+        "name_long": "Afghanistan",
+        "continent": "Asia",
+        "region": "Asia",
+        "subregion": "Southern Asia"
+      }
+    },
+    "ATA": {
+      "name": "Antarctica",
+      "index": 233,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 233,
+        "hex": "#0000e9",
+        "css": "rgb(0, 0, 233)"
+      },
+      "properties": {
+        "iso_a3": "ATA",
+        "name_long": "Antarctica",
+        "continent": "Antarctica",
+        "region": "Antarctica",
+        "subregion": "Antarctica"
+      }
+    },
+    "SXM": {
+      "name": "Sint Maarten",
+      "index": 234,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 234,
+        "hex": "#0000ea",
+        "css": "rgb(0, 0, 234)"
+      },
+      "properties": {
+        "iso_a3": "SXM",
+        "name_long": "Sint Maarten",
+        "continent": "North America",
+        "region": "Americas",
+        "subregion": "Caribbean"
+      }
+    },
+    "TUV": {
+      "name": "Tuvalu",
+      "index": 235,
+      "encodedColor": {
+        "r": 0,
+        "g": 0,
+        "b": 235,
+        "hex": "#0000eb",
+        "css": "rgb(0, 0, 235)"
+      },
+      "properties": {
+        "iso_a3": "TUV",
+        "name_long": "Tuvalu",
+        "continent": "Oceania",
+        "region": "Oceania",
+        "subregion": "Polynesia"
+      }
+    }
+  }
+}

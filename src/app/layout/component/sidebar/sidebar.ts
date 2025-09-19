@@ -30,7 +30,7 @@ interface Item {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, IconComponent, TableKeyboardDirective],
+  imports: [CommonModule, IconComponent, TableKeyboardDirective], // Updated imports
   template: `
     <aside
       class="sidebar"
