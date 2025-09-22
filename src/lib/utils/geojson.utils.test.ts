@@ -313,8 +313,8 @@ describe('GeoJSON Utils', () => {
       // Check first country
       const firstCountry = result.children[0] as THREE.Group;
       expect(firstCountry).toBeInstanceOf(THREE.Group);
-      expect(firstCountry.userData.name).toBe('Country A');
-      expect(firstCountry.userData.isCountry).toBe(true);
+      expect(firstCountry.userData['name']).toBe('Country A');
+      expect(firstCountry.userData['isCountry']).toBe(true);
     });
 
     it('should handle empty GeoJSON', () => {
@@ -352,7 +352,7 @@ describe('GeoJSON Utils', () => {
 
       const result = createInteractiveCountries(mockGeoJSON, 2);
       const country = result.children[0] as THREE.Group;
-      expect(country.userData.name).toBe('Unknown');
+      expect(country.userData['name']).toBe('Unknown');
     });
 
     it('should use custom radius', () => {

@@ -715,7 +715,8 @@ function unwrapLongitudes(ring: number[][]): number[][] {
   let lastLon = ring[0][0];
   out.push([lastLon, ring[0][1]]);
   for (let i = 1; i < ring.length; i++) {
-    let [lon, lat] = ring[i];
+    let [lon] = ring[i];
+    const lat = ring[i][1];
     while (lon - lastLon > 180) lon -= 360;
     while (lon - lastLon < -180) lon += 360;
     out.push([lon, lat]);
@@ -817,67 +818,6 @@ function calculateSphericalSignedArea(ring: number[][]): number {
 }
 
 /**
- * Ensure polygon ring has correct winding order using spherical geometry
- * @param ring Array of [lon, lat] coordinates
- * @param shouldBeCCW Whether ring should be counter-clockwise (true for outer rings)
- * @returns Ring with correct winding order
- */
-function ensureCorrectWinding(
-  ring: number[][],
-  shouldBeCCW: boolean,
-): number[][] {
-  if (ring.length < 3) return ring;
-
-  // Use spherical signed area calculation for proper winding detection
-  let signedArea = 0;
-  const n = ring.length - 1; // Exclude duplicate closing point
-
-  for (let i = 0; i < n; i++) {
-    const j = (i + 1) % n;
-    const [lon1, lat1] = ring[i];
-    const [lon2, lat2] = ring[j];
-
-    // Convert to radians for spherical calculation
-    const λ1 = (lon1 * Math.PI) / 180;
-    const φ1 = (lat1 * Math.PI) / 180;
-    const λ2 = (lon2 * Math.PI) / 180;
-    const φ2 = (lat2 * Math.PI) / 180;
-
-    // Spherical excess method for signed area on sphere
-    const Δλ = λ2 - λ1;
-
-    // Handle antimeridian crossing
-    let adjustedΔλ = Δλ;
-    if (Math.abs(Δλ) > Math.PI) {
-      adjustedΔλ = Δλ > 0 ? Δλ - 2 * Math.PI : Δλ + 2 * Math.PI;
-    }
-
-    const E =
-      2 *
-      Math.atan2(
-        Math.tan(adjustedΔλ / 2) * (Math.sin(φ1) + Math.sin(φ2)),
-        2 +
-          Math.sin(φ1) * Math.sin(φ2) +
-          Math.cos(φ1) * Math.cos(φ2) * Math.cos(adjustedΔλ),
-      );
-
-    signedArea += E;
-  }
-
-  const isCCW = signedArea > 0; // Positive area = CCW on sphere
-
-  // Reverse if winding is incorrect
-  if (isCCW !== shouldBeCCW) {
-    console.log(
-      `🔄 Correcting winding order: ${isCCW ? 'CCW' : 'CW'} → ${shouldBeCCW ? 'CCW' : 'CW'}`,
-    );
-    return [...ring].reverse();
-  }
-
-  return ring;
-}
-
-/**
  * Create triangulated polygon mesh with proper hole support
  * @param coordinates Polygon coordinates [outer, ...holes]
  * @param radius Sphere radius
@@ -906,8 +846,11 @@ function createPolygonSelectionMesh(
     // CRITICAL FIX: Use proper spherical winding for Earcut triangulation
     // For spherical projection, we need to determine correct winding based on geometry
     const useSphericalWinding =
-      (window as any).COUNTRY_SPHERICAL_WINDING !== false; // Default to spherical winding
-    const invertWinding = (window as any).COUNTRY_INVERT_WINDING || false; // Only invert if explicitly set
+      (window as Window & { COUNTRY_SPHERICAL_WINDING?: boolean })
+        .COUNTRY_SPHERICAL_WINDING !== false; // Default to spherical winding
+    const invertWinding =
+      (window as Window & { COUNTRY_INVERT_WINDING?: boolean })
+        .COUNTRY_INVERT_WINDING || false; // Only invert if explicitly set
 
     const correctedRings: number[][][] = coordinates.map((ring, index) => {
       let r = removeRingClosure(ring);

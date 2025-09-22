@@ -16,6 +16,7 @@ export default defineConfig({
           const content = readFileSync(id, 'utf-8');
           return `export default ${JSON.stringify(content)}`;
         }
+        return undefined;
       },
     },
   ],

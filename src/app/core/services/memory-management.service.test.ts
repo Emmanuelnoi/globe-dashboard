@@ -37,7 +37,7 @@ describe('MemoryManagementService', () => {
         memory: { geometries: 5, textures: 3 },
         render: { calls: 10 },
       },
-    } as any;
+    } as unknown as WebGLRenderer;
 
     // Create mock scene
     mockScene = new Scene();
@@ -196,7 +196,7 @@ describe('MemoryManagementService', () => {
         getContext: vi.fn().mockReturnValue({
           getExtension: vi.fn().mockReturnValue(null),
         }),
-      } as any;
+      } as unknown as WebGLRenderer;
 
       expect(() =>
         service.disposeRenderer(rendererWithoutExtension),
@@ -301,13 +301,13 @@ describe('MemoryManagementService', () => {
   describe('Force Garbage Collection', () => {
     it('should call global gc if available', () => {
       const mockGc = vi.fn();
-      (globalThis as any).window = { gc: mockGc };
+      (globalThis as { window?: { gc?: () => void } }).window = { gc: mockGc };
 
       service.forceGarbageCollection();
 
       expect(mockGc).toHaveBeenCalled();
 
-      delete (globalThis as any).window;
+      delete (globalThis as { window?: unknown }).window;
     });
 
     it('should not throw if gc is not available', () => {

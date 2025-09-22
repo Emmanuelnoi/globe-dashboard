@@ -1,6 +1,17 @@
 import { MeshStandardMaterial, Texture, Color, FrontSide } from 'three';
 
 /**
+ * Extended material interface with custom properties
+ */
+interface ExtendedMeshStandardMaterial extends MeshStandardMaterial {
+  countryIdTexture?: Texture;
+  selectionMaskTexture?: Texture;
+  selectionColor?: Color;
+  enableBorders?: boolean;
+  borderColor?: Color;
+}
+
+/**
  * Configuration for country selection material
  */
 export interface CountrySelectionMaterialConfig {
@@ -48,11 +59,12 @@ export function createCountrySelectionMaterial(
   });
 
   // Store reference textures for future GPU selection implementation
-  (material as any).countryIdTexture = countryIdTexture;
-  (material as any).selectionMaskTexture = selectionMaskTexture;
-  (material as any).selectionColor = selectionColor;
-  (material as any).enableBorders = enableBorders;
-  (material as any).borderColor = borderColor;
+  const extendedMaterial = material as ExtendedMeshStandardMaterial;
+  extendedMaterial.countryIdTexture = countryIdTexture;
+  extendedMaterial.selectionMaskTexture = selectionMaskTexture;
+  extendedMaterial.selectionColor = selectionColor;
+  extendedMaterial.enableBorders = enableBorders;
+  extendedMaterial.borderColor = borderColor;
 
   console.log(
     '📦 Created simplified Earth material (shader complexity disabled temporarily)',

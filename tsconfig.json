@@ -19,7 +19,7 @@
     "module": "ES2022",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["node"],
+    "types": ["node", "vitest/globals"],
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/app/*"],

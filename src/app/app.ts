@@ -9,10 +9,11 @@ import {
 import { Sidebar } from './layout/component/sidebar/sidebar';
 import { ComparisonCard } from './layout/component/comparison-card/comparison-card';
 import { NavigationStateService } from './core/services/navigation-state.service';
+import { PerformanceMonitorComponent } from './shared/components/performance-monitor/performance-monitor';
 
 @Component({
   selector: 'app-root',
-  imports: [Sidebar, ComparisonCard],
+  imports: [Sidebar, ComparisonCard, PerformanceMonitorComponent],
   template: `
     <div
       class="app-container"
@@ -80,6 +81,9 @@ import { NavigationStateService } from './core/services/navigation-state.service
           </div>
         </div>
       }
+
+      <!-- Performance Monitor -->
+      <app-performance-monitor />
     </div>
   `,
   styles: [

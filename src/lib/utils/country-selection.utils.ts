@@ -403,8 +403,8 @@ export class CountrySelectionService {
     // Update state
     this.selectedCountries.set(currentSelection);
 
-    // Update texture service
-    this.countryIdTextureService.updateSelectionMask(currentSelection);
+    // Note: GPU-based selection disabled - using individual country mesh selection instead
+    // this.countryIdTextureService.updateSelectionMask(currentSelection);
 
     // Clear pending updates
     this.pendingUpdates = [];

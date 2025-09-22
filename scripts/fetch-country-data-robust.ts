@@ -766,14 +766,14 @@ async function fetchCountriesData(): Promise<BaseCountry[]> {
 
   return countries
     .filter((country): country is RestCountryData => {
-      return (
+      return Boolean(
         country.name?.common &&
-        country.cca3 &&
-        (Array.isArray(country.capital)
-          ? country.capital.length > 0
-          : Boolean(country.capital)) &&
-        country.population > 0 &&
-        country.latlng?.length === 2
+          country.cca3 &&
+          (Array.isArray(country.capital)
+            ? country.capital.length > 0
+            : Boolean(country.capital)) &&
+          country.population > 0 &&
+          country.latlng?.length === 2,
       );
     })
     .map((country) => ({

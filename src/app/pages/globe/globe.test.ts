@@ -381,9 +381,7 @@ describe('Globe Component', () => {
   describe('Error Handling', () => {
     it('should handle data loading errors gracefully', async () => {
       const { loadGeoJSON } = await import('@lib/utils');
-      (
-        loadGeoJSON as jest.MockedFunction<typeof loadGeoJSON>
-      ).mockRejectedValue(new Error('Network error'));
+      vi.mocked(loadGeoJSON).mockRejectedValue(new Error('Network error'));
 
       const consoleErrorSpy = vi
         .spyOn(console, 'error')

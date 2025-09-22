@@ -24,7 +24,7 @@ describe('Keyboard Navigation Logic', () => {
     it('should calculate previous index for arrow up', () => {
       const currentIndex = 2;
       const totalItems = 5;
-      const prevIndex = currentIndex === 0 ? totalItems - 1 : currentIndex - 1;
+      const prevIndex = currentIndex <= 0 ? totalItems - 1 : currentIndex - 1;
 
       expect(prevIndex).toBe(1);
     });
@@ -32,7 +32,7 @@ describe('Keyboard Navigation Logic', () => {
     it('should wrap to end when arrow up at beginning', () => {
       const currentIndex = 0;
       const totalItems = 5;
-      const prevIndex = currentIndex === 0 ? totalItems - 1 : currentIndex - 1;
+      const prevIndex = currentIndex <= 0 ? totalItems - 1 : currentIndex - 1;
 
       expect(prevIndex).toBe(4);
     });

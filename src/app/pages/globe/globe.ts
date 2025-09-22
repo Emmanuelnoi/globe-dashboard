@@ -17,13 +17,12 @@ import {
   PerspectiveCamera,
   TextureLoader,
   SphereGeometry,
-  MeshStandardMaterial,
-  FrontSide,
   BackSide,
   Mesh,
   AmbientLight,
   DirectionalLight,
   ShaderMaterial,
+  MeshStandardMaterial,
   AdditiveBlending,
   WebGLRenderer,
   SRGBColorSpace,
@@ -31,6 +30,7 @@ import {
   Points,
   Group,
   Object3D,
+  Material,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import {
@@ -41,10 +41,8 @@ import {
   loadTopoJSON,
   createInteractiveCountriesFromTopo,
   disposeTopoJSONMeshes,
-  createCountrySelectionMaterial,
   CountrySelectionService,
   type TopoJSONRenderOptions,
-  type CountrySelectionMaterialConfig,
 } from '@lib/utils';
 import { LoadingComponent } from '@/shared/components/loading/loading.component';
 import { ErrorBoundaryComponent } from '@/shared/components/error-boundary/error-boundary.component';
@@ -56,12 +54,11 @@ import {
   CountryAccessibilityData,
 } from '@/core/services/accessibility.service';
 import { CountryIdTextureService } from '@lib/services/country-id-texture.service';
-import {
-  CountryTooltip,
-  TooltipPosition,
-} from '../../layout/component/country-tooltip/country-tooltip';
+import { TooltipPosition } from '../../layout/component/country-tooltip/country-tooltip';
 import { CountryDataService } from '../../core/services/country-data.service';
 import { CountryDataRecord } from '../../core/types/country-data.types';
+import { CountryHoverService } from '../../core/services/country-hover.service';
+import { CountryNameTooltipComponent } from '../../shared/components/country-name-tooltip/country-name-tooltip';
 
 @Component({
   selector: 'app-globe',
@@ -69,7 +66,7 @@ import { CountryDataRecord } from '../../core/types/country-data.types';
     CommonModule,
     LoadingComponent,
     ErrorBoundaryComponent,
-    CountryTooltip,
+    CountryNameTooltipComponent,
   ],
   template: `
     <app-error-boundary
@@ -143,12 +140,52 @@ import { CountryDataRecord } from '../../core/types/country-data.types';
         </div>
       </div>
 
-      <!-- Country Tooltip -->
-      <app-country-tooltip
-        [visible]="tooltipVisible()"
-        [country]="hoveredCountry()"
-        [position]="tooltipPosition()"
+      <!-- Country Name Tooltip (on hover) -->
+      <app-country-name-tooltip
+        [visible]="countryNameTooltipVisible()"
+        [countryName]="hoveredCountryName()"
+        [position]="countryNameTooltipPosition()"
       />
+
+      <!-- Fixed Position Country Details (on selection) -->
+      @if (selectedCountry()) {
+        <div class="fixed-country-details">
+          <div class="fixed-country-card">
+            <div class="country-header">
+              <div class="country-name">{{ selectedCountry()?.name }}</div>
+              <div class="country-code">{{ selectedCountry()?.code }}</div>
+            </div>
+
+            <div class="country-info">
+              <div class="info-row">
+                <span class="info-label">Capital:</span>
+                <span class="info-value">{{ selectedCountry()?.capital }}</span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-label">Population:</span>
+                <span class="info-value">{{
+                  selectedCountry()?.populationFormatted
+                }}</span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-label">GDP per capita:</span>
+                <span class="info-value">{{
+                  selectedCountry()?.gdpPerCapitaFormatted
+                }}</span>
+              </div>
+
+              <div class="info-row">
+                <span class="info-label">Life expectancy:</span>
+                <span class="info-value">{{
+                  selectedCountry()?.lifeExpectancyFormatted
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
     </app-error-boundary>
   `,
   styles: [
@@ -228,6 +265,75 @@ import { CountryDataRecord } from '../../core/types/country-data.types';
         outline: 2px solid #3b82f6;
         outline-offset: 2px;
       }
+
+      /* Fixed position country details */
+      .fixed-country-details {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        pointer-events: none;
+        width: auto;
+        height: auto;
+      }
+
+      .fixed-country-card {
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 16px;
+        color: white;
+        min-width: 280px;
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.3),
+          0 0 0 1px rgba(255, 255, 255, 0.05);
+        pointer-events: auto;
+      }
+
+      .fixed-country-card .country-header {
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .fixed-country-card .country-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 4px;
+      }
+
+      .fixed-country-card .country-code {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.7);
+        font-family: 'JetBrains Mono', 'Courier New', monospace;
+      }
+
+      .fixed-country-card .country-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .fixed-country-card .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+      }
+
+      .fixed-country-card .info-label {
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 500;
+      }
+
+      .fixed-country-card .info-value {
+        color: #00ff88;
+        font-weight: 600;
+        text-align: right;
+      }
     `,
   ],
 })
@@ -239,6 +345,7 @@ export class Globe implements AfterViewInit, OnDestroy {
   private countryIdTextureService = inject(CountryIdTextureService);
   private countrySelectionService = inject(CountrySelectionService);
   private countryDataService = inject(CountryDataService);
+  private countryHoverService = inject(CountryHoverService);
   @ViewChild('canvas') private canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('rendererContainer', { static: true })
   private rendererContainer!: ElementRef<HTMLDivElement>;
@@ -256,6 +363,17 @@ export class Globe implements AfterViewInit, OnDestroy {
   protected readonly hoveredCountry = signal<CountryDataRecord | null>(null);
   protected readonly tooltipPosition = signal<TooltipPosition>({ x: 0, y: 0 });
 
+  // Country name tooltip states (new improved tooltip)
+  protected readonly countryNameTooltipVisible = signal(false);
+  protected readonly hoveredCountryName = signal<string>('');
+  protected readonly countryNameTooltipPosition = signal<{
+    x: number;
+    y: number;
+  }>({ x: 0, y: 0 });
+
+  // Selected country state (for fixed position detailed tooltip)
+  protected readonly selectedCountry = signal<CountryDataRecord | null>(null);
+
   private camera!: PerspectiveCamera;
   private scene!: Scene;
   private renderer!: WebGLRenderer;
@@ -270,6 +388,10 @@ export class Globe implements AfterViewInit, OnDestroy {
   private lastMouseEvent = 0;
   private needsRender = true;
   private isAnimating = false;
+
+  // Camera interaction state for preventing selection during camera movement
+  private cameraInteracting = false;
+  private allowSelection = true;
 
   // 3D objects
   private sphere!: LineSegments;
@@ -394,40 +516,26 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       this.loader.load(
         '/textures/earthbump1k.jpg',
+        // '/textures/earth2048.jpg',
         (texture) => {
           try {
-            const geometry = new SphereGeometry(2, 64, 64);
+            const geometry = new SphereGeometry(1.98, 64, 64); // Slightly smaller than countries (radius 2)
 
-            // Create GPU-optimized selection material
-            const countryIdTexture =
-              this.countryIdTextureService.getCountryIdTexture();
-            const selectionMaskTexture =
-              this.countryIdTextureService.getSelectionMaskTexture();
-
-            if (!countryIdTexture || !selectionMaskTexture) {
-              throw new Error('Country ID textures not loaded');
-            }
-
-            const material = createCountrySelectionMaterial({
-              earthTexture: texture,
-              countryIdTexture: countryIdTexture,
-              selectionMaskTexture: selectionMaskTexture,
-              selectionColor: new Color(0x00ff88), // Bright green selection
-              selectionStrength: 0.6,
+            // Create realistic Earth material
+            const earthMaterial = new MeshStandardMaterial({
+              map: texture,
               roughness: 0.8,
               metalness: 0.1,
-              enableBorders: true,
-              borderColor: new Color(0x333333),
-              borderWidth: 0.001,
+              transparent: false,
             });
 
-            const earthMesh = new Mesh(geometry, material);
+            const earthMesh = new Mesh(geometry, earthMaterial);
             earthMesh.name = 'earth';
             earthMesh.renderOrder = 0; // Ensure Earth renders first
             this.earthMesh = earthMesh; // Store reference for later use
             this.scene.add(earthMesh);
 
-            console.log('✅ Earth mesh created with GPU selection material');
+            console.log('✅ Earth texture loaded with realistic world map');
             resolve();
           } catch (error) {
             reject(new Error(`Failed to create Earth mesh: ${error}`));
@@ -609,14 +717,21 @@ export class Globe implements AfterViewInit, OnDestroy {
         this.needsRender = true;
       });
 
-      // Add start/end listeners for smooth interaction
+      // Add start/end listeners for smooth interaction and selection control
       this.controls.addEventListener('start', () => {
+        console.log('🎥 Camera interaction started');
         this.isAnimating = true;
+        this.cameraInteracting = true;
+        this.allowSelection = false; // Disable selection during camera interaction
       });
 
       this.controls.addEventListener('end', () => {
+        console.log('🎥 Camera interaction ended');
         this.isAnimating = false;
         this.needsRender = true;
+        this.cameraInteracting = false;
+        // Re-enable selection immediately for better responsiveness
+        this.allowSelection = true;
       });
     } catch (error) {
       this.errorHandler.handleWebGLError(error as Error, 'controls_setup');
@@ -655,6 +770,9 @@ export class Globe implements AfterViewInit, OnDestroy {
       // Store reference and add to scene
       this.countries = countriesObject;
       this.scene.add(countriesObject);
+
+      // Ensure country objects have countryId in userData for selection service
+      this.ensureCountryIds();
 
       console.log(
         `✅ TopoJSON loaded: ${countriesObject.userData['countryCount']} countries, ${countriesObject.userData['arcCount']} shared arcs`,
@@ -699,6 +817,9 @@ export class Globe implements AfterViewInit, OnDestroy {
       // Store reference and add to scene
       this.countries = countriesObject;
       this.scene.add(countriesObject);
+
+      // Ensure country objects have countryId in userData for selection service
+      this.ensureCountryIds();
 
       console.log(
         `✅ GeoJSON loaded: ${countriesData.features.length} countries`,
@@ -939,9 +1060,19 @@ export class Globe implements AfterViewInit, OnDestroy {
   private setupCountrySelectionInteractions(): void {
     const canvas = this.renderer.domElement;
 
-    // Handle mouse clicks for country selection
+    // Handle mouse clicks for country selection (only if camera not interacting)
     canvas.addEventListener('click', (event) => {
-      this.handleCountrySelection(event);
+      console.log(
+        `🖱️ Click detected - allowSelection: ${this.allowSelection}, cameraInteracting: ${this.cameraInteracting}`,
+      );
+      if (this.allowSelection && !this.cameraInteracting) {
+        console.log('🎯 Attempting country selection...');
+        this.handleCountrySelection(event);
+      } else {
+        console.log(
+          '❌ Click ignored - camera interacting or selection disabled',
+        );
+      }
     });
 
     // Handle mouse hover for tooltips (throttled)
@@ -955,7 +1086,7 @@ export class Globe implements AfterViewInit, OnDestroy {
 
     // Hide tooltip when mouse leaves canvas
     canvas.addEventListener('mouseleave', () => {
-      this.hideTooltip();
+      this.hideAllTooltips();
     });
 
     console.log('✅ GPU country selection interactions setup complete');
@@ -1029,17 +1160,161 @@ export class Globe implements AfterViewInit, OnDestroy {
           countryData?.['name'] ||
           selectedCountryMesh.name.replace('selection-mesh-', '').split('_')[0];
 
-        // Optimized reset and selection
-        this.resetAllCountrySelections();
-        this.applyCountrySelectionToGroup(countryGroup, countryName);
+        // Handle multi-selection based on modifier keys
+        if (event.shiftKey) {
+          // Add to selection - don't reset others
+          this.applyCountrySelectionToGroup(countryGroup, countryName);
+        } else if (event.ctrlKey || event.metaKey) {
+          // Toggle selection
+          const isCurrentlySelected =
+            this.isCountrySelected(selectedCountryMesh);
+          if (isCurrentlySelected) {
+            this.removeCountrySelection(selectedCountryMesh);
+          } else {
+            this.applyCountrySelectionToGroup(countryGroup, countryName);
+          }
+        } else {
+          // Regular click - reset all and select this one
+          this.resetAllCountrySelections();
+          this.applyCountrySelectionToGroup(countryGroup, countryName);
+        }
 
         // Store current selection
         this.lastSelectedCountryMesh = selectedCountryMesh;
 
+        // Find detailed country data for selected country
+        const countryDataRecord = this.countryDataService
+          .getAllCountries()
+          .find((c: CountryDataRecord) => {
+            const name1 = c.name.toLowerCase();
+            const name2 = countryName.toLowerCase();
+            const code1 = c.code.toLowerCase();
+
+            return (
+              name1 === name2 ||
+              name1.includes(name2) ||
+              name2.includes(name1) ||
+              code1 === name2
+            );
+          });
+
+        // Show detailed tooltip in fixed position for selected country
+        if (countryDataRecord) {
+          this.selectedCountry.set(countryDataRecord);
+        }
+
         // Update accessibility
         this.updateAccessibilityCountrySelection(countryName);
+
+        console.log(`🎯 Country selected: ${countryName}`);
+      }
+    } else {
+      // No country clicked - clear selection
+      this.selectedCountry.set(null);
+    }
+  }
+
+  /**
+   * Check if a country is currently selected
+   */
+  private isCountrySelected(mesh: Mesh): boolean {
+    const material = mesh.material as Material & {
+      emissive?: { r: number; g: number; b: number };
+    };
+    return !!(material.emissive && material.emissive.r > 0);
+  }
+
+  /**
+   * Remove selection from a country
+   */
+  private removeCountrySelection(mesh: Mesh): void {
+    const material = mesh.material as Material & {
+      transparent?: boolean;
+      opacity?: number;
+      emissive?: { setHex: (hex: number) => void };
+    };
+
+    if (material) {
+      material.transparent = true;
+      material.opacity = 0.7;
+      if (material.emissive) {
+        material.emissive.setHex(0x000000); // Remove glow
       }
     }
+  }
+
+  /**
+   * Apply selection visual to a country by ID
+   */
+  private applyCountrySelectionById(countryId: string): void {
+    if (!this.countries) return;
+
+    this.countries.traverse((child) => {
+      if (child.name.startsWith('selection-mesh-') && child.type === 'Mesh') {
+        const mesh = child as Mesh;
+        const countryGroup = mesh.parent;
+
+        if (countryGroup) {
+          const countryData = countryGroup.userData;
+          const countryName =
+            countryData?.['properties']?.['NAME'] ||
+            countryData?.['name'] ||
+            mesh.name.replace('selection-mesh-', '').split('_')[0];
+
+          // Check if this mesh corresponds to the selected country
+          if (this.countryMatches(countryId, countryName)) {
+            const material = mesh.material as Material & {
+              color?: { setHex: (hex: number) => void };
+              opacity?: number;
+            };
+            if (material && 'color' in material) {
+              // Apply selected color
+              material.color?.setHex(0xff6b35);
+              if ('opacity' in material) {
+                material.opacity = 0.8;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  /**
+   * Check if country ID/name matches
+   */
+  private countryMatches(countryId: string, countryName: string): boolean {
+    const id1 = countryId.toLowerCase();
+    const name1 = countryName.toLowerCase();
+
+    return id1 === name1 || id1.includes(name1) || name1.includes(id1);
+  }
+
+  /**
+   * Ensure all country objects have countryId in userData for selection service
+   */
+  private ensureCountryIds(): void {
+    if (!this.countries) return;
+
+    this.countries.traverse((child) => {
+      if (
+        child.type === 'Group' &&
+        child.userData &&
+        child.userData['properties']
+      ) {
+        // This is a country group
+        const countryName =
+          child.userData['properties']['NAME'] ||
+          child.userData['name'] ||
+          child.name;
+
+        if (countryName && !child.userData['countryId']) {
+          child.userData['countryId'] = countryName;
+        }
+      }
+    });
+
+    console.log('✅ Country IDs ensured for selection service');
   }
 
   /**
@@ -1055,11 +1330,14 @@ export class Globe implements AfterViewInit, OnDestroy {
         child.name.startsWith('selection-mesh-') &&
         child.type === 'Mesh'
       ) {
-        const material = (child as any).material;
+        const material = (child as Mesh).material as Material & {
+          color?: Color;
+          emissive?: Color;
+        };
         if (material) {
           material.transparent = true;
           material.opacity = 0.1; // Slightly visible for interaction
-          material.color.setHex(0x444444);
+          material.color?.setHex(0x444444);
           material.needsUpdate = true;
 
           if (material.emissive) {
@@ -1136,11 +1414,16 @@ export class Globe implements AfterViewInit, OnDestroy {
   private applyCountrySelection(mesh: Mesh): void {
     if (!mesh || !mesh.geometry) return;
 
-    const material = mesh.material as any;
+    const material = mesh.material as Material & {
+      transparent?: boolean;
+      opacity?: number;
+      color?: Color;
+      emissive?: Color;
+    };
     if (material) {
       material.transparent = true;
       material.opacity = 0.85;
-      material.color.setHex(0x00ff88); // Green selection
+      material.color?.setHex(0x00ff88); // Green selection
       if (material.emissive) {
         material.emissive.setHex(0x006644);
       }
@@ -1197,13 +1480,13 @@ export class Globe implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Optimized country hover handling
+   * Enhanced country hover handling using specialized service
    */
   private async handleCountryHover(event: MouseEvent): Promise<void> {
     try {
       // Early exit if countries not loaded
       if (!this.countries || this.countries.children.length === 0) {
-        this.hideTooltip();
+        this.hideAllTooltips();
         return;
       }
 
@@ -1220,77 +1503,48 @@ export class Globe implements AfterViewInit, OnDestroy {
         y: -(y / canvas.height) * 2 + 1,
       };
 
-      // Use optimized raycasting
-      const { Raycaster, Vector2 } = await import('three');
-      const raycaster = new Raycaster();
-      raycaster.near = 0.1;
-      raycaster.far = 10;
-      const mouseVector = new Vector2(mouse.x, mouse.y);
-      raycaster.setFromCamera(mouseVector, this.camera);
-
-      // Optimized intersection check
-      const intersects = raycaster.intersectObjects(
-        this.countries.children,
-        true,
+      // Use the specialized hover service that understands TopoJSON structure
+      const hoverResult = this.countryHoverService.detectCountryHover(
+        mouse,
+        this.camera,
+        this.countries,
       );
 
-      if (intersects.length > 0) {
-        // Find first valid country mesh
-        for (const intersect of intersects) {
-          const obj = intersect.object;
+      if (hoverResult) {
+        // Show only country name tooltip on hover
+        this.hoveredCountryName.set(hoverResult.countryName);
+        this.countryNameTooltipPosition.set({
+          x: event.clientX,
+          y: event.clientY,
+        });
+        this.countryNameTooltipVisible.set(true);
 
-          // Skip borders
-          if (
-            obj.name === 'unified-borders' ||
-            obj.userData?.['isUnifiedBorder']
-          ) {
-            continue;
-          }
-
-          const countryCode =
-            obj.userData?.['countryCode'] ||
-            obj.userData?.['country_code'] ||
-            obj.parent?.userData?.['countryCode'] ||
-            obj.parent?.userData?.['country_code'];
-
-          if (countryCode) {
-            const countryData = this.countryDataService
-              .getAllCountries()
-              .find(
-                (c: CountryDataRecord) =>
-                  c.code === countryCode ||
-                  c.name.toLowerCase() === countryCode.toLowerCase(),
-              );
-
-            if (countryData) {
-              this.hoveredCountry.set(countryData);
-              this.tooltipPosition.set({
-                x: event.clientX,
-                y: event.clientY,
-              });
-              this.tooltipVisible.set(true);
-              canvas.style.cursor = 'pointer';
-              return;
-            }
-          }
-        }
+        canvas.style.cursor = 'pointer';
+      } else {
+        // No country found - hide name tooltip only
+        this.hideNameTooltip();
+        canvas.style.cursor = 'default';
       }
-
-      // No country found
-      this.hideTooltip();
-      canvas.style.cursor = 'default';
     } catch (error) {
       console.warn('⚠️ Error in country hover handler:', error);
-      this.hideTooltip();
+      this.hideNameTooltip();
     }
   }
 
   /**
-   * Hide the country tooltip
+   * Hide only the country name tooltip (for hover)
    */
-  private hideTooltip(): void {
-    this.tooltipVisible.set(false);
-    this.hoveredCountry.set(null);
+  private hideNameTooltip(): void {
+    this.countryNameTooltipVisible.set(false);
+    this.hoveredCountryName.set('');
+  }
+
+  /**
+   * Hide all tooltips (for mouse leave - keeps selected country tooltip)
+   */
+  private hideAllTooltips(): void {
+    this.hideNameTooltip();
+    // Keep selected country tooltip visible even on mouse leave
   }
 
   /**
