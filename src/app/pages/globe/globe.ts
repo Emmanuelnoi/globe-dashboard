@@ -422,6 +422,12 @@ export class Globe implements AfterViewInit, OnDestroy {
         this.countryIdTextureService.updateSelectionMask(selectedIds);
       }
     });
+
+    // Setup effect for bi-directional linking with comparison table
+    effect(() => {
+      const selectedCountryCodes = this.countryDataService.selectedCountries();
+      this.syncGlobeWithComparisonTable(selectedCountryCodes);
+    });
   }
 
   async ngAfterViewInit(): Promise<void> {
@@ -774,6 +780,14 @@ export class Globe implements AfterViewInit, OnDestroy {
       // Ensure country objects have countryId in userData for selection service
       this.ensureCountryIds();
 
+      // Initialize all selection materials to be completely invisible
+      this.initializeSelectionMaterials();
+
+      // Sync with any existing comparison table selections
+      this.syncGlobeWithComparisonTable(
+        this.countryDataService.selectedCountries(),
+      );
+
       console.log(
         `✅ TopoJSON loaded: ${countriesObject.userData['countryCount']} countries, ${countriesObject.userData['arcCount']} shared arcs`,
       );
@@ -820,6 +834,14 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       // Ensure country objects have countryId in userData for selection service
       this.ensureCountryIds();
+
+      // Initialize all selection materials to be completely invisible
+      this.initializeSelectionMaterials();
+
+      // Sync with any existing comparison table selections
+      this.syncGlobeWithComparisonTable(
+        this.countryDataService.selectedCountries(),
+      );
 
       console.log(
         `✅ GeoJSON loaded: ${countriesData.features.length} countries`,
@@ -1060,19 +1082,74 @@ export class Globe implements AfterViewInit, OnDestroy {
   private setupCountrySelectionInteractions(): void {
     const canvas = this.renderer.domElement;
 
-    // Handle mouse clicks for country selection (only if camera not interacting)
+    // Timing variables for proper single/double-click separation
+    let clickTimeout: number | null = null;
+    let isDoubleClick = false;
+
+    // Handle single clicks with proper double-click separation
     canvas.addEventListener('click', (event) => {
       console.log(
         `🖱️ Click detected - allowSelection: ${this.allowSelection}, cameraInteracting: ${this.cameraInteracting}`,
       );
+
+      // Clear any existing timeout
+      if (clickTimeout) {
+        clearTimeout(clickTimeout);
+        clickTimeout = null;
+      }
+
+      // If this is part of a double-click, ignore the single-click
+      if (isDoubleClick) {
+        console.log('📜 Single-click ignored (part of double-click)');
+        isDoubleClick = false;
+        return;
+      }
+
+      // Set a timeout to handle single-click after double-click detection window
+      clickTimeout = setTimeout(() => {
+        console.log('🎯 Single-click confirmed, processing...');
+
+        if (this.allowSelection && !this.cameraInteracting) {
+          console.log('✅ Showing country info (single-click)...');
+          this.handleCountryInfoDisplay(event);
+        } else {
+          console.log(
+            '❌ Single-click ignored - camera interacting or selection disabled',
+          );
+        }
+        clickTimeout = null;
+      }, 250); // 250ms delay to allow for double-click detection
+    });
+
+    // Handle double-click for adding countries to comparison table
+    canvas.addEventListener('dblclick', (event) => {
+      console.log(
+        `🖱️ Double-click detected - allowSelection: ${this.allowSelection}, cameraInteracting: ${this.cameraInteracting}`,
+      );
+
+      // Mark as double-click to prevent single-click handler
+      isDoubleClick = true;
+
+      // Clear single-click timeout immediately
+      if (clickTimeout) {
+        clearTimeout(clickTimeout);
+        clickTimeout = null;
+        console.log('📜 Single-click timeout cleared for double-click');
+      }
+
       if (this.allowSelection && !this.cameraInteracting) {
-        console.log('🎯 Attempting country selection...');
-        this.handleCountrySelection(event);
+        console.log('✅ Processing double-click for country selection...');
+        this.handleCountryAddToComparison(event);
       } else {
         console.log(
-          '❌ Click ignored - camera interacting or selection disabled',
+          '❌ Double-click ignored - camera interacting or selection disabled',
         );
       }
+
+      // Reset double-click flag after a short delay
+      setTimeout(() => {
+        isDoubleClick = false;
+      }, 100);
     });
 
     // Handle mouse hover for tooltips (throttled)
@@ -1090,6 +1167,128 @@ export class Globe implements AfterViewInit, OnDestroy {
     });
 
     console.log('✅ GPU country selection interactions setup complete');
+  }
+
+  /**
+   * Handle country info display on single-click (WITH visual selection and detailed info card)
+   * Single-click: Select only one country
+   * Shift+click: Add to existing selection (multiple countries)
+   */
+  private async handleCountryInfoDisplay(event: MouseEvent): Promise<void> {
+    event.preventDefault();
+
+    const isShiftClick = event.shiftKey;
+    console.log(
+      `🔍 Starting country info display - ${isShiftClick ? 'Shift+click' : 'Single-click'}...`,
+    );
+
+    // Early exit if countries not loaded
+    if (!this.countries || this.countries.children.length === 0) {
+      console.log('❌ Countries not loaded yet');
+      return;
+    }
+
+    try {
+      // Get country name from hover detection
+      console.log('🎯 Detecting country from click event...');
+      const countryResult = await this.detectCountryFromEvent(event);
+
+      if (countryResult?.countryName) {
+        const countryName = countryResult.countryName;
+        console.log(
+          `✅ ${isShiftClick ? 'Shift+click' : 'Single-click'}: Detected country "${countryName}"`,
+        );
+
+        // Get detailed country data from service (with name normalization for USA, etc.)
+        const normalizedCountryName =
+          this.normalizeCountryNameForDataService(countryName);
+        console.log(
+          `🔍 Normalizing country name: "${countryName}" → "${normalizedCountryName}"`,
+        );
+
+        const countryData = this.countryDataService.getCountryByName(
+          normalizedCountryName,
+        );
+        if (countryData) {
+          if (isShiftClick) {
+            // Shift+click: Add to existing selection (multiple countries)
+            console.log(`📊 Adding to selection (Shift+click): ${countryName}`);
+
+            // Check if country is already selected
+            if (this.selectedCountry()?.code === countryData.code) {
+              console.log(`🔄 Country already selected: ${countryName}`);
+              return; // Don't add duplicate
+            }
+
+            // Apply visual selection highlighting (additive)
+            console.log(`🎨 Adding visual selection to ${countryName}`);
+            this.applyPersistentCountrySelection(countryName);
+
+            // For Shift+click, we don't change selectedCountry signal
+            // Just apply visual highlighting - the info card stays on the first selected country
+          } else {
+            // Single-click: Select only this country (clear previous selections)
+            console.log(`📊 Setting single selected country: ${countryName}`);
+
+            // Clear all previous visual selections first
+            console.log('🧹 Clearing all previous selections for single-click');
+            this.resetAllCountrySelections();
+
+            // Set the selected country to show the detailed info card
+            this.selectedCountry.set(countryData);
+
+            // Apply visual selection highlighting to this country only
+            console.log(
+              `🎨 Applying single visual selection to ${countryName}`,
+            );
+            this.applyPersistentCountrySelection(countryName);
+          }
+
+          // Show immediate feedback tooltip for both cases
+          const x = event.clientX;
+          const y = event.clientY;
+          this.hoveredCountryName.set(countryName);
+          this.countryNameTooltipPosition.set({ x, y });
+          this.countryNameTooltipVisible.set(true);
+
+          // Hide the simple tooltip after 2 seconds
+          setTimeout(() => {
+            this.countryNameTooltipVisible.set(false);
+            this.hoveredCountryName.set('');
+          }, 2000);
+
+          console.log(`📋 Country processed:`, {
+            name: countryData.name,
+            code: countryData.code,
+            selectionType: isShiftClick ? 'multiple' : 'single',
+            showingDetailCard: !isShiftClick,
+          });
+        } else {
+          console.log(`❌ No country data found for "${countryName}"`);
+
+          // Fallback: Just show the simple tooltip if no detailed data available
+          const x = event.clientX;
+          const y = event.clientY;
+          this.hoveredCountryName.set(countryName);
+          this.countryNameTooltipPosition.set({ x, y });
+          this.countryNameTooltipVisible.set(true);
+
+          setTimeout(() => {
+            this.countryNameTooltipVisible.set(false);
+            this.hoveredCountryName.set('');
+          }, 4000);
+        }
+      } else {
+        console.log('❌ Click: No country detected from click event');
+
+        // Clear selection when clicking on empty space (both single and shift-click)
+        console.log('🧹 Clearing all selections (clicked on empty space)');
+        this.selectedCountry.set(null);
+        this.resetAllCountrySelections();
+      }
+    } catch (error) {
+      console.error('❌ Error in handleCountryInfoDisplay:', error);
+    }
   }
 
   /**
@@ -1174,8 +1373,8 @@ export class Globe implements AfterViewInit, OnDestroy {
             this.applyCountrySelectionToGroup(countryGroup, countryName);
           }
         } else {
-          // Regular click - reset all and select this one
-          this.resetAllCountrySelections();
+          // Regular click - only reset temporary selections, keep comparison table selections
+          this.resetTemporarySelections();
           this.applyCountrySelectionToGroup(countryGroup, countryName);
         }
 
@@ -1215,6 +1414,440 @@ export class Globe implements AfterViewInit, OnDestroy {
   }
 
   /**
+   * Handle adding country to comparison table from double-click events
+   */
+  private async handleCountryAddToComparison(event: MouseEvent): Promise<void> {
+    event.preventDefault();
+
+    console.log('🔍 Double-click handler started');
+
+    // Early exit if countries not loaded
+    if (!this.countries || this.countries.children.length === 0) {
+      console.log('❌ Countries not loaded yet');
+      return;
+    }
+
+    // Get country name from hover detection
+    const countryResult = await this.detectCountryFromEvent(event);
+    console.log('🔍 Country detection result:', countryResult);
+
+    if (countryResult?.countryName) {
+      const countryName = countryResult.countryName;
+      console.log(`🎯 Detected country: ${countryName}`);
+
+      // Check if country exists in data
+      const country = this.countryDataService.getCountryByName(countryName);
+      console.log(`🔍 Country data lookup:`, country);
+
+      // Add country to comparison table via CountryDataService
+      const added = this.countryDataService.addCountryFromGlobe(countryName);
+      console.log(`🔍 Add result: ${added}`);
+
+      if (added) {
+        // Apply visual selection to the country on globe
+        this.applyPersistentCountrySelection(countryName);
+
+        console.log(
+          `✅ Successfully added country to comparison: ${countryName} (${country?.code})`,
+        );
+      } else {
+        console.log(
+          `⚠️ Country already in comparison or not found: ${countryName}`,
+        );
+      }
+    } else {
+      console.log('❌ No country detected from double-click');
+
+      // Additional debugging - try alternative detection method
+      const alternativeResult =
+        await this.debugAlternativeCountryDetection(event);
+      console.log('🔍 Alternative detection result:', alternativeResult);
+    }
+  }
+
+  /**
+   * Apply persistent visual selection to country (for comparison table integration)
+   */
+  private applyPersistentCountrySelection(countryName: string): void {
+    if (!this.countries) return;
+
+    console.log(`🎯 Applying persistent selection to: ${countryName}`);
+
+    // Use the same approach as applyCountrySelectionToGroup - search for selection meshes directly
+    const selectionMeshes: Mesh[] = [];
+
+    this.countries.traverse((child) => {
+      if (
+        child.name &&
+        child.name.startsWith('selection-mesh-') &&
+        child.type === 'Mesh'
+      ) {
+        const meshName = child.name
+          .replace('selection-mesh-', '')
+          .split('_')[0];
+
+        // Apply the same name formatting as the country hover service
+        const formattedMeshName = this.formatCountryName(meshName);
+
+        // Enhanced matching logic for USA and other problematic countries
+        const isMatch = this.isCountryNameMatch(
+          countryName,
+          meshName,
+          formattedMeshName,
+        );
+
+        if (isMatch) {
+          selectionMeshes.push(child as Mesh);
+          console.log(
+            `🔍 Found matching selection mesh: ${child.name} for country: ${countryName} (mesh: ${meshName}, formatted: ${formattedMeshName})`,
+          );
+        }
+      }
+    });
+
+    console.log(
+      `🎯 Found ${selectionMeshes.length} selection meshes for ${countryName}`,
+    );
+
+    // Apply selection styling to all found meshes
+    selectionMeshes.forEach((mesh, index) => {
+      this.applyCountrySelection(mesh);
+      console.log(
+        `✅ Applied selection to mesh ${index + 1}/${selectionMeshes.length}: ${mesh.name}`,
+      );
+    });
+
+    this.needsRender = true;
+  }
+
+  /**
+   * Enhanced country name matching with bidirectional logic for USA and other problematic countries
+   */
+  private isCountryNameMatch(
+    countryName: string,
+    meshName: string,
+    formattedMeshName: string,
+  ): boolean {
+    // Direct matches (case-insensitive)
+    if (
+      formattedMeshName === countryName ||
+      formattedMeshName.toLowerCase() === countryName.toLowerCase() ||
+      meshName === countryName ||
+      meshName.toLowerCase() === countryName.toLowerCase()
+    ) {
+      return true;
+    }
+
+    // Special bidirectional mappings for problematic countries
+    const usaVariants = [
+      'United States',
+      'United States of America',
+      'USA',
+      'US',
+      'America',
+      'UnitedStates',
+      'UnitedStatesofAmerica',
+    ];
+
+    const mexicoVariants = [
+      'Mexico',
+      'United Mexican States',
+      'UnitedMexicanStates',
+      'Estados',
+      'MexicanRepublic',
+    ];
+
+    // Check if both country name and mesh name are USA variants
+    const isCountryUSA = usaVariants.some(
+      (variant) => variant.toLowerCase() === countryName.toLowerCase(),
+    );
+    const isMeshUSA = usaVariants.some(
+      (variant) =>
+        variant.toLowerCase() === meshName.toLowerCase() ||
+        variant.toLowerCase() === formattedMeshName.toLowerCase(),
+    );
+
+    if (isCountryUSA && isMeshUSA) {
+      return true;
+    }
+
+    // Check if both country name and mesh name are Mexico variants
+    const isCountryMexico = mexicoVariants.some(
+      (variant) => variant.toLowerCase() === countryName.toLowerCase(),
+    );
+    const isMeshMexico = mexicoVariants.some(
+      (variant) =>
+        variant.toLowerCase() === meshName.toLowerCase() ||
+        variant.toLowerCase() === formattedMeshName.toLowerCase(),
+    );
+
+    if (isCountryMexico && isMeshMexico) {
+      return true;
+    }
+
+    // Partial matching for other countries
+    const normalizedCountry = countryName.toLowerCase().replace(/[^a-z]/g, '');
+    const normalizedMesh = meshName.toLowerCase().replace(/[^a-z]/g, '');
+    const normalizedFormatted = formattedMeshName
+      .toLowerCase()
+      .replace(/[^a-z]/g, '');
+
+    return (
+      normalizedCountry.includes(normalizedMesh) ||
+      normalizedMesh.includes(normalizedCountry) ||
+      normalizedCountry.includes(normalizedFormatted) ||
+      normalizedFormatted.includes(normalizedCountry)
+    );
+  }
+
+  /**
+   * Normalize country name for CountryDataService lookup
+   * Converts detected country names to the format expected by the data service
+   */
+  private normalizeCountryNameForDataService(
+    detectedCountryName: string,
+  ): string {
+    // Normalize spaces: trim and replace multiple spaces with single space
+    const normalizedName = detectedCountryName.trim().replace(/\s+/g, ' ');
+
+    // Comprehensive country name mappings based on actual dataset and common mesh/data mismatches
+    const countryMappings: Record<string, string> = {
+      // USA variants
+      'United States of America': 'United States',
+      UnitedStatesofAmerica: 'United States',
+      UnitedStates: 'United States',
+      USA: 'United States',
+      US: 'United States',
+      America: 'United States',
+
+      // Mexico variants
+      'United Mexican States': 'Mexico',
+      UnitedMexicanStates: 'Mexico',
+      Estados: 'Mexico',
+      MexicanRepublic: 'Mexico',
+
+      // United Kingdom variants
+      UnitedKingdom: 'United Kingdom',
+      UK: 'United Kingdom',
+
+      // Czech Republic variants - CRITICAL FIX: Dataset uses "Czechia"
+      CzechRepublic: 'Czechia',
+      'Czech Republic': 'Czechia',
+      CzechoslovakianRepublic: 'Czechia',
+
+      // Multi-word countries that might have spacing issues
+      NewZealand: 'New Zealand',
+      SouthAfrica: 'South Africa',
+      SaudiArabia: 'Saudi Arabia',
+      CostaRica: 'Costa Rica',
+      PuertoRico: 'Puerto Rico',
+      SouthKorea: 'South Korea',
+      NorthKorea: 'North Korea',
+      SouthSudan: 'South Sudan',
+      WestBankandGaza: 'West Bank and Gaza',
+      BosniaandHerzegovina: 'Bosnia and Herzegovina',
+      TrinidadandTobago: 'Trinidad and Tobago',
+      PapuaNewGuinea: 'Papua New Guinea',
+      SolomonIslands: 'Solomon Islands',
+      CentralAfricanRepublic: 'Central African Republic',
+      DominicanRepublic: 'Dominican Republic',
+      EquatorialGuinea: 'Equatorial Guinea',
+      ElSalvador: 'El Salvador',
+      HongKong: 'Hong Kong',
+      IvoryCoast: 'Ivory Coast',
+      SanMarino: 'San Marino',
+      VaticanCity: 'Vatican City',
+      CapeVerde: 'Cape Verde',
+      SaintLucia: 'Saint Lucia',
+      NewCaledonia: 'New Caledonia',
+
+      // Countries with special variations
+      UnitedArabEmirates: 'United Arab Emirates',
+      RepublicoftheCongo: 'Republic of the Congo',
+      DRCongo: 'DR Congo',
+      DemocraticRepublicofCongo: 'DR Congo',
+      NorthMacedonia: 'North Macedonia',
+      GuineaBissau: 'Guinea-Bissau',
+      TimorLeste: 'Timor-Leste',
+      SierraLeone: 'Sierra Leone',
+      BurkinaFaso: 'Burkina Faso',
+      MarshallIslands: 'Marshall Islands',
+      CookIslands: 'Cook Islands',
+      NorthernMarianaIslands: 'Northern Mariana Islands',
+      SintMaarten: 'Sint Maarten',
+
+      // Common variations that might appear
+      'U S A': 'United States',
+      'U K': 'United Kingdom',
+      'U A E': 'United Arab Emirates',
+    };
+
+    // Check for exact match in mappings (case-insensitive)
+    const mappingKey = Object.keys(countryMappings).find(
+      (key) => key.toLowerCase() === normalizedName.toLowerCase(),
+    );
+
+    if (mappingKey) {
+      return countryMappings[mappingKey];
+    }
+
+    // For countries not in the mapping, return the normalized name
+    return normalizedName;
+  }
+
+  /**
+   * Format country name for matching (simplified version of country-hover.service.ts)
+   */
+  private formatCountryName(meshCountryName: string): string {
+    const nameMap: Record<string, string> = {
+      UnitedStates: 'United States',
+      UnitedStatesofAmerica: 'United States',
+      USA: 'United States',
+      America: 'United States',
+      US: 'United States',
+      Mexico: 'Mexico',
+      UnitedMexicanStates: 'Mexico',
+      Estados: 'Mexico',
+      MexicanRepublic: 'Mexico',
+    };
+
+    if (nameMap[meshCountryName]) {
+      return nameMap[meshCountryName];
+    }
+
+    // Convert camelCase to spaced format
+    return meshCountryName.replace(/([A-Z])/g, ' $1').trim();
+  }
+
+  /**
+   * Detect country from mouse event (shared logic for clicks and double-clicks)
+   */
+  private async detectCountryFromEvent(
+    event: MouseEvent,
+  ): Promise<{ countryName: string; countryGroup?: Object3D } | null> {
+    // Get mouse coordinates relative to canvas
+    const canvas = this.renderer.domElement;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    // Convert to normalized device coordinates (-1 to +1)
+    const mouse = {
+      x: (x / canvas.width) * 2 - 1,
+      y: -(y / canvas.height) * 2 + 1,
+    };
+
+    // Use country hover service for detection
+    const hoverResult = this.countryHoverService.detectCountryHover(
+      mouse,
+      this.camera,
+      this.countries,
+    );
+
+    if (hoverResult?.countryName) {
+      return {
+        countryName: hoverResult.countryName,
+        countryGroup: hoverResult.object,
+      };
+    }
+
+    return null;
+  }
+
+  /**
+   * Debug alternative country detection method for problematic countries
+   */
+  private async debugAlternativeCountryDetection(
+    event: MouseEvent,
+  ): Promise<{ countryName: string; method: string } | null> {
+    const canvas = this.renderer.domElement;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    // Convert to normalized device coordinates (-1 to +1)
+    const mouse = {
+      x: (x / canvas.width) * 2 - 1,
+      y: -(y / canvas.height) * 2 + 1,
+    };
+
+    console.log('🔍 Mouse coordinates:', { x, y, normalized: mouse });
+
+    // Use Three.js raycasting directly
+    const { Raycaster, Vector2 } = await import('three');
+    const raycaster = new Raycaster();
+    const mouseVector = new Vector2(mouse.x, mouse.y);
+    raycaster.setFromCamera(mouseVector, this.camera);
+
+    // Get all intersections
+    const intersects = raycaster.intersectObjects(
+      this.countries.children,
+      true,
+    );
+    console.log(`🔍 Found ${intersects.length} intersections`);
+
+    for (let i = 0; i < intersects.length; i++) {
+      const intersect = intersects[i];
+      const obj = intersect.object;
+      console.log(`🔍 Intersection ${i}:`, {
+        name: obj.name,
+        type: obj.type,
+        userData: obj.userData,
+        parent: obj.parent?.name,
+        parentUserData: obj.parent?.userData,
+      });
+
+      // Try different methods to extract country name
+      let countryName = null;
+
+      // Method 1: From object name
+      if (obj.name && obj.name.includes('selection-mesh-')) {
+        countryName = obj.name.replace('selection-mesh-', '').split('_')[0];
+        console.log(`🔍 Method 1 (object name): ${countryName}`);
+      }
+
+      // Method 2: From userData
+      if (obj.userData?.['name']) {
+        countryName = obj.userData['name'];
+        console.log(`🔍 Method 2 (object userData): ${countryName}`);
+      }
+
+      // Method 3: From parent userData
+      if (obj.parent?.userData?.['name']) {
+        countryName = obj.parent.userData['name'];
+        console.log(`🔍 Method 3 (parent userData): ${countryName}`);
+      }
+
+      // Method 4: From properties
+      if (obj.userData?.['properties']?.['NAME']) {
+        countryName = obj.userData['properties']['NAME'];
+        console.log(`🔍 Method 4 (properties): ${countryName}`);
+      }
+
+      // Method 5: From properties.name (lowercase)
+      if (obj.userData?.['properties']?.['name']) {
+        countryName = obj.userData['properties']['name'];
+        console.log(`🔍 Method 5 (properties.name): ${countryName}`);
+      }
+
+      // Method 6: From any name-like property
+      if (obj.userData?.['countryName']) {
+        countryName = obj.userData['countryName'];
+        console.log(`🔍 Method 6 (countryName): ${countryName}`);
+      }
+
+      if (countryName) {
+        console.log(
+          `✅ Successfully found country: "${countryName}" using alternative raycasting`,
+        );
+        return { countryName, method: 'alternative-raycasting' };
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Check if a country is currently selected
    */
   private isCountrySelected(mesh: Mesh): boolean {
@@ -1222,6 +1855,39 @@ export class Globe implements AfterViewInit, OnDestroy {
       emissive?: { r: number; g: number; b: number };
     };
     return !!(material.emissive && material.emissive.r > 0);
+  }
+
+  /**
+   * Reset temporary selections while preserving comparison table selections
+   */
+  private resetTemporarySelections(): void {
+    if (!this.countries) return;
+
+    const selectedCountryCodes = this.countryDataService.selectedCountries();
+    const selectedCountryNames = new Set(
+      selectedCountryCodes
+        .map((code) => this.countryDataService.getCountryByCode(code)?.name)
+        .filter((name) => name),
+    );
+
+    console.log(
+      `🔄 Resetting temporary selections, preserving: ${Array.from(selectedCountryNames).join(', ')}`,
+    );
+
+    this.countries.traverse((child) => {
+      if (child.type === 'Mesh') {
+        const mesh = child as Mesh;
+        const countryName =
+          child.userData?.['name'] ||
+          child.parent?.userData?.['name'] ||
+          child.parent?.userData?.['properties']?.['NAME'];
+
+        // Only reset selection if country is NOT in the comparison table
+        if (countryName && !selectedCountryNames.has(countryName)) {
+          this.removeCountrySelection(mesh);
+        }
+      }
+    });
   }
 
   /**
@@ -1318,6 +1984,42 @@ export class Globe implements AfterViewInit, OnDestroy {
   }
 
   /**
+   * Initialize all selection materials to be completely invisible
+   * This prevents the gray overlay issue on page load
+   */
+  private initializeSelectionMaterials(): void {
+    if (!this.countries) return;
+
+    this.countries.traverse((child) => {
+      if (
+        child.name &&
+        child.name.startsWith('selection-mesh-') &&
+        child.type === 'Mesh'
+      ) {
+        const material = (child as Mesh).material as Material & {
+          color?: Color;
+          emissive?: Color;
+          transparent?: boolean;
+          opacity?: number;
+        };
+
+        if (material) {
+          // Ensure selection meshes start completely invisible
+          material.transparent = true;
+          material.opacity = 0.0;
+          material.color?.setHex(0x000000); // Black (invisible)
+          if (material.emissive) {
+            material.emissive.setHex(0x000000);
+          }
+          material.needsUpdate = true;
+        }
+      }
+    });
+
+    console.log('✅ Selection materials initialized to invisible state');
+  }
+
+  /**
    * Optimized reset of country selections
    */
   private resetAllCountrySelections(): void {
@@ -1336,8 +2038,8 @@ export class Globe implements AfterViewInit, OnDestroy {
         };
         if (material) {
           material.transparent = true;
-          material.opacity = 0.1; // Slightly visible for interaction
-          material.color?.setHex(0x444444);
+          material.opacity = 0.0; // Completely invisible when not selected
+          material.color?.setHex(0x000000); // Black (invisible)
           material.needsUpdate = true;
 
           if (material.emissive) {
@@ -1545,6 +2247,44 @@ export class Globe implements AfterViewInit, OnDestroy {
   private hideAllTooltips(): void {
     this.hideNameTooltip();
     // Keep selected country tooltip visible even on mouse leave
+  }
+
+  /**
+   * Sync globe visual state with comparison table selections
+   */
+  private syncGlobeWithComparisonTable(
+    selectedCountryCodes: readonly string[],
+  ): void {
+    if (!this.countries || this.countries.children.length === 0) {
+      console.log(
+        `🔄 Countries not loaded yet, deferring sync for ${selectedCountryCodes.length} countries`,
+      );
+      return;
+    }
+
+    console.log(
+      `🔄 Syncing globe with ${selectedCountryCodes.length} selected countries: ${selectedCountryCodes.join(', ')}`,
+    );
+
+    // Reset all country selections first
+    this.resetAllCountrySelections();
+
+    // Apply selection to countries in the comparison table
+    selectedCountryCodes.forEach((countryCode, index) => {
+      const country = this.countryDataService.getCountryByCode(countryCode);
+      if (country) {
+        console.log(
+          `🔄 Syncing country ${index + 1}/${selectedCountryCodes.length}: ${country.name} (${countryCode})`,
+        );
+        this.applyPersistentCountrySelection(country.name);
+      } else {
+        console.warn(`⚠️ Could not find country data for code: ${countryCode}`);
+      }
+    });
+
+    console.log(
+      `✅ Globe sync completed for ${selectedCountryCodes.length} countries`,
+    );
   }
 
   /**

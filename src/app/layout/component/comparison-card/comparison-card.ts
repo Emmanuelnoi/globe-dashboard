@@ -47,28 +47,236 @@ import { CountrySearch } from '../country-search/country-search';
 
           <!-- Action buttons grouped together -->
           <div class="action-buttons">
-            <button
-              class="btn ghost"
-              type="button"
-              (click)="showFilterModal()"
-              aria-label="Filter countries"
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  d="M3 7h18M7 12h10M10 17h4"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  fill="none"
-                />
-              </svg>
-              Filter
-            </button>
+            <!-- Compact Sort Control (Pattern A) -->
+            <div class="sort-control" role="group" aria-label="Sort countries">
+              <div class="sort-button-group">
+                <!-- Main sort button with dropdown -->
+                <button
+                  class="sort-main-btn"
+                  type="button"
+                  (click)="toggleSortDropdown()"
+                  [attr.aria-expanded]="showSortDropdown()"
+                  aria-label="Select sort metric"
+                >
+                  <span class="sort-label">Sort by</span>
+                  <span class="sort-metric">{{ getCurrentSortLabel() }}</span>
+                  <svg
+                    class="dropdown-icon"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      d="M6 8l4 4 4-4"
+                    />
+                  </svg>
+                </button>
+
+                <!-- Direction toggle button -->
+                <button
+                  class="sort-direction-btn"
+                  type="button"
+                  (click)="toggleSortDirection()"
+                  [attr.aria-label]="
+                    'Sort ' +
+                    (sortDirection() === 'asc' ? 'ascending' : 'descending')
+                  "
+                >
+                  <svg
+                    class="direction-icon"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                  >
+                    @if (sortDirection() === 'asc') {
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 4l-4 4h8l-4-4z"
+                      />
+                    } @else {
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 16l4-4H6l4 4z"
+                      />
+                    }
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Dropdown menu -->
+              @if (showSortDropdown()) {
+                <div class="sort-dropdown-menu" role="menu">
+                  <button
+                    type="button"
+                    class="sort-option"
+                    [class.active]="sortMetric() === 'name'"
+                    role="menuitem"
+                    (click)="selectSortMetric('name')"
+                  >
+                    <span>Country Name</span>
+                    @if (sortMetric() === 'name') {
+                      <svg
+                        class="check-icon"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 20 20"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 10l2 2 6-6"
+                        />
+                      </svg>
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    class="sort-option"
+                    [class.active]="sortMetric() === 'hdi'"
+                    role="menuitem"
+                    (click)="selectSortMetric('hdi')"
+                  >
+                    <span>HDI</span>
+                    @if (sortMetric() === 'hdi') {
+                      <svg
+                        class="check-icon"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 20 20"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 10l2 2 6-6"
+                        />
+                      </svg>
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    class="sort-option"
+                    [class.active]="sortMetric() === 'gdp'"
+                    role="menuitem"
+                    (click)="selectSortMetric('gdp')"
+                  >
+                    <span>GDP per Capita</span>
+                    @if (sortMetric() === 'gdp') {
+                      <svg
+                        class="check-icon"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 20 20"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 10l2 2 6-6"
+                        />
+                      </svg>
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    class="sort-option"
+                    [class.active]="sortMetric() === 'population'"
+                    role="menuitem"
+                    (click)="selectSortMetric('population')"
+                  >
+                    <span>Population</span>
+                    @if (sortMetric() === 'population') {
+                      <svg
+                        class="check-icon"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 20 20"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 10l2 2 6-6"
+                        />
+                      </svg>
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    class="sort-option"
+                    [class.active]="sortMetric() === 'lifeExpectancy'"
+                    role="menuitem"
+                    (click)="selectSortMetric('lifeExpectancy')"
+                  >
+                    <span>Life Expectancy</span>
+                    @if (sortMetric() === 'lifeExpectancy') {
+                      <svg
+                        class="check-icon"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 20 20"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 10l2 2 6-6"
+                        />
+                      </svg>
+                    }
+                  </button>
+                  <button
+                    type="button"
+                    class="sort-option"
+                    [class.active]="sortMetric() === 'happiness'"
+                    role="menuitem"
+                    (click)="selectSortMetric('happiness')"
+                  >
+                    <span>Happiness Index</span>
+                    @if (sortMetric() === 'happiness') {
+                      <svg
+                        class="check-icon"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 20 20"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 10l2 2 6-6"
+                        />
+                      </svg>
+                    }
+                  </button>
+                </div>
+              }
+            </div>
 
             <button
               class="btn ghost"
@@ -656,66 +864,14 @@ import { CountrySearch } from '../country-search/country-search';
         font-size: 14px;
       }
 
-      /* Modal styles */
-      .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(8px);
-        z-index: 1000;
+      /* Compact Sort Control (Pattern A) Styles */
+      .sort-control {
+        position: relative;
+        display: inline-block;
+      }
+
+      .sort-button-group {
         display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .modal-content {
-        background: linear-gradient(
-          180deg,
-          rgba(255, 255, 255, 0.08),
-          rgba(255, 255, 255, 0.04)
-        );
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 12px;
-        padding: 0;
-        max-width: 600px;
-        width: 90vw;
-        max-height: 80vh;
-        overflow: auto;
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-      }
-
-      .modal-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 20px 24px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .modal-header h3 {
-        margin: 0;
-        color: rgba(255, 255, 255, 0.95);
-        font-size: 18px;
-        font-weight: 600;
-      }
-
-      .modal-body {
-        padding: 24px;
-      }
-
-      .quick-add-buttons {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 12px;
-      }
-
-      .country-quick-add {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 12px;
         border-radius: 8px;
         border: 1px solid rgba(255, 255, 255, 0.08);
         background: linear-gradient(
@@ -723,31 +879,136 @@ import { CountrySearch } from '../country-search/country-search';
           rgba(255, 255, 255, 0.04),
           rgba(255, 255, 255, 0.01)
         );
-        color: rgba(255, 255, 255, 0.9);
-        cursor: pointer;
+        backdrop-filter: blur(12px) saturate(1.1);
+        -webkit-backdrop-filter: blur(12px) saturate(1.1);
+        overflow: hidden;
         transition: all 0.15s ease;
-        font-weight: 500;
       }
 
-      .country-quick-add:not(:disabled):hover {
+      .sort-button-group:hover {
+        border-color: rgba(255, 255, 255, 0.12);
         background: linear-gradient(
           180deg,
-          rgba(255, 255, 255, 0.08),
-          rgba(255, 255, 255, 0.04)
+          rgba(255, 255, 255, 0.06),
+          rgba(255, 255, 255, 0.02)
         );
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
       }
 
-      .country-quick-add:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+      .sort-main-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 12px;
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        flex: 1;
+        min-width: 120px;
+        transition: color 0.15s ease;
       }
 
-      .country-region {
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.6);
+      .sort-main-btn:hover {
+        color: rgba(255, 255, 255, 0.95);
+      }
+
+      .sort-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 12px;
+      }
+
+      .sort-metric {
+        font-weight: 600;
+      }
+
+      .dropdown-icon {
+        opacity: 0.7;
+        transition: transform 0.15s ease;
+      }
+
+      .sort-main-btn[aria-expanded='true'] .dropdown-icon {
+        transform: rotate(180deg);
+      }
+
+      .sort-direction-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 9px 8px;
+        background: rgba(255, 255, 255, 0.02);
+        border: none;
+        border-left: 1px solid rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        cursor: pointer;
+        transition: all 0.15s ease;
+        width: 32px;
+      }
+
+      .sort-direction-btn:hover {
+        background: rgba(255, 255, 255, 0.04);
+        color: rgba(255, 255, 255, 0.95);
+      }
+
+      .direction-icon {
+        opacity: 0.8;
+      }
+
+      /* Dropdown menu */
+      .sort-dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1000;
         margin-top: 4px;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.85),
+          rgba(0, 0, 0, 0.95)
+        );
+        backdrop-filter: blur(20px) saturate(1.2);
+        -webkit-backdrop-filter: blur(20px) saturate(1.2);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+        min-width: 200px;
+      }
+
+      .sort-option {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 10px 12px;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        text-align: left;
+      }
+
+      .sort-option:hover {
+        background: rgba(25, 184, 148, 0.1);
+        color: #19b894;
+      }
+
+      .sort-option.active {
+        background: rgba(25, 184, 148, 0.15);
+        color: #19b894;
+      }
+
+      .check-icon {
+        opacity: 0.8;
+        color: #19b894;
       }
 
       /* Responsive */
@@ -828,10 +1089,23 @@ export class ComparisonCard implements AfterViewInit {
 
   readonly focusedIndex = this._focusedIndex.asReadonly();
 
+  // Sort state signals
+  readonly _sortMetric = signal<string>('none');
+  readonly _sortDirection = signal<'asc' | 'desc'>('desc');
+  readonly _showSortDropdown = signal<boolean>(false);
+
+  readonly sortMetric = this._sortMetric.asReadonly();
+  readonly sortDirection = this._sortDirection.asReadonly();
+  readonly showSortDropdown = this._showSortDropdown.asReadonly();
+
   // Computed values
-  readonly displayedCountries = computed(() =>
-    this.countryDataService.selectedCountryData(),
-  );
+  readonly displayedCountries = computed(() => {
+    const selectedCountries = this.countryDataService.selectedCountryData();
+    const metric = this.sortMetric();
+    const direction = this.sortDirection();
+
+    return this.applySortLogic(selectedCountries, metric, direction);
+  });
 
   // DOM refs for keyboard focus
   @ViewChildren('rowItem', { read: ElementRef }) rowItems!: QueryList<
@@ -839,17 +1113,8 @@ export class ComparisonCard implements AfterViewInit {
   >;
 
   ngAfterViewInit(): void {
-    // Initialize with some default countries if none selected
-    if (this.countryDataService.selectedCountries().length === 0) {
-      this.countryDataService.selectCountries([
-        'USA',
-        'CHN',
-        'JPN',
-        'DEU',
-        'GBR',
-      ]);
-    }
-
+    // Start with empty table - countries are added only via user interaction
+    // (double-click on globe or search selection)
     this.clampFocusedIndex();
   }
 
@@ -878,16 +1143,117 @@ export class ComparisonCard implements AfterViewInit {
     this.clampFocusedIndex();
   }
 
-  // Modal handling
-  showFilterModal(): void {
-    // TODO: Implement filter modal
-    console.log('Filter modal not yet implemented');
+  // Sort control methods
+  toggleSortDropdown(): void {
+    this._showSortDropdown.update((show) => !show);
+  }
+
+  toggleSortDirection(): void {
+    this._sortDirection.update((direction) =>
+      direction === 'asc' ? 'desc' : 'asc',
+    );
+  }
+
+  selectSortMetric(metric: string): void {
+    this._sortMetric.set(metric);
+    this._showSortDropdown.set(false);
+  }
+
+  getCurrentSortLabel(): string {
+    const metric = this.sortMetric();
+    const direction = this.sortDirection();
+    const arrow = direction === 'asc' ? '↑' : '↓';
+
+    switch (metric) {
+      case 'name':
+        return `Country Name ${arrow}`;
+      case 'hdi':
+        return `HDI ${arrow}`;
+      case 'gdp':
+        return `GDP per Capita ${arrow}`;
+      case 'population':
+        return `Population ${arrow}`;
+      case 'lifeExpectancy':
+        return `Life Expectancy ${arrow}`;
+      case 'happiness':
+        return `Happiness Index ${arrow}`;
+      default:
+        return 'None';
+    }
+  }
+
+  // Sort application logic
+  private applySortLogic(
+    countries: readonly CountryDataRecord[],
+    metric: string,
+    direction: 'asc' | 'desc',
+  ): readonly CountryDataRecord[] {
+    if (metric === 'none') {
+      return [...countries];
+    }
+
+    const ascending = direction === 'asc';
+
+    return [...countries].sort((a, b) => {
+      let valueA: number | string | null | undefined;
+      let valueB: number | string | null | undefined;
+
+      switch (metric) {
+        case 'name':
+          valueA = a.name;
+          valueB = b.name;
+          break;
+        case 'gdp':
+          valueA = a.gdpPerCapita;
+          valueB = b.gdpPerCapita;
+          break;
+        case 'hdi':
+          valueA = a.hdi;
+          valueB = b.hdi;
+          break;
+        case 'population':
+          valueA = a.population;
+          valueB = b.population;
+          break;
+        case 'lifeExpectancy':
+          valueA = a.lifeExpectancy;
+          valueB = b.lifeExpectancy;
+          break;
+        case 'happiness':
+          valueA = a.happiness;
+          valueB = b.happiness;
+          break;
+        default:
+          return 0;
+      }
+
+      // Handle undefined/null values - put them at the end
+      if (valueA === undefined || valueA === null) {
+        return valueB === undefined || valueB === null ? 0 : 1;
+      }
+      if (valueB === undefined || valueB === null) {
+        return -1;
+      }
+
+      // String comparison for country names
+      if (typeof valueA === 'string' && typeof valueB === 'string') {
+        const result = valueA.localeCompare(valueB);
+        return ascending ? result : -result;
+      }
+
+      // Numeric comparison
+      const result = (valueA as number) - (valueB as number);
+      return ascending ? result : -result;
+    });
   }
 
   // Clear and export
   onClearAll(): void {
     this.countryDataService.clearSelection();
     this.countryDataService.clearSearch();
+    this._sortMetric.set('none');
+    this._sortDirection.set('desc');
+    this._showSortDropdown.set(false);
     this._focusedIndex.set(0);
   }
 

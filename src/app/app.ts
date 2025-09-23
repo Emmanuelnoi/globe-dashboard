@@ -10,10 +10,16 @@ import { Sidebar } from './layout/component/sidebar/sidebar';
 import { ComparisonCard } from './layout/component/comparison-card/comparison-card';
 import { NavigationStateService } from './core/services/navigation-state.service';
 import { PerformanceMonitorComponent } from './shared/components/performance-monitor/performance-monitor';
+import { NotificationToast } from './shared/components/notification-toast/notification-toast';
 
 @Component({
   selector: 'app-root',
-  imports: [Sidebar, ComparisonCard, PerformanceMonitorComponent],
+  imports: [
+    Sidebar,
+    ComparisonCard,
+    PerformanceMonitorComponent,
+    NotificationToast,
+  ],
   template: `
     <div
       class="app-container"
@@ -84,6 +90,9 @@ import { PerformanceMonitorComponent } from './shared/components/performance-mon
 
       <!-- Performance Monitor -->
       <app-performance-monitor />
+
+      <!-- Notification Toast -->
+      <app-notification-toast></app-notification-toast>
     </div>
   `,
   styles: [
