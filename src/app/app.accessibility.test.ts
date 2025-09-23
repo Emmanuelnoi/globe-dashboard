@@ -1,5 +1,64 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { App } from './app';
+import { NavigationStateService } from './core/services/navigation-state.service';
+import { CountryDataService } from './core/services/country-data.service';
+import { PerformanceMonitorService } from './core/services/performance-monitor.service';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
+// Mock NavigationStateService
+class MockNavigationStateService {
+  isCountryComparisonActive = (): boolean => false;
+  isPerformanceMonitorActive = (): boolean => false;
+}
+
+// Mock CountryDataService
+class MockCountryDataService {
+  selectedCountries = (): unknown[] => [];
+  hasSelectedCountries = (): boolean => false;
+  countryCount = (): number => 241;
+  dataCompleteness = (): number => 0.834;
+}
+
+// Mock PerformanceMonitorService
+class MockPerformanceMonitorService {
+  isEnabled = (): boolean => false;
+  getStats = (): unknown => ({
+    current: {
+      frameTime: 16,
+      fps: 60,
+      memoryUsage: 0,
+      renderTime: 0,
+      drawCalls: 0,
+      triangleCount: 0,
+      timestamp: 0,
+    },
+    average: {
+      frameTime: 16,
+      fps: 60,
+      memoryUsage: 0,
+      renderTime: 0,
+      drawCalls: 0,
+      triangleCount: 0,
+      timestamp: 0,
+    },
+    peak: {
+      frameTime: 16,
+      fps: 60,
+      memoryUsage: 0,
+      renderTime: 0,
+      drawCalls: 0,
+      triangleCount: 0,
+      timestamp: 0,
+    },
+    history: [],
+    warnings: [],
+  });
+  startMonitoring = (): void => {};
+  stopMonitoring = (): void => {};
+  recordRenderStart = (): void => {};
+  recordRenderEnd = (): void => {};
+  updateStats = (): void => {};
+}
 
 describe('App Accessibility', () => {
   let _component: App;
@@ -7,7 +66,18 @@ describe('App Accessibility', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [App],
+      imports: [App, NoopAnimationsModule],
+      providers: [
+        {
+          provide: NavigationStateService,
+          useClass: MockNavigationStateService,
+        },
+        { provide: CountryDataService, useClass: MockCountryDataService },
+        {
+          provide: PerformanceMonitorService,
+          useClass: MockPerformanceMonitorService,
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(App);

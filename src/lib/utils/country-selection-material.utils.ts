@@ -66,9 +66,7 @@ export function createCountrySelectionMaterial(
   extendedMaterial.enableBorders = enableBorders;
   extendedMaterial.borderColor = borderColor;
 
-  console.log(
-    '📦 Created simplified Earth material (shader complexity disabled temporarily)',
-  );
+  // Material creation completed successfully
 
   return material;
 }

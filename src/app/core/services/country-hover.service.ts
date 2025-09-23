@@ -232,9 +232,13 @@ export class CountryHoverService {
    * Format country name for display
    */
   private formatCountryName(meshCountryName: string): string {
-    // Handle common cases
+    // Handle common cases with comprehensive mapping for problematic countries
     const nameMap: Record<string, string> = {
       UnitedStates: 'United States',
+      UnitedStatesofAmerica: 'United States',
+      USA: 'United States',
+      America: 'United States',
+      US: 'United States',
       UnitedKingdom: 'United Kingdom',
       NewZealand: 'New Zealand',
       SouthAfrica: 'South Africa',
@@ -253,6 +257,11 @@ export class CountryHoverService {
       EquatorialGuinea: 'Equatorial Guinea',
       ElSalvador: 'El Salvador',
       CzechRepublic: 'Czech Republic',
+      // Mexico variants
+      Mexico: 'Mexico',
+      UnitedMexicanStates: 'Mexico',
+      Estados: 'Mexico',
+      MexicanRepublic: 'Mexico',
     };
 
     // Check if we have a specific mapping

@@ -410,9 +410,7 @@ export class CountrySelectionService {
     this.pendingUpdates = [];
     this.batchUpdateTimeout = undefined;
 
-    console.log(
-      `🎯 Selection updated: ${currentSelection.size} countries selected`,
-    );
+    // Selection state updated successfully
   }
 
   private updateHistory(countryId: string): void {

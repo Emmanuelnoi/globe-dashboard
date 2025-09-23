@@ -13,6 +13,9 @@ import {
 import { feature as topoFeature, mesh as topoMesh } from 'topojson-client';
 import earcut from 'earcut';
 
+// Debug configuration - set to false in production for cleaner console
+const DEBUG_GEOMETRY = false;
+
 /**
  * GeoJSON Feature interface
  */
@@ -837,9 +840,11 @@ function createPolygonSelectionMesh(
     const exteriorRing = coordinates[0];
     if (!exteriorRing || exteriorRing.length < 4) return null; // Need at least 4 points (including closure)
 
-    console.log(
-      `🔺 Triangulating ${name}: ${coordinates.length} rings (1 outer + ${coordinates.length - 1} holes)`,
-    );
+    if (DEBUG_GEOMETRY) {
+      console.log(
+        `🔺 Triangulating ${name}: ${coordinates.length} rings (1 outer + ${coordinates.length - 1} holes)`,
+      );
+    }
 
     // CONCRETE FIX 4: Process rings with proper closure, unwrapping, and winding
     // Remove closure, unwrap antimeridian, canonicalize winding for earcut
@@ -869,9 +874,10 @@ function createPolygonSelectionMesh(
 
         // Log winding decisions for debugging
         if (
-          name.includes('Brazil') ||
-          name.includes('USA') ||
-          name.includes('United States')
+          DEBUG_GEOMETRY &&
+          (name.includes('Brazil') ||
+            name.includes('USA') ||
+            name.includes('United States'))
         ) {
           console.log(
             `  Ring ${index}: spherical area = ${sphericalArea.toFixed(6)}, currently ${isCurrentlyCCW ? 'CCW' : 'CW'}, target ${shouldBeCCW ? 'CCW' : 'CW'}`,
@@ -888,9 +894,10 @@ function createPolygonSelectionMesh(
 
     // Log winding configuration for debugging
     if (
-      name.includes('Brazil') ||
-      name.includes('USA') ||
-      name.includes('United States')
+      DEBUG_GEOMETRY &&
+      (name.includes('Brazil') ||
+        name.includes('USA') ||
+        name.includes('United States'))
     ) {
       console.log(`🔄 ENHANCED WINDING CONFIG for ${name}:`);
       console.log(
@@ -973,7 +980,7 @@ function createPolygonSelectionMesh(
       debugCountries.some((country) => name.includes(country)) ||
       triangles.length < 100;
 
-    if (shouldDebug) {
+    if (shouldDebug && DEBUG_GEOMETRY) {
       console.log(`🔍 DETAILED DEBUG for ${name}:`);
       console.log(
         `  Original rings: ${coordinates.length} (${coordinates.map((r) => r.length).join(', ')} vertices each)`,

@@ -59,6 +59,7 @@
   },
   "devDependencies": {
     "@angular-eslint/builder": "20.1.1",
+    "@angular/animations": "^20.3.1",
     "@angular/build": "^20.2.2",
     "@angular/cli": "^20.2.2",
     "@angular/common": "^20.2.4",
@@ -84,7 +85,9 @@
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
+    "gl": "^8.1.6",
     "globals": "^16.4.0",
+    "headless-gl": "^3.0.7",
     "husky": "^9.1.7",
     "jasmine-core": "~5.8.0",
     "jiti": "^2.5.1",

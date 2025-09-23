@@ -426,6 +426,145 @@ export class CountryDataService {
   }
 
   /**
+   * Add country to selection from globe interaction (by name)
+   * Used when double-clicking countries on the 3D globe
+   */
+  addCountryFromGlobe(countryName: string): boolean {
+    // Try exact match first
+    let country = this.getCountryByName(countryName);
+
+    // If no exact match, try fuzzy matching for problematic countries
+    if (!country) {
+      console.log(
+        `🔍 No exact match for "${countryName}", trying fuzzy matching...`,
+      );
+      country = this.findCountryByFuzzyName(countryName);
+    }
+
+    if (!country) {
+      console.warn(`Country not found after fuzzy matching: ${countryName}`);
+      return false;
+    }
+
+    // Check if already selected to prevent duplicates
+    if (this.selectedCountries().includes(country.code)) {
+      console.log(`Country already selected: ${countryName} (${country.code})`);
+      return false;
+    }
+
+    this.addToSelection([country.code]);
+    console.log(`Added country from globe: ${countryName} (${country.code})`);
+    return true;
+  }
+
+  /**
+   * Find country using fuzzy name matching for mesh names that don't exactly match data names
+   */
+  private findCountryByFuzzyName(
+    meshName: string,
+  ): CountryDataRecord | undefined {
+    const normalizedMeshName = meshName
+      .toLowerCase()
+      .replace(/\s+/g, '')
+      .replace(/[^a-z]/g, '');
+
+    // Special mappings for problematic countries
+    const specialMappings: Record<string, string> = {
+      unitedstates: 'United States',
+      unitedstatesofamerica: 'United States',
+      usa: 'United States',
+      america: 'United States',
+      us: 'United States',
+      unitedmexicanstates: 'Mexico',
+      estados: 'Mexico',
+      mexicanrepublic: 'Mexico',
+      unitedkingdom: 'United Kingdom',
+      uk: 'United Kingdom',
+      southkorea: 'South Korea',
+      northkorea: 'North Korea',
+    };
+
+    // Check special mappings first
+    if (specialMappings[normalizedMeshName]) {
+      const targetName = specialMappings[normalizedMeshName];
+      const country = this.getCountryByName(targetName);
+      if (country) {
+        console.log(
+          `✅ Found country via special mapping: "${meshName}" -> "${targetName}" (${country.code})`,
+        );
+        return country;
+      }
+    }
+
+    // Try partial matching against all country names
+    for (const country of COUNTRY_DATA) {
+      const normalizedCountryName = country.name
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[^a-z]/g, '');
+
+      // Check if the mesh name contains the country name or vice versa
+      if (
+        normalizedMeshName.includes(normalizedCountryName) ||
+        normalizedCountryName.includes(normalizedMeshName)
+      ) {
+        console.log(
+          `✅ Found country via partial matching: "${meshName}" -> "${country.name}" (${country.code})`,
+        );
+        return country;
+      }
+
+      // Also check against country code
+      if (country.code.toLowerCase() === normalizedMeshName) {
+        console.log(
+          `✅ Found country via code matching: "${meshName}" -> "${country.name}" (${country.code})`,
+        );
+        return country;
+      }
+    }
+
+    console.warn(
+      `❌ No fuzzy match found for: "${meshName}" (normalized: "${normalizedMeshName}")`,
+    );
+    return undefined;
+  }
+
+  /**
+   * Remove country from selection (for both globe and table interactions)
+   */
+  removeCountryFromSelection(countryCode: string): boolean {
+    if (!this.selectedCountries().includes(countryCode)) {
+      return false;
+    }
+
+    this.removeFromSelection([countryCode]);
+    console.log(`Removed country from selection: ${countryCode}`);
+    return true;
+  }
+
+  /**
+   * Check if a country is currently selected (used by globe for visual state)
+   */
+  isCountrySelected(countryCode: string): boolean {
+    return this.selectedCountries().includes(countryCode);
+  }
+
+  /**
+   * Check if a country is selected by name (used by globe interactions)
+   */
+  isCountrySelectedByName(countryName: string): boolean {
+    const country = this.getCountryByName(countryName);
+    return country ? this.isCountrySelected(country.code) : false;
+  }
+
+  /**
+   * Get all selected country codes (for globe visual synchronization)
+   */
+  getSelectedCountryCodes(): readonly string[] {
+    return this.selectedCountries();
+  }
+
+  /**
    * Get data statistics
    */
   getDataStatistics() {
