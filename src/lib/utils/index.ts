@@ -1,10 +1,6 @@
 export { getStarfield } from './starfield.utils';
 export { getFresnelMat } from './getFresnelMat.utils';
 export {
-  createCountrySelectionMaterial,
-  type CountrySelectionMaterialConfig,
-} from './country-selection-material.utils';
-export {
   CountrySelectionService,
   type SelectionGesture,
   type CountrySelectionEvent,

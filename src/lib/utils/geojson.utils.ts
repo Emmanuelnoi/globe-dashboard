@@ -491,8 +491,6 @@ export function createUnifiedBorderGeometry(
 ): UnifiedBorderResult {
   const { radius = 2, borderOffset = 0.001 } = options;
 
-  console.log('🌐 Creating unified border geometry from TopoJSON...');
-
   // Extract mesh boundaries (shared arcs only)
   const meshGeometry = topoMesh(
     topology as Parameters<typeof topoMesh>[0],
@@ -553,10 +551,6 @@ export function createUnifiedBorderGeometry(
     countryCount: topology.objects.countries.geometries?.length || 0,
     arcCount: meshGeometry.coordinates.length,
   };
-
-  console.log(
-    `✅ Created unified borders: ${result.countryCount} countries, ${result.arcCount} arcs`,
-  );
 
   return result;
 }
@@ -635,7 +629,6 @@ export function createCountrySelectionMeshes(
     },
   );
 
-  console.log(`Created ${selectionGroup.children.length} selection meshes`);
   return selectionGroup;
 }
 
@@ -955,10 +948,6 @@ function createPolygonSelectionMesh(
       return null;
     }
 
-    console.log(
-      `✅ Triangulation successful: ${triangles.length / 3} triangles for ${name}`,
-    );
-
     // CRITICAL VALIDATION: Check triangle indices
     const maxIndex = Math.max(...triangles);
     const vertexCount = vertices3D.length;
@@ -1114,10 +1103,6 @@ function createPolygonSelectionMesh(
     const safeGeometry = geometry.toNonIndexed();
     safeGeometry.computeVertexNormals();
 
-    console.log(
-      `🔧 Created ${name} geometry: ${vertices3D.length} vertices → ${safeGeometry.attributes['position'].count} final vertices`,
-    );
-
     // Create material for country selection with z-fighting prevention
     const material = enableFill
       ? new MeshBasicMaterial({
@@ -1212,10 +1197,6 @@ export function createInteractiveCountriesFromTopo(
       arcCount: unifiedResult.arcCount,
       renderingMode: 'unified-borders',
     };
-
-    console.log(
-      `🎯 Created TopoJSON countries: ${unifiedResult.countryCount} countries with unified borders`,
-    );
 
     return mainGroup;
   } catch (error) {

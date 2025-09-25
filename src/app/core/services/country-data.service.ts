@@ -435,9 +435,6 @@ export class CountryDataService {
 
     // If no exact match, try fuzzy matching for problematic countries
     if (!country) {
-      console.log(
-        `🔍 No exact match for "${countryName}", trying fuzzy matching...`,
-      );
       country = this.findCountryByFuzzyName(countryName);
     }
 
@@ -448,12 +445,10 @@ export class CountryDataService {
 
     // Check if already selected to prevent duplicates
     if (this.selectedCountries().includes(country.code)) {
-      console.log(`Country already selected: ${countryName} (${country.code})`);
       return false;
     }
 
     this.addToSelection([country.code]);
-    console.log(`Added country from globe: ${countryName} (${country.code})`);
     return true;
   }
 
@@ -489,9 +484,6 @@ export class CountryDataService {
       const targetName = specialMappings[normalizedMeshName];
       const country = this.getCountryByName(targetName);
       if (country) {
-        console.log(
-          `✅ Found country via special mapping: "${meshName}" -> "${targetName}" (${country.code})`,
-        );
         return country;
       }
     }
@@ -508,17 +500,11 @@ export class CountryDataService {
         normalizedMeshName.includes(normalizedCountryName) ||
         normalizedCountryName.includes(normalizedMeshName)
       ) {
-        console.log(
-          `✅ Found country via partial matching: "${meshName}" -> "${country.name}" (${country.code})`,
-        );
         return country;
       }
 
       // Also check against country code
       if (country.code.toLowerCase() === normalizedMeshName) {
-        console.log(
-          `✅ Found country via code matching: "${meshName}" -> "${country.name}" (${country.code})`,
-        );
         return country;
       }
     }
@@ -538,7 +524,6 @@ export class CountryDataService {
     }
 
     this.removeFromSelection([countryCode]);
-    console.log(`Removed country from selection: ${countryCode}`);
     return true;
   }
 

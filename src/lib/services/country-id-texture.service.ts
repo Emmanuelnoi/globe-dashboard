@@ -289,8 +289,6 @@ export class CountryIdTextureService {
       this.indexToIdMap.set(data.index, countryId);
       this.idToDataMap.set(countryId, data);
     }
-
-    console.log(`📍 Built lookup maps for ${this.indexToIdMap.size} countries`);
   }
 
   private createSelectionMask(width: number, height: number): void {
@@ -313,8 +311,6 @@ export class CountryIdTextureService {
     this.selectionMaskTexture.wrapS = ClampToEdgeWrapping;
     this.selectionMaskTexture.wrapT = ClampToEdgeWrapping;
     this.selectionMaskTexture.generateMipmaps = false;
-
-    console.log(`🎨 Created selection mask: ${width}x${height}`);
   }
 
   private paintSelectionMaskBitmap(selectedIds: Set<string>): void {

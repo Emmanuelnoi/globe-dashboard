@@ -67,14 +67,11 @@ export class PerformanceMonitorService {
     this.frameCount = 0;
     this.lastTime = performance.now();
     this.history = [];
-
-    console.log('🔍 Performance monitoring started');
   }
 
   stopMonitoring(): void {
     this.isMonitoring = false;
     this.isEnabled.set(false);
-    console.log('🔍 Performance monitoring stopped');
   }
 
   // Call this at the start of each render frame

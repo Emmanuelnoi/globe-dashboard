@@ -100,7 +100,8 @@ export const VIEW_CONFIGS: Record<ViewMode, ViewConfig> = {
     id: 'game-quiz',
     title: 'Game Quiz',
     description: 'Interactive geography quiz game',
-    isImplemented: false,
+    component: 'GameHub',
+    isImplemented: true,
   },
   'bird-migration': {
     id: 'bird-migration',

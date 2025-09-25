@@ -59,6 +59,8 @@ import { CountryDataService } from '../../core/services/country-data.service';
 import { CountryDataRecord } from '../../core/types/country-data.types';
 import { CountryHoverService } from '../../core/services/country-hover.service';
 import { CountryNameTooltipComponent } from '../../shared/components/country-name-tooltip/country-name-tooltip';
+import { InteractionModeService } from '../../core/services/interaction-mode';
+import { QuizStateService } from '../../features/quiz/services/quiz-state';
 
 @Component({
   selector: 'app-globe',
@@ -140,15 +142,17 @@ import { CountryNameTooltipComponent } from '../../shared/components/country-nam
         </div>
       </div>
 
-      <!-- Country Name Tooltip (on hover) -->
+      <!-- Country Name Tooltip (on hover) - hidden during quiz mode -->
       <app-country-name-tooltip
-        [visible]="countryNameTooltipVisible()"
+        [visible]="
+          countryNameTooltipVisible() && !interactionModeService.isQuizMode()
+        "
         [countryName]="hoveredCountryName()"
         [position]="countryNameTooltipPosition()"
       />
 
-      <!-- Fixed Position Country Details (on selection) -->
-      @if (selectedCountry()) {
+      <!-- Fixed Position Country Details (on selection) - hidden during quiz mode -->
+      @if (selectedCountry() && !interactionModeService.isQuizMode()) {
         <div class="fixed-country-details">
           <div class="fixed-country-card">
             <div class="country-header">
@@ -346,6 +350,8 @@ export class Globe implements AfterViewInit, OnDestroy {
   private countrySelectionService = inject(CountrySelectionService);
   private countryDataService = inject(CountryDataService);
   private countryHoverService = inject(CountryHoverService);
+  protected interactionModeService = inject(InteractionModeService);
+  private quizStateService = inject(QuizStateService);
   @ViewChild('canvas') private canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('rendererContainer', { static: true })
   private rendererContainer!: ElementRef<HTMLDivElement>;
@@ -373,6 +379,9 @@ export class Globe implements AfterViewInit, OnDestroy {
 
   // Selected country state (for fixed position detailed tooltip)
   protected readonly selectedCountry = signal<CountryDataRecord | null>(null);
+
+  // Quiz candidate state (for quiz mode highlighting)
+  private readonly quizCandidate = signal<string | null>(null);
 
   private camera!: PerspectiveCamera;
   private scene!: Scene;
@@ -427,6 +436,17 @@ export class Globe implements AfterViewInit, OnDestroy {
     effect(() => {
       const selectedCountryCodes = this.countryDataService.selectedCountries();
       this.syncGlobeWithComparisonTable(selectedCountryCodes);
+    });
+
+    // Setup effect for quiz candidate highlighting
+    effect(() => {
+      const selectedCandidate = this.quizStateService.selectedCandidate();
+      const gameState = this.quizStateService.gameState();
+
+      // Clear quiz highlight when candidate is cleared or game ends
+      if (!selectedCandidate || gameState === 'idle' || gameState === 'ended') {
+        this.clearQuizCandidateHighlight();
+      }
     });
   }
 
@@ -541,7 +561,6 @@ export class Globe implements AfterViewInit, OnDestroy {
             this.earthMesh = earthMesh; // Store reference for later use
             this.scene.add(earthMesh);
 
-            console.log('✅ Earth texture loaded with realistic world map');
             resolve();
           } catch (error) {
             reject(new Error(`Failed to create Earth mesh: ${error}`));
@@ -606,7 +625,6 @@ export class Globe implements AfterViewInit, OnDestroy {
     } catch (error) {
       this.errorHandler.handleWebGLError(error as Error, 'atmosphere_setup');
       // Non-critical error, continue without atmosphere
-      console.warn('Failed to setup atmosphere effects:', error);
     }
   }
 
@@ -649,14 +667,13 @@ export class Globe implements AfterViewInit, OnDestroy {
       const canvas = this.renderer.domElement;
       canvas.addEventListener('webglcontextlost', (event) => {
         event.preventDefault();
-        console.warn('🚨 WebGL context lost');
         this.errorRecovery.handleWebGLContextLoss(canvas, () =>
           this.reinitializeScene(),
         );
       });
 
       canvas.addEventListener('webglcontextrestored', () => {
-        console.log('✅ WebGL context restored');
+        // Context restored - renderer will continue normally
       });
 
       // Add canvas to DOM
@@ -671,12 +688,6 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       // Initial render
       this.needsRender = true;
-
-      console.log('✅ Renderer initialized successfully', {
-        capabilities,
-        pixelRatio,
-        antialias: !capabilities.isLowEnd,
-      });
     } catch (error) {
       this.errorRecovery.handleRendererError(error as Error);
       throw new Error(`Failed to initialize WebGL renderer: ${error}`);
@@ -688,17 +699,13 @@ export class Globe implements AfterViewInit, OnDestroy {
    */
   private async reinitializeScene(): Promise<void> {
     try {
-      console.log('🔄 Reinitializing scene after context loss...');
-
       // Clear current state
       this.cleanup();
 
       // Reinitialize everything
       await this.initializeScene();
-
-      console.log('✅ Scene reinitialized successfully');
     } catch (error) {
-      console.error('❌ Failed to reinitialize scene:', error);
+      console.error('Failed to reinitialize scene:', error);
       this.handleInitializationError(error);
     }
   }
@@ -725,14 +732,12 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       // Add start/end listeners for smooth interaction and selection control
       this.controls.addEventListener('start', () => {
-        console.log('🎥 Camera interaction started');
         this.isAnimating = true;
         this.cameraInteracting = true;
         this.allowSelection = false; // Disable selection during camera interaction
       });
 
       this.controls.addEventListener('end', () => {
-        console.log('🎥 Camera interaction ended');
         this.isAnimating = false;
         this.needsRender = true;
         this.cameraInteracting = false;
@@ -758,7 +763,6 @@ export class Globe implements AfterViewInit, OnDestroy {
    */
   private async loadTopoJSONData(): Promise<void> {
     try {
-      console.log('🌍 Loading TopoJSON data with unified borders...');
       this.renderingMode.set('topojson');
 
       // Load TopoJSON topology with retry mechanism
@@ -787,17 +791,11 @@ export class Globe implements AfterViewInit, OnDestroy {
       this.syncGlobeWithComparisonTable(
         this.countryDataService.selectedCountries(),
       );
-
-      console.log(
-        `✅ TopoJSON loaded: ${countriesObject.userData['countryCount']} countries, ${countriesObject.userData['arcCount']} shared arcs`,
-      );
     } catch (error) {
       this.errorHandler.handleNetworkError(
         error as Error,
         '/data/world.topo.json',
       );
-
-      console.warn('TopoJSON failed, falling back to GeoJSON...', error);
 
       // Fallback to GeoJSON if TopoJSON fails
       try {
@@ -816,7 +814,6 @@ export class Globe implements AfterViewInit, OnDestroy {
    */
   private async loadGeoJSONData(): Promise<void> {
     try {
-      console.log('🗺️ Loading GeoJSON data (fallback mode)...');
       this.renderingMode.set('geojson');
 
       // Load countries data with timeout and retry
@@ -841,10 +838,6 @@ export class Globe implements AfterViewInit, OnDestroy {
       // Sync with any existing comparison table selections
       this.syncGlobeWithComparisonTable(
         this.countryDataService.selectedCountries(),
-      );
-
-      console.log(
-        `✅ GeoJSON loaded: ${countriesData.features.length} countries`,
       );
     } catch (error) {
       this.errorHandler.handleNetworkError(
@@ -913,10 +906,6 @@ export class Globe implements AfterViewInit, OnDestroy {
   async toggleRenderingMode(useTopoJSON: boolean): Promise<void> {
     if (this.useTopoJSON === useTopoJSON) return;
 
-    console.log(
-      `🔄 Switching rendering mode to ${useTopoJSON ? 'TopoJSON' : 'GeoJSON'}`,
-    );
-
     this.useTopoJSON = useTopoJSON;
     this.loadingMessage.set('Switching rendering mode...');
     this.loadingProgress.set(50);
@@ -938,10 +927,6 @@ export class Globe implements AfterViewInit, OnDestroy {
       setTimeout(() => {
         this.isLoading.set(false);
       }, 300);
-
-      console.log(
-        `✅ Successfully switched to ${useTopoJSON ? 'TopoJSON' : 'GeoJSON'} rendering`,
-      );
     } catch (error) {
       console.error('Failed to switch rendering mode:', error);
       this.handleInitializationError(error);
@@ -956,8 +941,6 @@ export class Globe implements AfterViewInit, OnDestroy {
   }
 
   retryInitialization(): void {
-    console.log('Retrying globe initialization...');
-
     // Reset states
     this.initError.set(null);
     this.isLoading.set(true);
@@ -976,8 +959,6 @@ export class Globe implements AfterViewInit, OnDestroy {
 
   private cleanup(): void {
     try {
-      console.log('🧹 Starting comprehensive Three.js cleanup...');
-
       // Stop animation
       if (this.animationId) {
         cancelAnimationFrame(this.animationId);
@@ -987,7 +968,6 @@ export class Globe implements AfterViewInit, OnDestroy {
       // Dispose of countries and related meshes using memory manager
       if (this.countries) {
         if (this.renderingMode() === 'topojson') {
-          console.log('🧹 Disposing TopoJSON meshes...');
           disposeTopoJSONMeshes(this.countries);
         }
         this.memoryManager.disposeObject3D(this.countries);
@@ -1060,18 +1040,16 @@ export class Globe implements AfterViewInit, OnDestroy {
         this.memoryManager.forceGarbageCollection();
       }
 
-      console.log('✅ Three.js cleanup completed successfully');
-
-      // Log memory stats for debugging
+      // Log memory stats for debugging in development only
       if (
         typeof window !== 'undefined' &&
         !window.location.host.includes('prod')
       ) {
         const stats = this.memoryManager.getMemoryStats();
-        console.log('📊 Memory cleanup stats:', stats);
+        console.log('Memory cleanup stats:', stats);
       }
     } catch (error) {
-      console.warn('⚠️ Error during cleanup:', error);
+      console.warn('Error during cleanup:', error);
       this.errorRecovery.handleGeometryError(error as Error, 'cleanup');
     }
   }
@@ -1083,15 +1061,11 @@ export class Globe implements AfterViewInit, OnDestroy {
     const canvas = this.renderer.domElement;
 
     // Timing variables for proper single/double-click separation
-    let clickTimeout: number | null = null;
+    let clickTimeout: ReturnType<typeof setTimeout> | null = null;
     let isDoubleClick = false;
 
     // Handle single clicks with proper double-click separation
     canvas.addEventListener('click', (event) => {
-      console.log(
-        `🖱️ Click detected - allowSelection: ${this.allowSelection}, cameraInteracting: ${this.cameraInteracting}`,
-      );
-
       // Clear any existing timeout
       if (clickTimeout) {
         clearTimeout(clickTimeout);
@@ -1100,22 +1074,14 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       // If this is part of a double-click, ignore the single-click
       if (isDoubleClick) {
-        console.log('📜 Single-click ignored (part of double-click)');
         isDoubleClick = false;
         return;
       }
 
       // Set a timeout to handle single-click after double-click detection window
       clickTimeout = setTimeout(() => {
-        console.log('🎯 Single-click confirmed, processing...');
-
         if (this.allowSelection && !this.cameraInteracting) {
-          console.log('✅ Showing country info (single-click)...');
           this.handleCountryInfoDisplay(event);
-        } else {
-          console.log(
-            '❌ Single-click ignored - camera interacting or selection disabled',
-          );
         }
         clickTimeout = null;
       }, 250); // 250ms delay to allow for double-click detection
@@ -1123,10 +1089,6 @@ export class Globe implements AfterViewInit, OnDestroy {
 
     // Handle double-click for adding countries to comparison table
     canvas.addEventListener('dblclick', (event) => {
-      console.log(
-        `🖱️ Double-click detected - allowSelection: ${this.allowSelection}, cameraInteracting: ${this.cameraInteracting}`,
-      );
-
       // Mark as double-click to prevent single-click handler
       isDoubleClick = true;
 
@@ -1134,16 +1096,10 @@ export class Globe implements AfterViewInit, OnDestroy {
       if (clickTimeout) {
         clearTimeout(clickTimeout);
         clickTimeout = null;
-        console.log('📜 Single-click timeout cleared for double-click');
       }
 
       if (this.allowSelection && !this.cameraInteracting) {
-        console.log('✅ Processing double-click for country selection...');
         this.handleCountryAddToComparison(event);
-      } else {
-        console.log(
-          '❌ Double-click ignored - camera interacting or selection disabled',
-        );
       }
 
       // Reset double-click flag after a short delay
@@ -1165,8 +1121,6 @@ export class Globe implements AfterViewInit, OnDestroy {
     canvas.addEventListener('mouseleave', () => {
       this.hideAllTooltips();
     });
-
-    console.log('✅ GPU country selection interactions setup complete');
   }
 
   /**
@@ -1178,69 +1132,73 @@ export class Globe implements AfterViewInit, OnDestroy {
     event.preventDefault();
 
     const isShiftClick = event.shiftKey;
-    console.log(
-      `🔍 Starting country info display - ${isShiftClick ? 'Shift+click' : 'Single-click'}...`,
-    );
 
     // Early exit if countries not loaded
     if (!this.countries || this.countries.children.length === 0) {
-      console.log('❌ Countries not loaded yet');
       return;
     }
 
     try {
       // Get country name from hover detection
-      console.log('🎯 Detecting country from click event...');
       const countryResult = await this.detectCountryFromEvent(event);
 
       if (countryResult?.countryName) {
         const countryName = countryResult.countryName;
-        console.log(
-          `✅ ${isShiftClick ? 'Shift+click' : 'Single-click'}: Detected country "${countryName}"`,
-        );
 
         // Get detailed country data from service (with name normalization for USA, etc.)
         const normalizedCountryName =
           this.normalizeCountryNameForDataService(countryName);
-        console.log(
-          `🔍 Normalizing country name: "${countryName}" → "${normalizedCountryName}"`,
-        );
 
         const countryData = this.countryDataService.getCountryByName(
           normalizedCountryName,
         );
         if (countryData) {
+          // Check if we're in quiz mode - if so, forward to quiz service instead of explore mode logic
+          if (this.interactionModeService.isQuizMode()) {
+            // For quiz mode, we use the country ID (code) as the candidate
+            this.quizStateService.selectCandidate(countryData.id);
+
+            // Apply quiz candidate highlighting to the globe
+            this.applyQuizCandidateHighlight(countryName);
+
+            // Show brief visual feedback tooltip
+            const x = event.clientX;
+            const y = event.clientY;
+            this.hoveredCountryName.set(countryName);
+            this.countryNameTooltipPosition.set({ x, y });
+            this.countryNameTooltipVisible.set(true);
+
+            // Hide tooltip quickly since quiz HUD will show selection
+            setTimeout(() => {
+              this.countryNameTooltipVisible.set(false);
+              this.hoveredCountryName.set('');
+            }, 1000);
+
+            return; // Exit early - don't process explore mode logic
+          }
+
+          // Explore mode logic continues below
           if (isShiftClick) {
             // Shift+click: Add to existing selection (multiple countries)
-            console.log(`📊 Adding to selection (Shift+click): ${countryName}`);
-
             // Check if country is already selected
             if (this.selectedCountry()?.code === countryData.code) {
-              console.log(`🔄 Country already selected: ${countryName}`);
               return; // Don't add duplicate
             }
 
             // Apply visual selection highlighting (additive)
-            console.log(`🎨 Adding visual selection to ${countryName}`);
             this.applyPersistentCountrySelection(countryName);
 
             // For Shift+click, we don't change selectedCountry signal
             // Just apply visual highlighting - the info card stays on the first selected country
           } else {
             // Single-click: Select only this country (clear previous selections)
-            console.log(`📊 Setting single selected country: ${countryName}`);
-
             // Clear all previous visual selections first
-            console.log('🧹 Clearing all previous selections for single-click');
             this.resetAllCountrySelections();
 
             // Set the selected country to show the detailed info card
             this.selectedCountry.set(countryData);
 
             // Apply visual selection highlighting to this country only
-            console.log(
-              `🎨 Applying single visual selection to ${countryName}`,
-            );
             this.applyPersistentCountrySelection(countryName);
           }
 
@@ -1256,16 +1214,7 @@ export class Globe implements AfterViewInit, OnDestroy {
             this.countryNameTooltipVisible.set(false);
             this.hoveredCountryName.set('');
           }, 2000);
-
-          console.log(`📋 Country processed:`, {
-            name: countryData.name,
-            code: countryData.code,
-            selectionType: isShiftClick ? 'multiple' : 'single',
-            showingDetailCard: !isShiftClick,
-          });
         } else {
-          console.log(`❌ No country data found for "${countryName}"`);
-
           // Fallback: Just show the simple tooltip if no detailed data available
           const x = event.clientX;
           const y = event.clientY;
@@ -1279,15 +1228,12 @@ export class Globe implements AfterViewInit, OnDestroy {
           }, 4000);
         }
       } else {
-        console.log('❌ Click: No country detected from click event');
-
         // Clear selection when clicking on empty space (both single and shift-click)
-        console.log('🧹 Clearing all selections (clicked on empty space)');
         this.selectedCountry.set(null);
         this.resetAllCountrySelections();
       }
     } catch (error) {
-      console.error('❌ Error in handleCountryInfoDisplay:', error);
+      console.error('Error in handleCountryInfoDisplay:', error);
     }
   }
 
@@ -1404,8 +1350,6 @@ export class Globe implements AfterViewInit, OnDestroy {
 
         // Update accessibility
         this.updateAccessibilityCountrySelection(countryName);
-
-        console.log(`🎯 Country selected: ${countryName}`);
       }
     } else {
       // No country clicked - clear selection
@@ -1419,49 +1363,24 @@ export class Globe implements AfterViewInit, OnDestroy {
   private async handleCountryAddToComparison(event: MouseEvent): Promise<void> {
     event.preventDefault();
 
-    console.log('🔍 Double-click handler started');
-
     // Early exit if countries not loaded
     if (!this.countries || this.countries.children.length === 0) {
-      console.log('❌ Countries not loaded yet');
       return;
     }
 
     // Get country name from hover detection
     const countryResult = await this.detectCountryFromEvent(event);
-    console.log('🔍 Country detection result:', countryResult);
 
     if (countryResult?.countryName) {
       const countryName = countryResult.countryName;
-      console.log(`🎯 Detected country: ${countryName}`);
-
-      // Check if country exists in data
-      const country = this.countryDataService.getCountryByName(countryName);
-      console.log(`🔍 Country data lookup:`, country);
 
       // Add country to comparison table via CountryDataService
       const added = this.countryDataService.addCountryFromGlobe(countryName);
-      console.log(`🔍 Add result: ${added}`);
 
       if (added) {
         // Apply visual selection to the country on globe
         this.applyPersistentCountrySelection(countryName);
-
-        console.log(
-          `✅ Successfully added country to comparison: ${countryName} (${country?.code})`,
-        );
-      } else {
-        console.log(
-          `⚠️ Country already in comparison or not found: ${countryName}`,
-        );
       }
-    } else {
-      console.log('❌ No country detected from double-click');
-
-      // Additional debugging - try alternative detection method
-      const alternativeResult =
-        await this.debugAlternativeCountryDetection(event);
-      console.log('🔍 Alternative detection result:', alternativeResult);
     }
   }
 
@@ -1470,8 +1389,6 @@ export class Globe implements AfterViewInit, OnDestroy {
    */
   private applyPersistentCountrySelection(countryName: string): void {
     if (!this.countries) return;
-
-    console.log(`🎯 Applying persistent selection to: ${countryName}`);
 
     // Use the same approach as applyCountrySelectionToGroup - search for selection meshes directly
     const selectionMeshes: Mesh[] = [];
@@ -1498,23 +1415,13 @@ export class Globe implements AfterViewInit, OnDestroy {
 
         if (isMatch) {
           selectionMeshes.push(child as Mesh);
-          console.log(
-            `🔍 Found matching selection mesh: ${child.name} for country: ${countryName} (mesh: ${meshName}, formatted: ${formattedMeshName})`,
-          );
         }
       }
     });
 
-    console.log(
-      `🎯 Found ${selectionMeshes.length} selection meshes for ${countryName}`,
-    );
-
     // Apply selection styling to all found meshes
-    selectionMeshes.forEach((mesh, index) => {
+    selectionMeshes.forEach((mesh) => {
       this.applyCountrySelection(mesh);
-      console.log(
-        `✅ Applied selection to mesh ${index + 1}/${selectionMeshes.length}: ${mesh.name}`,
-      );
     });
 
     this.needsRender = true;
@@ -1771,8 +1678,6 @@ export class Globe implements AfterViewInit, OnDestroy {
       y: -(y / canvas.height) * 2 + 1,
     };
 
-    console.log('🔍 Mouse coordinates:', { x, y, normalized: mouse });
-
     // Use Three.js raycasting directly
     const { Raycaster, Vector2 } = await import('three');
     const raycaster = new Raycaster();
@@ -1784,62 +1689,30 @@ export class Globe implements AfterViewInit, OnDestroy {
       this.countries.children,
       true,
     );
-    console.log(`🔍 Found ${intersects.length} intersections`);
 
     for (let i = 0; i < intersects.length; i++) {
       const intersect = intersects[i];
       const obj = intersect.object;
-      console.log(`🔍 Intersection ${i}:`, {
-        name: obj.name,
-        type: obj.type,
-        userData: obj.userData,
-        parent: obj.parent?.name,
-        parentUserData: obj.parent?.userData,
-      });
 
       // Try different methods to extract country name
       let countryName = null;
 
-      // Method 1: From object name
+      // Try different methods to extract country name
       if (obj.name && obj.name.includes('selection-mesh-')) {
         countryName = obj.name.replace('selection-mesh-', '').split('_')[0];
-        console.log(`🔍 Method 1 (object name): ${countryName}`);
-      }
-
-      // Method 2: From userData
-      if (obj.userData?.['name']) {
+      } else if (obj.userData?.['name']) {
         countryName = obj.userData['name'];
-        console.log(`🔍 Method 2 (object userData): ${countryName}`);
-      }
-
-      // Method 3: From parent userData
-      if (obj.parent?.userData?.['name']) {
+      } else if (obj.parent?.userData?.['name']) {
         countryName = obj.parent.userData['name'];
-        console.log(`🔍 Method 3 (parent userData): ${countryName}`);
-      }
-
-      // Method 4: From properties
-      if (obj.userData?.['properties']?.['NAME']) {
+      } else if (obj.userData?.['properties']?.['NAME']) {
         countryName = obj.userData['properties']['NAME'];
-        console.log(`🔍 Method 4 (properties): ${countryName}`);
-      }
-
-      // Method 5: From properties.name (lowercase)
-      if (obj.userData?.['properties']?.['name']) {
+      } else if (obj.userData?.['properties']?.['name']) {
         countryName = obj.userData['properties']['name'];
-        console.log(`🔍 Method 5 (properties.name): ${countryName}`);
-      }
-
-      // Method 6: From any name-like property
-      if (obj.userData?.['countryName']) {
+      } else if (obj.userData?.['countryName']) {
         countryName = obj.userData['countryName'];
-        console.log(`🔍 Method 6 (countryName): ${countryName}`);
       }
 
       if (countryName) {
-        console.log(
-          `✅ Successfully found country: "${countryName}" using alternative raycasting`,
-        );
         return { countryName, method: 'alternative-raycasting' };
       }
     }
@@ -1868,10 +1741,6 @@ export class Globe implements AfterViewInit, OnDestroy {
       selectedCountryCodes
         .map((code) => this.countryDataService.getCountryByCode(code)?.name)
         .filter((name) => name),
-    );
-
-    console.log(
-      `🔄 Resetting temporary selections, preserving: ${Array.from(selectedCountryNames).join(', ')}`,
     );
 
     this.countries.traverse((child) => {
@@ -1979,8 +1848,6 @@ export class Globe implements AfterViewInit, OnDestroy {
         }
       }
     });
-
-    console.log('✅ Country IDs ensured for selection service');
   }
 
   /**
@@ -2015,8 +1882,6 @@ export class Globe implements AfterViewInit, OnDestroy {
         }
       }
     });
-
-    console.log('✅ Selection materials initialized to invisible state');
   }
 
   /**
@@ -2050,6 +1915,146 @@ export class Globe implements AfterViewInit, OnDestroy {
     });
 
     this.lastSelectedCountryMesh = null;
+    this.needsRender = true;
+  }
+
+  /**
+   * Apply quiz candidate highlighting to a country (distinct from explore mode selection)
+   */
+  private applyQuizCandidateHighlight(countryName: string): void {
+    if (!this.countries) return;
+
+    // Clear any previous quiz highlight first
+    this.clearQuizCandidateHighlight();
+
+    // Find selection meshes for this country
+    const selectionMeshes: Mesh[] = [];
+
+    this.countries.traverse((child) => {
+      if (
+        child.name &&
+        child.name.startsWith('selection-mesh-') &&
+        child.type === 'Mesh'
+      ) {
+        const meshName = child.name
+          .replace('selection-mesh-', '')
+          .split('_')[0];
+
+        const formattedMeshName = this.formatCountryName(meshName);
+
+        const isMatch = this.isCountryNameMatch(
+          countryName,
+          meshName,
+          formattedMeshName,
+        );
+
+        if (isMatch) {
+          selectionMeshes.push(child as Mesh);
+        }
+      }
+    });
+
+    // Apply quiz-specific styling with radial offset
+    selectionMeshes.forEach((mesh) => {
+      this.applyQuizCandidateSelection(mesh);
+    });
+
+    // Store the current quiz candidate
+    this.quizCandidate.set(countryName);
+    this.needsRender = true;
+  }
+
+  /**
+   * Apply quiz candidate selection material with distinct visual appearance
+   */
+  private applyQuizCandidateSelection(mesh: Mesh): void {
+    if (!mesh || !mesh.geometry) return;
+
+    const material = mesh.material as Material & {
+      transparent?: boolean;
+      opacity?: number;
+      color?: Color;
+      emissive?: Color;
+    };
+
+    if (material) {
+      material.transparent = true;
+      material.opacity = 0.75;
+      material.color?.setHex(0x3b82f6); // Blue quiz candidate (different from green explore)
+      if (material.emissive) {
+        material.emissive.setHex(0x1e40af); // Darker blue emissive
+      }
+      // Ensure proper depth handling with radial offset
+      material.depthTest = false;
+      material.depthWrite = false;
+      material.needsUpdate = true;
+    }
+
+    // Higher render order than explore mode (10) to distinguish quiz selections
+    mesh.renderOrder = 15;
+
+    // Add slight radial offset to avoid z-fighting
+    const scale = 1.002; // Very subtle offset, just enough to prevent z-fighting
+    mesh.scale.setScalar(scale);
+
+    mesh.visible = true;
+    this.needsRender = true;
+  }
+
+  /**
+   * Clear current quiz candidate highlighting
+   */
+  private clearQuizCandidateHighlight(): void {
+    if (!this.countries || !this.quizCandidate()) return;
+
+    const currentCandidate = this.quizCandidate();
+
+    this.countries.traverse((child) => {
+      if (
+        child.name &&
+        child.name.startsWith('selection-mesh-') &&
+        child.type === 'Mesh'
+      ) {
+        const meshName = child.name
+          .replace('selection-mesh-', '')
+          .split('_')[0];
+
+        const formattedMeshName = this.formatCountryName(meshName);
+
+        const isMatch = this.isCountryNameMatch(
+          currentCandidate!,
+          meshName,
+          formattedMeshName,
+        );
+
+        if (isMatch) {
+          const mesh = child as Mesh;
+          const material = mesh.material as Material & {
+            transparent?: boolean;
+            opacity?: number;
+            color?: Color;
+            emissive?: Color;
+          };
+
+          if (material) {
+            material.transparent = true;
+            material.opacity = 0.0; // Make invisible
+            material.color?.setHex(0x000000); // Black (invisible)
+            if (material.emissive) {
+              material.emissive.setHex(0x000000);
+            }
+            material.needsUpdate = true;
+          }
+
+          // Reset scale and render order
+          mesh.scale.setScalar(1.0);
+          mesh.renderOrder = 0;
+          mesh.visible = false;
+        }
+      }
+    });
+
+    this.quizCandidate.set(null);
     this.needsRender = true;
   }
 
@@ -2095,16 +2100,9 @@ export class Globe implements AfterViewInit, OnDestroy {
       });
     }
 
-    console.log(
-      `🎯 Found ${selectionMeshes.length} selection meshes for ${countryName}`,
-    );
-
     // Apply selection styling to all found meshes
-    selectionMeshes.forEach((mesh, index) => {
+    selectionMeshes.forEach((mesh) => {
       this.applyCountrySelection(mesh);
-      console.log(
-        `✅ Applied selection to mesh ${index + 1}/${selectionMeshes.length}: ${mesh.name}`,
-      );
     });
 
     this.needsRender = true;
@@ -2186,8 +2184,12 @@ export class Globe implements AfterViewInit, OnDestroy {
    */
   private async handleCountryHover(event: MouseEvent): Promise<void> {
     try {
-      // Early exit if countries not loaded
-      if (!this.countries || this.countries.children.length === 0) {
+      // Early exit if countries not loaded or in quiz mode
+      if (
+        !this.countries ||
+        this.countries.children.length === 0 ||
+        this.interactionModeService.isQuizMode()
+      ) {
         this.hideAllTooltips();
         return;
       }
@@ -2256,35 +2258,21 @@ export class Globe implements AfterViewInit, OnDestroy {
     selectedCountryCodes: readonly string[],
   ): void {
     if (!this.countries || this.countries.children.length === 0) {
-      console.log(
-        `🔄 Countries not loaded yet, deferring sync for ${selectedCountryCodes.length} countries`,
-      );
       return;
     }
-
-    console.log(
-      `🔄 Syncing globe with ${selectedCountryCodes.length} selected countries: ${selectedCountryCodes.join(', ')}`,
-    );
 
     // Reset all country selections first
     this.resetAllCountrySelections();
 
     // Apply selection to countries in the comparison table
-    selectedCountryCodes.forEach((countryCode, index) => {
+    selectedCountryCodes.forEach((countryCode, _index) => {
       const country = this.countryDataService.getCountryByCode(countryCode);
       if (country) {
-        console.log(
-          `🔄 Syncing country ${index + 1}/${selectedCountryCodes.length}: ${country.name} (${countryCode})`,
-        );
         this.applyPersistentCountrySelection(country.name);
       } else {
-        console.warn(`⚠️ Could not find country data for code: ${countryCode}`);
+        console.warn(`Could not find country data for code: ${countryCode}`);
       }
     });
-
-    console.log(
-      `✅ Globe sync completed for ${selectedCountryCodes.length} countries`,
-    );
   }
 
   /**
@@ -2314,7 +2302,6 @@ export class Globe implements AfterViewInit, OnDestroy {
    */
   onFocus(): void {
     this.accessibility.isKeyboardMode.set(true);
-    console.log('🎯 Globe focused - keyboard navigation enabled');
   }
 
   /**

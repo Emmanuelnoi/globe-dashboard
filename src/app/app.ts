@@ -9,17 +9,13 @@ import {
 import { Sidebar } from './layout/component/sidebar/sidebar';
 import { ComparisonCard } from './layout/component/comparison-card/comparison-card';
 import { NavigationStateService } from './core/services/navigation-state.service';
-import { PerformanceMonitorComponent } from './shared/components/performance-monitor/performance-monitor';
 import { NotificationToast } from './shared/components/notification-toast/notification-toast';
+import { GameHub } from './features/quiz/components/game-hub/game-hub';
+import { QuizStateService } from './features/quiz/services/quiz-state';
 
 @Component({
   selector: 'app-root',
-  imports: [
-    Sidebar,
-    ComparisonCard,
-    PerformanceMonitorComponent,
-    NotificationToast,
-  ],
+  imports: [Sidebar, ComparisonCard, NotificationToast, GameHub],
   template: `
     <div
       class="app-container"
@@ -56,14 +52,9 @@ import { NotificationToast } from './shared/components/notification-toast/notifi
         <app-comparison-card />
       }
 
-      <!-- Placeholder for future views -->
+      <!-- Game Quiz Feature - Unified Card -->
       @if (navigationService.isGameQuizActive()) {
-        <div class="placeholder-view" role="region" aria-label="Game Quiz">
-          <div class="placeholder-content">
-            <h2>🎮 Game Quiz</h2>
-            <p>Coming Soon - Interactive geography quiz game</p>
-          </div>
-        </div>
+        <app-game-hub />
       }
 
       @if (navigationService.isBirdMigrationActive()) {
@@ -89,7 +80,7 @@ import { NotificationToast } from './shared/components/notification-toast/notifi
       }
 
       <!-- Performance Monitor -->
-      <app-performance-monitor />
+      <!-- <app-performance-monitor /> -->
 
       <!-- Notification Toast -->
       <app-notification-toast></app-notification-toast>
@@ -220,6 +211,7 @@ export class App implements AfterViewInit {
 
   // Inject navigation service for template access
   protected readonly navigationService = inject(NavigationStateService);
+  protected readonly quizStateService = inject(QuizStateService);
   protected readonly title = signal('global-dashboard');
 
   async ngAfterViewInit(): Promise<void> {
