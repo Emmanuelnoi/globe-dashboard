@@ -25,6 +25,9 @@ importers:
       earcut:
         specifier: ^3.0.0
         version: 3.0.2
+      idb:
+        specifier: ^8.0.3
+        version: 8.0.3
       lucide-angular:
         specifier: ^0.542.0
         version: 0.542.0(@angular/common@20.2.4(@angular/core@20.2.4(@angular/compiler@20.2.4)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.2.4(@angular/compiler@20.2.4)(rxjs@7.8.2)(zone.js@0.15.1))
@@ -4935,6 +4938,12 @@ packages:
         integrity: sha512-cf6L2Ds3h57VVmkZe+Pn+5APsT7FpqJtEhhieDCvrE2MK5Qk9MyffgQyuxQTm6BChfeZNtcOLHp9IcWRVcIcBQ==,
       }
     engines: { node: ">=0.10.0" }
+
+  idb@8.0.3:
+    resolution:
+      {
+        integrity: sha512-LtwtVyVYO5BqRvcsKuB2iUMnHwPVByPCXFXOpuU96IZPPoPN6xjOGxZQ74pgSVVLQWtUOYgyeL4GE98BY5D3wg==,
+      }
 
   ieee754@1.2.1:
     resolution:
@@ -11577,6 +11586,8 @@ snapshots:
   iconv-lite@0.7.0:
     dependencies:
       safer-buffer: 2.1.2
+
+  idb@8.0.3: {}
 
   ieee754@1.2.1: {}
 

@@ -2,6 +2,7 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QuizStateService } from '../../services/quiz-state';
+import { StatsPanelComponent } from '../stats-panel/stats-panel';
 import {
   GameMode,
   Difficulty,
@@ -11,7 +12,7 @@ import {
 @Component({
   selector: 'app-game-hub',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, StatsPanelComponent],
   template: `
     <div class="quiz-view" role="region" aria-label="Game Quiz Hub">
       <div class="quiz-content">
@@ -235,24 +236,77 @@ import {
                   {{ currentQuestion()!.prompt }}
                 }
               </div>
+
+              <!-- Flag Display for Flag ID Mode -->
+              @if (
+                currentQuestion()?.type === 'flag-id' &&
+                currentQuestion()?.metadata?.flagUrl
+              ) {
+                <div class="flag-display">
+                  <img
+                    [src]="currentQuestion()?.metadata?.flagUrl"
+                    [alt]="'Flag to identify'"
+                    class="question-flag"
+                    loading="eager"
+                    (error)="onFlagError($event)"
+                  />
+                </div>
+              }
             </div>
 
-            <!-- Selected Candidate Display -->
+            <!-- Selection Interface -->
             <div class="selection-section">
-              @if (selectedCandidate()) {
+              <!-- Multiple Choice Grid (for capital-match, flag-id, facts-guess) -->
+              @if (isMultipleChoiceMode()) {
                 <div
-                  class="selected-candidate"
-                  role="status"
-                  aria-live="polite"
+                  class="multiple-choice-grid"
+                  role="radiogroup"
+                  [attr.aria-label]="
+                    'Answer choices for: ' + currentQuestion()?.prompt
+                  "
                 >
-                  <span class="selection-label">Selected</span>
+                  @if (currentQuestion()?.choices; as choices) {
+                    @for (choice of choices; track choice) {
+                      <button
+                        type="button"
+                        class="choice-button"
+                        [class.selected]="selectedCandidate() === choice"
+                        [disabled]="isConfirmLocked()"
+                        (click)="selectChoice(choice)"
+                        role="radio"
+                        [attr.aria-checked]="selectedCandidate() === choice"
+                        [attr.aria-label]="'Select ' + choice"
+                      >
+                        <div class="choice-content">
+                          <span class="choice-text">{{ choice }}</span>
+                        </div>
+                        @if (selectedCandidate() === choice) {
+                          <div class="choice-indicator">✓</div>
+                        }
+                      </button>
+                    }
+                  }
                 </div>
               } @else {
-                <div class="no-selection" role="status" aria-live="polite">
-                  <span class="selection-hint"
-                    >Click a country on the globe to select it</span
+                <!-- Globe Selection Display (for find-country) -->
+                @if (selectedCandidate()) {
+                  <div
+                    class="selected-candidate"
+                    role="status"
+                    aria-live="polite"
                   >
-                </div>
+                    <span class="selection-label"
+                      >Selected:
+                      {{ getCountryName(selectedCandidate()!) }}</span
+                    >
+                  </div>
+                } @else {
+                  <div class="no-selection" role="status" aria-live="polite">
+                    <span class="selection-hint"
+                      >Click a country on the globe to select it</span
+                    >
+                  </div>
+                }
               }
             </div>
 
@@ -462,6 +516,10 @@ import {
                 <span class="btn-icon">🎮</span>
                 Play Again
               </button>
+              <button class="action-btn secondary-btn" (click)="toggleStats()">
+                <span class="btn-icon">📊</span>
+                {{ showStats() ? 'Hide Stats' : 'View Stats' }}
+              </button>
               <button
                 class="action-btn secondary-btn"
                 (click)="returnToExplore()"
@@ -471,6 +529,11 @@ import {
               </button>
             </div>
           </div>
+        }
+
+        <!-- Stats Panel Modal -->
+        @if (showStats()) {
+          <app-stats-panel (closeStats)="hideStats()" />
         }
       </div>
     </div>
@@ -1526,6 +1589,138 @@ import {
         }
       }
 
+      /* Flag Display Styles for Flag ID Mode */
+      .flag-display {
+        display: flex;
+        justify-content: center;
+        margin: 16px 0;
+        padding: 16px;
+        background: rgba(33, 33, 33);
+        border: 0px;
+        border-radius: 8px;
+        backdrop-filter: blur(8px);
+      }
+
+      .question-flag {
+        width: 120px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        box-shadow:
+          0 4px 12px rgba(0, 0, 0, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+
+      @media (max-width: 768px) {
+        .flag-display {
+          margin: 12px 0;
+          padding: 12px;
+        }
+
+        .question-flag {
+          width: 100px;
+          height: 66px;
+        }
+      }
+
+      /* Multiple Choice Grid Styles */
+      .multiple-choice-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin: 16px 0;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .choice-button {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        min-height: 48px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+        outline: none;
+        backdrop-filter: blur(8px);
+      }
+
+      .choice-button:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(100, 200, 255, 0.3);
+        transform: translateY(-1px);
+      }
+
+      .choice-button:focus {
+        border-color: rgba(100, 200, 255, 0.8);
+        box-shadow: 0 0 0 2px rgba(100, 200, 255, 0.2);
+      }
+
+      .choice-button.selected {
+        background: rgba(100, 200, 255, 0.2);
+        border-color: rgba(100, 200, 255, 0.8);
+        color: rgba(255, 255, 255, 0.95);
+      }
+
+      .choice-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: none;
+      }
+
+      .choice-content {
+        display: flex;
+        align-items: center;
+        flex: 1;
+      }
+
+      .choice-text {
+        font-weight: 500;
+        line-height: 1.3;
+        word-break: break-word;
+      }
+
+      .choice-indicator {
+        color: rgba(100, 200, 255, 1);
+        font-size: 16px;
+        font-weight: bold;
+        margin-left: 8px;
+        flex-shrink: 0;
+      }
+
+      /* Adjust grid for more choices on hard difficulty */
+      @media (min-width: 400px) {
+        .multiple-choice-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .multiple-choice-grid {
+          grid-template-columns: 1fr;
+          gap: 8px;
+          margin: 12px 0;
+        }
+
+        .choice-button {
+          padding: 10px 12px;
+          min-height: 44px;
+          font-size: 13px;
+        }
+
+        .mode-selector {
+          grid-template-columns: 1fr;
+        }
+      }
+
       @media (max-width: 1024px) and (min-width: 769px) {
         .quiz-view {
           width: 300px;
@@ -1534,6 +1729,26 @@ import {
 
         .mode-selector {
           grid-template-columns: 1fr;
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
         }
       }
     `,
@@ -1547,6 +1762,7 @@ export class GameHub {
   readonly selectedDifficulty = signal<Difficulty>('easy');
   readonly questionCount = signal<number>(10);
   readonly isStarting = signal<boolean>(false);
+  readonly showStats = signal<boolean>(false);
 
   // Available options
   readonly availableModes: Array<{
@@ -1555,9 +1771,9 @@ export class GameHub {
     enabled: boolean;
   }> = [
     { value: 'find-country', label: 'Find Country', enabled: true },
-    { value: 'capital-match', label: 'Capital Match', enabled: false },
-    { value: 'flag-id', label: 'Flag ID', enabled: false },
-    { value: 'facts-guess', label: 'Facts Guess', enabled: false },
+    { value: 'capital-match', label: 'Capital Match', enabled: true },
+    { value: 'flag-id', label: 'Flag ID', enabled: true },
+    { value: 'facts-guess', label: 'Facts Guess', enabled: true },
   ];
 
   readonly difficulties: Array<{
@@ -1705,12 +1921,22 @@ export class GameHub {
   startNewGame(): void {
     const currentSession = this.quizStateService.currentSession();
     if (currentSession?.configuration) {
+      this.showStats.set(false);
       this.quizStateService.resetToIdle();
       // Small delay to ensure state is reset
       setTimeout(() => {
         this.quizStateService.startGame(currentSession.configuration);
       }, 100);
     }
+  }
+
+  // Stats panel methods
+  toggleStats(): void {
+    this.showStats.update((current) => !current);
+  }
+
+  hideStats(): void {
+    this.showStats.set(false);
   }
 
   // Quiz HUD computed values
@@ -1777,6 +2003,27 @@ export class GameHub {
 
   returnToExplore(): void {
     this.quizStateService.resetToIdle();
+  }
+
+  // Multiple choice methods
+  isMultipleChoiceMode(): boolean {
+    const mode = this.quizStateService.configuration()?.mode;
+    return (
+      mode === 'capital-match' || mode === 'flag-id' || mode === 'facts-guess'
+    );
+  }
+
+  selectChoice(choice: string): void {
+    if (!this.quizStateService.isConfirmLocked()) {
+      this.quizStateService.selectCandidate(choice);
+    }
+  }
+
+  onFlagError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src =
+      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iNjAiIGZpbGw9IiNmMGYwZjAiLz48dGV4dCB4PSI1MCIgeT0iMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RmxhZzwvdGV4dD48L3N2Zz4=';
+    img.alt = 'Flag not available';
   }
 
   // Getters for template access to signals

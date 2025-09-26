@@ -17,6 +17,8 @@ import {
 import { InteractionModeService } from '../../../core/services/interaction-mode';
 import { CountryDataService } from '../../../core/services/country-data.service';
 import { CountryDataRecord } from '../../../core/types/country-data.types';
+import { QuestionGeneratorService } from './question-generator.service';
+import { UserStatsService } from '../../../core/services/user-stats.service';
 
 // Timer configuration
 const QUESTION_TIME_LIMITS = {
@@ -39,6 +41,8 @@ export class QuizStateService {
   private readonly destroyRef = inject(DestroyRef);
   private readonly interactionModeService = inject(InteractionModeService);
   private readonly countryDataService = inject(CountryDataService);
+  private readonly questionGeneratorService = inject(QuestionGeneratorService);
+  private readonly userStatsService = inject(UserStatsService);
   private timerAnimationFrame?: number;
   private questionStartTime = 0;
   private sessionStartTime = 0;
@@ -226,7 +230,7 @@ export class QuizStateService {
     this.transitionToState('evaluating');
 
     // Show result for 2 seconds, then continue
-    setTimeout(() => this.proceedAfterResult(), 2000);
+    setTimeout(async () => await this.proceedAfterResult(), 2000);
   }
 
   /**
@@ -259,13 +263,16 @@ export class QuizStateService {
 
     // Transition through evaluating state first, then proceed
     this.transitionToState('evaluating');
-    this.proceedAfterResult();
+    // Handle async call properly for skip
+    this.proceedAfterResult().catch((error) => {
+      console.error('Error proceeding after skip:', error);
+    });
   }
 
   /**
    * End the current game session
    */
-  endGame(): void {
+  async endGame(): Promise<void> {
     const session = this._currentSession();
     if (!session) return;
 
@@ -282,6 +289,20 @@ export class QuizStateService {
     };
 
     this._currentSession.set(finalSession);
+
+    // First show results
+    this.transitionToState('results');
+
+    // Save session to persistent storage
+    try {
+      await this.userStatsService.saveSession(finalSession);
+      console.log('📊 Session saved to IndexedDB successfully');
+    } catch (error) {
+      console.error('❌ Failed to save session to IndexedDB:', error);
+      // Don't block the UI flow if saving fails
+    }
+
+    // Then transition to ended state
     this.transitionToState('ended');
 
     // Switch back to explore interaction mode
@@ -361,11 +382,12 @@ export class QuizStateService {
     this.questionStartTime = Date.now();
   }
 
-  private proceedAfterResult(): void {
+  private async proceedAfterResult(): Promise<void> {
     this._currentQuestionIndex.update((i) => i + 1);
 
     if (this.questionsComplete()) {
-      this.transitionToState('results');
+      // All questions complete, end the game and save session
+      await this.endGame();
     } else {
       this.loadNextQuestion();
     }
@@ -421,204 +443,12 @@ export class QuizStateService {
   }
 
   private generateQuestions(config: GameConfiguration): Question[] {
-    if (config.mode === 'find-country') {
-      return this.generateFindCountryQuestions(config);
-    }
-
-    // Fallback for other modes (Sprint 2)
-    console.warn(
-      `Mode ${config.mode} not implemented yet, using stub questions`,
-    );
-    return this.generateStubQuestions(config);
-  }
-
-  private generateFindCountryQuestions(config: GameConfiguration): Question[] {
-    // Get all available countries from the data service
-    const allCountries = this.countryDataService.getAllCountries();
-
-    if (allCountries.length === 0) {
-      console.error('No countries available for quiz generation');
-      return this.generateStubQuestions(config);
-    }
-
-    // Filter countries based on difficulty
-    const eligibleCountries = this.filterCountriesByDifficulty(
-      allCountries,
+    // Use the dedicated QuestionGeneratorService
+    return this.questionGeneratorService.generateSession(
+      config.mode,
       config.difficulty,
-    );
-
-    if (eligibleCountries.length < config.questionCount) {
-      console.warn(
-        `Not enough eligible countries (${eligibleCountries.length}) for requested questions (${config.questionCount}). Using all available.`,
-      );
-    }
-
-    // Randomly select unique countries for questions
-    const selectedCountries = this.selectRandomCountries(
-      eligibleCountries,
       config.questionCount,
+      config.seed,
     );
-
-    // Generate questions from selected countries
-    const questions: Question[] = selectedCountries.map((country, index) => {
-      const questionPrompt = this.generateFindCountryPrompt(
-        country,
-        config.difficulty,
-      );
-
-      return {
-        id: `find_country_${index + 1}`,
-        type: 'find-country',
-        prompt: questionPrompt,
-        correctAnswer: country.id,
-        metadata: {
-          countryId: country.id,
-          countryName: country.name,
-          capital: country.capital,
-          region: country.region,
-          population: country.population,
-          difficulty: config.difficulty,
-        },
-      };
-    });
-
-    return questions;
-  }
-
-  private filterCountriesByDifficulty(
-    countries: readonly CountryDataRecord[],
-    difficulty: Difficulty,
-  ): CountryDataRecord[] {
-    // Filter logic based on difficulty:
-    // Easy: Larger, well-known countries (population > 10M)
-    // Medium: Mix of medium and large countries (population > 1M)
-    // Hard: All countries including small ones
-
-    switch (difficulty) {
-      case 'easy':
-        return [
-          ...countries.filter(
-            (country) =>
-              country.population > 10_000_000 ||
-              [
-                'United States',
-                'China',
-                'Russia',
-                'Canada',
-                'Brazil',
-                'Australia',
-                'India',
-                'Mexico',
-              ].includes(country.name),
-          ),
-        ];
-
-      case 'medium':
-        return [
-          ...countries.filter(
-            (country) =>
-              country.population > 1_000_000 ||
-              ['Luxembourg', 'Malta', 'Iceland', 'Singapore'].includes(
-                country.name,
-              ),
-          ),
-        ];
-
-      case 'hard':
-        return [...countries]; // All countries available for hard difficulty
-
-      default:
-        return [...countries];
-    }
-  }
-
-  private selectRandomCountries(
-    countries: CountryDataRecord[],
-    count: number,
-  ): CountryDataRecord[] {
-    // Shuffle and select unique countries
-    const shuffled = [...countries].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, Math.min(count, countries.length));
-  }
-
-  private generateFindCountryPrompt(
-    country: CountryDataRecord,
-    difficulty: Difficulty,
-  ): string {
-    // Generate different types of prompts based on available data and difficulty
-    const prompts: string[] = [];
-
-    // Capital-based prompts (most common)
-    if (country.capital && country.capital !== 'N/A') {
-      prompts.push(`Find the country whose capital is ${country.capital}`);
-    }
-
-    // Region-based prompts (for variety)
-    if (country.region) {
-      prompts.push(`Find this ${country.region} country: ${country.name}`);
-    }
-
-    // Population-based prompts (for larger countries)
-    if (difficulty !== 'easy' && country.population > 50_000_000) {
-      const popFormatted =
-        country.populationFormatted ||
-        `${Math.round(country.population / 1_000_000)}M+`;
-      prompts.push(
-        `Find the country with approximately ${popFormatted} people: ${country.name}`,
-      );
-    }
-
-    // GDP-based prompts (for countries with data)
-    if (
-      difficulty === 'hard' &&
-      country.gdpPerCapita &&
-      country.gdpPerCapita > 30000
-    ) {
-      prompts.push(`Find this high-income country: ${country.name}`);
-    }
-
-    // Regional context prompts
-    if (country.subregion) {
-      prompts.push(`Find this ${country.subregion} country: ${country.name}`);
-    }
-
-    // Fallback to simple prompt
-    if (prompts.length === 0) {
-      prompts.push(`Find the country: ${country.name}`);
-    }
-
-    // Select random prompt for variety
-    const selectedPrompt = prompts[Math.floor(Math.random() * prompts.length)];
-
-    // For hard difficulty, sometimes make it more challenging by removing the country name
-    if (
-      difficulty === 'hard' &&
-      Math.random() < 0.3 &&
-      country.capital &&
-      country.capital !== 'N/A'
-    ) {
-      return `Find the country whose capital is ${country.capital}`;
-    }
-
-    return selectedPrompt;
-  }
-
-  private generateStubQuestions(config: GameConfiguration): Question[] {
-    const questions: Question[] = [];
-
-    for (let i = 0; i < config.questionCount; i++) {
-      questions.push({
-        id: `stub_q_${i + 1}`,
-        type: config.mode,
-        prompt: `Find Country Question ${i + 1} (${config.difficulty}) - Coming Soon`,
-        correctAnswer: 'SAMPLE_COUNTRY_ID',
-        metadata: {
-          countryId: 'SAMPLE_COUNTRY_ID',
-          isStub: true,
-        },
-      });
-    }
-
-    return questions;
   }
 }

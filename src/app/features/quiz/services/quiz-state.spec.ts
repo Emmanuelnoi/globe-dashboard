@@ -267,24 +267,24 @@ describe('QuizStateService', () => {
       expect(service.gameState()).toBe('results');
     });
 
-    it('should transition from results to ended when ending game', () => {
+    it('should transition from results to ended when ending game', async () => {
       service.selectCandidate('US');
       service.confirmCandidate();
       vi.advanceTimersByTime(2000);
 
       expect(service.gameState()).toBe('results');
 
-      service.endGame();
+      await service.endGame();
 
       expect(service.gameState()).toBe('ended');
       expect(mockInteractionModeService.enableExploreMode).toHaveBeenCalled();
     });
 
-    it('should transition from ended to idle when resetting', () => {
+    it('should transition from ended to idle when resetting', async () => {
       service.selectCandidate('US');
       service.confirmCandidate();
       vi.advanceTimersByTime(2000);
-      service.endGame();
+      await service.endGame();
 
       expect(service.gameState()).toBe('ended');
 
@@ -690,7 +690,7 @@ describe('QuizStateService', () => {
       expect(session!.completed).toBe(false);
     });
 
-    it('should update session on game end', () => {
+    it('should update session on game end', async () => {
       service.startGame({
         mode: 'find-country',
         difficulty: 'easy',
@@ -700,7 +700,7 @@ describe('QuizStateService', () => {
       service.selectCandidate('US');
       service.confirmCandidate();
       vi.advanceTimersByTime(2000);
-      service.endGame();
+      await service.endGame();
 
       const session = service.currentSession();
       expect(session!.completed).toBe(true);
@@ -709,7 +709,7 @@ describe('QuizStateService', () => {
       expect(session!.bestStreak).toBeGreaterThanOrEqual(0);
     });
 
-    it('should calculate best streak correctly', () => {
+    it('should calculate best streak correctly', async () => {
       service.startGame({
         mode: 'find-country',
         difficulty: 'easy',
@@ -731,7 +731,7 @@ describe('QuizStateService', () => {
       service.confirmCandidate();
       vi.advanceTimersByTime(2000);
 
-      service.endGame();
+      await service.endGame();
 
       const session = service.currentSession();
       expect(session!.bestStreak).toBe(2);
