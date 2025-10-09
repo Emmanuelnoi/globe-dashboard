@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   computed,
   effect,
@@ -20,6 +21,7 @@ export interface TooltipPosition {
   selector: 'app-country-tooltip',
   standalone: true,
   imports: [CommonModule, IconComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (visible() && country()) {
       <div

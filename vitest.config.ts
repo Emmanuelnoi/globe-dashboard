@@ -34,21 +34,35 @@ export default defineConfig({
     },
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'lcov'],
       exclude: [
         'node_modules/',
         'src/test-setup.ts',
+        'src/test-setup/**',
         '**/*.d.ts',
         '**/*.config.*',
+        '**/*.spec.ts',
+        '**/*.test.ts',
+        '**/types/**',
+        '**/models/**',
         'dist/',
         '.angular/',
+        'src/main.ts',
+        'src/environments/**',
       ],
+      thresholds: {
+        statements: 80,
+        branches: 80,
+        functions: 80,
+        lines: 80,
+      },
     },
   },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src/app', import.meta.url)),
       '@lib': fileURLToPath(new URL('./src/lib', import.meta.url)),
+      '@env': fileURLToPath(new URL('./src/environments', import.meta.url)),
     },
   },
   define: {

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   QueryList,
@@ -17,467 +18,499 @@ import { CountrySearch } from '../country-search/country-search';
 @Component({
   selector: 'app-comparison-card',
   imports: [CommonModule, TableKeyboardDirective, CountrySearch],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="cmp-card centered-card" aria-labelledby="cmp-title">
+    <section
+      class="cmp-card centered-card"
+      [class.collapsed]="isCollapsed()"
+      aria-labelledby="cmp-title"
+    >
       <header class="cmp-header">
-        <h2 id="cmp-title">Country Statistics Comparison</h2>
-        <div class="stats-summary">
-          <span class="stats-item">
-            <strong>{{ countryDataService.countryCount() }}</strong> countries
-          </span>
-          <span class="stats-item">
-            <strong>{{ countryDataService.selectedCountries().length }}</strong>
-            selected
-          </span>
-          @if (countryDataService.dataCompleteness() > 0) {
+        <div class="header-top">
+          <h2 id="cmp-title">🌍 Country Comparison</h2>
+          <button
+            type="button"
+            class="collapse-btn"
+            (click)="toggleCollapse()"
+            [attr.aria-expanded]="!isCollapsed()"
+            aria-label="{{
+              isCollapsed()
+                ? 'Expand Country Comparison panel'
+                : 'Collapse Country Comparison panel'
+            }}"
+            title="{{ isCollapsed() ? 'Expand panel' : 'Collapse panel' }}"
+          >
+            {{ isCollapsed() ? '▲' : '▼' }}
+          </button>
+        </div>
+        @if (!isCollapsed()) {
+          <div class="stats-summary">
             <span class="stats-item">
-              <strong
-                >{{
-                  (countryDataService.dataCompleteness() * 100).toFixed(1)
-                }}%</strong
-              >
-              data completeness
+              <strong>{{ countryDataService.countryCount() }}</strong> countries
             </span>
-          }
-        </div>
-
-        <div class="controls" role="toolbar" aria-label="Table actions">
-          <!-- Country Search Component -->
-          <app-country-search [collapsed]="false"></app-country-search>
-
-          <!-- Action buttons grouped together -->
-          <div class="action-buttons">
-            <!-- Compact Sort Control (Pattern A) -->
-            <div class="sort-control" role="group" aria-label="Sort countries">
-              <div class="sort-button-group">
-                <!-- Main sort button with dropdown -->
-                <button
-                  class="sort-main-btn"
-                  type="button"
-                  (click)="toggleSortDropdown()"
-                  [attr.aria-expanded]="showSortDropdown()"
-                  aria-label="Select sort metric"
+            <span class="stats-item">
+              <strong>{{
+                countryDataService.selectedCountries().length
+              }}</strong>
+              selected
+            </span>
+            @if (countryDataService.dataCompleteness() > 0) {
+              <span class="stats-item">
+                <strong
+                  >{{
+                    (countryDataService.dataCompleteness() * 100).toFixed(1)
+                  }}%</strong
                 >
-                  <span class="sort-label">Sort by</span>
-                  <span class="sort-metric">{{ getCurrentSortLabel() }}</span>
-                  <svg
-                    class="dropdown-icon"
-                    width="12"
-                    height="12"
-                    viewBox="0 0 20 20"
-                    aria-hidden="true"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="1.5"
-                      d="M6 8l4 4 4-4"
-                    />
-                  </svg>
-                </button>
-
-                <!-- Direction toggle button -->
-                <button
-                  class="sort-direction-btn"
-                  type="button"
-                  (click)="toggleSortDirection()"
-                  [attr.aria-label]="
-                    'Sort ' +
-                    (sortDirection() === 'asc' ? 'ascending' : 'descending')
-                  "
-                >
-                  <svg
-                    class="direction-icon"
-                    width="12"
-                    height="12"
-                    viewBox="0 0 20 20"
-                    aria-hidden="true"
-                  >
-                    @if (sortDirection() === 'asc') {
-                      <path
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10 4l-4 4h8l-4-4z"
-                      />
-                    } @else {
-                      <path
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10 16l4-4H6l4 4z"
-                      />
-                    }
-                  </svg>
-                </button>
-              </div>
-
-              <!-- Dropdown menu -->
-              @if (showSortDropdown()) {
-                <div class="sort-dropdown-menu" role="menu">
-                  <button
-                    type="button"
-                    class="sort-option"
-                    [class.active]="sortMetric() === 'name'"
-                    role="menuitem"
-                    (click)="selectSortMetric('name')"
-                  >
-                    <span>Country Name</span>
-                    @if (sortMetric() === 'name') {
-                      <svg
-                        class="check-icon"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 20 20"
-                        aria-hidden="true"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M6 10l2 2 6-6"
-                        />
-                      </svg>
-                    }
-                  </button>
-                  <button
-                    type="button"
-                    class="sort-option"
-                    [class.active]="sortMetric() === 'hdi'"
-                    role="menuitem"
-                    (click)="selectSortMetric('hdi')"
-                  >
-                    <span>HDI</span>
-                    @if (sortMetric() === 'hdi') {
-                      <svg
-                        class="check-icon"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 20 20"
-                        aria-hidden="true"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M6 10l2 2 6-6"
-                        />
-                      </svg>
-                    }
-                  </button>
-                  <button
-                    type="button"
-                    class="sort-option"
-                    [class.active]="sortMetric() === 'gdp'"
-                    role="menuitem"
-                    (click)="selectSortMetric('gdp')"
-                  >
-                    <span>GDP per Capita</span>
-                    @if (sortMetric() === 'gdp') {
-                      <svg
-                        class="check-icon"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 20 20"
-                        aria-hidden="true"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M6 10l2 2 6-6"
-                        />
-                      </svg>
-                    }
-                  </button>
-                  <button
-                    type="button"
-                    class="sort-option"
-                    [class.active]="sortMetric() === 'population'"
-                    role="menuitem"
-                    (click)="selectSortMetric('population')"
-                  >
-                    <span>Population</span>
-                    @if (sortMetric() === 'population') {
-                      <svg
-                        class="check-icon"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 20 20"
-                        aria-hidden="true"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M6 10l2 2 6-6"
-                        />
-                      </svg>
-                    }
-                  </button>
-                  <button
-                    type="button"
-                    class="sort-option"
-                    [class.active]="sortMetric() === 'lifeExpectancy'"
-                    role="menuitem"
-                    (click)="selectSortMetric('lifeExpectancy')"
-                  >
-                    <span>Life Expectancy</span>
-                    @if (sortMetric() === 'lifeExpectancy') {
-                      <svg
-                        class="check-icon"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 20 20"
-                        aria-hidden="true"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M6 10l2 2 6-6"
-                        />
-                      </svg>
-                    }
-                  </button>
-                  <button
-                    type="button"
-                    class="sort-option"
-                    [class.active]="sortMetric() === 'happiness'"
-                    role="menuitem"
-                    (click)="selectSortMetric('happiness')"
-                  >
-                    <span>Happiness Index</span>
-                    @if (sortMetric() === 'happiness') {
-                      <svg
-                        class="check-icon"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 20 20"
-                        aria-hidden="true"
-                      >
-                        <path
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M6 10l2 2 6-6"
-                        />
-                      </svg>
-                    }
-                  </button>
-                </div>
-              }
-            </div>
-
-            <button
-              class="btn ghost"
-              type="button"
-              (click)="onClearAll()"
-              aria-label="Clear all filters"
-            >
-              Clear All
-            </button>
-
-            <button
-              class="btn primary"
-              type="button"
-              (click)="onExportCSV()"
-              aria-label="Export CSV"
-              [disabled]="!countryDataService.hasSelectedCountries()"
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  d="M12 3v12"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  fill="none"
-                />
-                <path
-                  d="M8 11l4 4 4-4"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  fill="none"
-                />
-                <path
-                  d="M21 21H3"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  fill="none"
-                />
-              </svg>
-              <span>Export CSV</span>
-            </button>
+                data completeness
+              </span>
+            }
           </div>
-        </div>
-      </header>
 
-      <!-- glass wrapper: fixed header + scrollable body inside this wrapper -->
-      <div
-        class="glass-table-wrapper"
-        role="region"
-        aria-label="Country comparison table"
-        [appTableKeyboard]="displayedCountries().length"
-        [(focusedIndex)]="_focusedIndex"
-        (navigate)="focusRow($event)"
-        (activate)="toggleRowSelection($event)"
-      >
-        <table
-          class="cmp-table"
-          role="table"
-          aria-describedby="cmp-title"
-          tabindex="0"
-        >
-          <thead role="rowgroup">
-            <tr role="row">
-              <th scope="col">Country</th>
-              <th scope="col">Code</th>
-              <th scope="col">Capital</th>
-              <th scope="col">Region</th>
-              <th scope="col">GDP per Capita</th>
-              <th scope="col">HDI</th>
-              <th scope="col" class="highlighted">Population</th>
-              <th scope="col">Life Expectancy</th>
-              <th scope="col">Happiness Index</th>
-              <th scope="col" class="actions-col" aria-hidden="true">
-                Actions
-              </th>
-            </tr>
-          </thead>
+          <div class="controls" role="toolbar" aria-label="Table actions">
+            <!-- Country Search Component -->
+            <app-country-search [collapsed]="false"></app-country-search>
 
-          <tbody role="rowgroup">
-            @for (
-              country of displayedCountries();
-              let i = $index;
-              track trackByCode(i, country)
-            ) {
-              <tr
-                #rowItem
-                role="row"
-                class="data-row"
-                [attr.data-code]="country.code"
-                [attr.tabindex]="i === focusedIndex() ? 0 : -1"
-                [attr.aria-selected]="isSelected(country.code)"
-                (click)="toggleRowSelection(i)"
+            <!-- Action buttons grouped together -->
+            <div class="action-buttons">
+              <!-- Compact Sort Control (Pattern A) -->
+              <div
+                class="sort-control"
+                role="group"
+                aria-label="Sort countries"
               >
-                <td role="cell" class="country-cell">
-                  <a
-                    class="country-link"
-                    href="#"
-                    (click)="
-                      $event.preventDefault(); selectCountry(country.code)
-                    "
-                  >
-                    <span class="country-name">{{ country.name }}</span>
-                  </a>
-                </td>
-
-                <td role="cell">
-                  <span class="code-pill">{{ country.code }}</span>
-                </td>
-
-                <td role="cell">{{ country.capital }}</td>
-                <td role="cell">
-                  <span class="region-badge">{{ country.region }}</span>
-                </td>
-
-                <td role="cell">
-                  <span class="gdp-value">{{
-                    country.gdpPerCapitaFormatted
-                  }}</span>
-                </td>
-
-                <td role="cell">
-                  <span class="hdi-value">{{ country.hdiFormatted }}</span>
-                  @if (country.hdiCategory) {
-                    <span
-                      class="hdi-badge"
-                      [attr.data-category]="country.hdiCategory"
-                    >
-                      {{ country.hdiCategory }}
-                    </span>
-                  }
-                </td>
-
-                <td role="cell" class="population-cell">
-                  <strong>{{ country.populationFormatted }}</strong>
-                </td>
-
-                <td role="cell">
-                  <span class="life-expectancy">{{
-                    country.lifeExpectancyFormatted
-                  }}</span>
-                </td>
-
-                <td role="cell">
-                  <span class="heart" aria-hidden="true">❤</span>
-                  <span class="happiness-value">{{
-                    country.happinessFormatted
-                  }}</span>
-                </td>
-
-                <td role="cell" class="actions-col">
+                <div class="sort-button-group">
+                  <!-- Main sort button with dropdown -->
                   <button
-                    class="icon-btn"
-                    [attr.aria-label]="'Remove ' + country.name"
-                    (click)="
-                      removeCountry(country.code); $event.stopPropagation()
-                    "
+                    class="sort-main-btn"
+                    type="button"
+                    (click)="toggleSortDropdown()"
+                    [attr.aria-expanded]="showSortDropdown()"
+                    aria-label="Select sort metric"
                   >
+                    <span class="sort-label">Sort by</span>
+                    <span class="sort-metric">{{ getCurrentSortLabel() }}</span>
                     <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
+                      class="dropdown-icon"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 20 20"
                       aria-hidden="true"
                     >
                       <path
-                        d="M18 6L6 18M6 6l12 12"
                         stroke="currentColor"
-                        stroke-width="1.5"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        fill="none"
+                        stroke-width="1.5"
+                        d="M6 8l4 4 4-4"
                       />
                     </svg>
                   </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
 
-        <!-- Empty state -->
-        @if (displayedCountries().length === 0) {
-          <div class="empty-state">
-            <div class="empty-content">
-              <h3>No countries selected</h3>
-              <p>
-                Use the search above to find and select countries for
-                comparison.
-              </p>
+                  <!-- Direction toggle button -->
+                  <button
+                    class="sort-direction-btn"
+                    type="button"
+                    (click)="toggleSortDirection()"
+                    [attr.aria-label]="
+                      'Sort ' +
+                      (sortDirection() === 'asc' ? 'ascending' : 'descending')
+                    "
+                  >
+                    <svg
+                      class="direction-icon"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 20 20"
+                      aria-hidden="true"
+                    >
+                      @if (sortDirection() === 'asc') {
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M10 4l-4 4h8l-4-4z"
+                        />
+                      } @else {
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M10 16l4-4H6l4 4z"
+                        />
+                      }
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Dropdown menu -->
+                @if (showSortDropdown()) {
+                  <div class="sort-dropdown-menu" role="menu">
+                    <button
+                      type="button"
+                      class="sort-option"
+                      [class.active]="sortMetric() === 'name'"
+                      role="menuitem"
+                      (click)="selectSortMetric('name')"
+                    >
+                      <span>Country Name</span>
+                      @if (sortMetric() === 'name') {
+                        <svg
+                          class="check-icon"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 20 20"
+                          aria-hidden="true"
+                        >
+                          <path
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 10l2 2 6-6"
+                          />
+                        </svg>
+                      }
+                    </button>
+                    <button
+                      type="button"
+                      class="sort-option"
+                      [class.active]="sortMetric() === 'hdi'"
+                      role="menuitem"
+                      (click)="selectSortMetric('hdi')"
+                    >
+                      <span>HDI</span>
+                      @if (sortMetric() === 'hdi') {
+                        <svg
+                          class="check-icon"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 20 20"
+                          aria-hidden="true"
+                        >
+                          <path
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 10l2 2 6-6"
+                          />
+                        </svg>
+                      }
+                    </button>
+                    <button
+                      type="button"
+                      class="sort-option"
+                      [class.active]="sortMetric() === 'gdp'"
+                      role="menuitem"
+                      (click)="selectSortMetric('gdp')"
+                    >
+                      <span>GDP per Capita</span>
+                      @if (sortMetric() === 'gdp') {
+                        <svg
+                          class="check-icon"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 20 20"
+                          aria-hidden="true"
+                        >
+                          <path
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 10l2 2 6-6"
+                          />
+                        </svg>
+                      }
+                    </button>
+                    <button
+                      type="button"
+                      class="sort-option"
+                      [class.active]="sortMetric() === 'population'"
+                      role="menuitem"
+                      (click)="selectSortMetric('population')"
+                    >
+                      <span>Population</span>
+                      @if (sortMetric() === 'population') {
+                        <svg
+                          class="check-icon"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 20 20"
+                          aria-hidden="true"
+                        >
+                          <path
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 10l2 2 6-6"
+                          />
+                        </svg>
+                      }
+                    </button>
+                    <button
+                      type="button"
+                      class="sort-option"
+                      [class.active]="sortMetric() === 'lifeExpectancy'"
+                      role="menuitem"
+                      (click)="selectSortMetric('lifeExpectancy')"
+                    >
+                      <span>Life Expectancy</span>
+                      @if (sortMetric() === 'lifeExpectancy') {
+                        <svg
+                          class="check-icon"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 20 20"
+                          aria-hidden="true"
+                        >
+                          <path
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 10l2 2 6-6"
+                          />
+                        </svg>
+                      }
+                    </button>
+                    <button
+                      type="button"
+                      class="sort-option"
+                      [class.active]="sortMetric() === 'happiness'"
+                      role="menuitem"
+                      (click)="selectSortMetric('happiness')"
+                    >
+                      <span>Happiness Index</span>
+                      @if (sortMetric() === 'happiness') {
+                        <svg
+                          class="check-icon"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 20 20"
+                          aria-hidden="true"
+                        >
+                          <path
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 10l2 2 6-6"
+                          />
+                        </svg>
+                      }
+                    </button>
+                  </div>
+                }
+              </div>
+
+              <button
+                class="btn ghost"
+                type="button"
+                (click)="onClearAll()"
+                aria-label="Clear all filters"
+              >
+                Clear All
+              </button>
+
+              <button
+                class="btn primary"
+                type="button"
+                (click)="onExportCSV()"
+                aria-label="Export CSV"
+                [disabled]="!countryDataService.hasSelectedCountries()"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12 3v12"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    fill="none"
+                  />
+                  <path
+                    d="M8 11l4 4 4-4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    fill="none"
+                  />
+                  <path
+                    d="M21 21H3"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    fill="none"
+                  />
+                </svg>
+                <span>Export CSV</span>
+              </button>
             </div>
           </div>
         }
-      </div>
+      </header>
+
+      @if (!isCollapsed()) {
+        <!-- glass wrapper: fixed header + scrollable body inside this wrapper -->
+        <div
+          class="glass-table-wrapper"
+          role="region"
+          aria-label="Country comparison table"
+          [appTableKeyboard]="displayedCountries().length"
+          [(focusedIndex)]="_focusedIndex"
+          (navigate)="focusRow($event)"
+          (activate)="toggleRowSelection($event)"
+        >
+          <table
+            class="cmp-table"
+            role="table"
+            aria-describedby="cmp-title"
+            tabindex="0"
+          >
+            <thead role="rowgroup">
+              <tr role="row">
+                <th scope="col">Country</th>
+                <th scope="col">Code</th>
+                <th scope="col">Capital</th>
+                <th scope="col">Region</th>
+                <th scope="col">GDP per Capita</th>
+                <th scope="col">HDI</th>
+                <th scope="col" class="highlighted">Population</th>
+                <th scope="col">Life Expectancy</th>
+                <th scope="col">Happiness Index</th>
+                <th scope="col" class="actions-col" aria-hidden="true">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+
+            <tbody role="rowgroup">
+              @for (
+                country of displayedCountries();
+                let i = $index;
+                track trackByCode(i, country)
+              ) {
+                <tr
+                  #rowItem
+                  role="row"
+                  class="data-row"
+                  [attr.data-code]="country.code"
+                  [attr.tabindex]="i === focusedIndex() ? 0 : -1"
+                  [attr.aria-selected]="isSelected(country.code)"
+                  (click)="toggleRowSelection(i)"
+                >
+                  <td role="cell" class="country-cell">
+                    <a
+                      class="country-link"
+                      href="#"
+                      (click)="
+                        $event.preventDefault(); selectCountry(country.code)
+                      "
+                    >
+                      <span class="country-name">{{ country.name }}</span>
+                    </a>
+                  </td>
+
+                  <td role="cell">
+                    <span class="code-pill">{{ country.code }}</span>
+                  </td>
+
+                  <td role="cell">{{ country.capital }}</td>
+                  <td role="cell">
+                    <span class="region-badge">{{ country.region }}</span>
+                  </td>
+
+                  <td role="cell">
+                    <span class="gdp-value">{{
+                      country.gdpPerCapitaFormatted
+                    }}</span>
+                  </td>
+
+                  <td role="cell">
+                    <span class="hdi-value">{{ country.hdiFormatted }}</span>
+                    @if (country.hdiCategory) {
+                      <span
+                        class="hdi-badge"
+                        [attr.data-category]="country.hdiCategory"
+                      >
+                        {{ country.hdiCategory }}
+                      </span>
+                    }
+                  </td>
+
+                  <td role="cell" class="population-cell">
+                    <strong>{{ country.populationFormatted }}</strong>
+                  </td>
+
+                  <td role="cell">
+                    <span class="life-expectancy">{{
+                      country.lifeExpectancyFormatted
+                    }}</span>
+                  </td>
+
+                  <td role="cell">
+                    <span class="heart" aria-hidden="true">❤</span>
+                    <span class="happiness-value">{{
+                      country.happinessFormatted
+                    }}</span>
+                  </td>
+
+                  <td role="cell" class="actions-col">
+                    <button
+                      class="icon-btn"
+                      [attr.aria-label]="'Remove ' + country.name"
+                      (click)="
+                        removeCountry(country.code); $event.stopPropagation()
+                      "
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M18 6L6 18M6 6l12 12"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          fill="none"
+                        />
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <!-- Empty state -->
+          @if (displayedCountries().length === 0) {
+            <div class="empty-state">
+              <div class="empty-content">
+                <h3>No countries selected</h3>
+                <p>
+                  Use the search above to find and select countries for
+                  comparison.
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+      }
+      <!-- End collapsible content -->
     </section>
   `, // Updated template
   styles: [
@@ -532,16 +565,26 @@ import { CountrySearch } from '../country-search/country-search';
         box-shadow:
           0 18px 40px rgba(0, 0, 0, 0.45),
           inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        transition: padding 0.3s ease;
+      }
+
+      .cmp-card.collapsed {
+        padding: 12px 20px;
       }
 
       /* header + controls */
       .cmp-header {
         display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .header-top {
+        display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 14px;
-        flex-wrap: wrap;
+        width: 100%;
       }
 
       .cmp-header h2 {
@@ -549,6 +592,28 @@ import { CountrySearch } from '../country-search/country-search';
         font-weight: 600;
         font-size: 20px;
         color: var(--muted);
+      }
+
+      .collapse-btn {
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .collapse-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+      }
+
+      .collapse-btn:active {
+        transform: translateY(0);
       }
 
       .stats-summary {
@@ -1085,8 +1150,10 @@ export class ComparisonCard implements AfterViewInit {
   protected readonly countryDataService = inject(CountryDataService);
 
   // UI state signals
+  readonly _isCollapsed = signal<boolean>(false);
   readonly _focusedIndex = signal(0);
 
+  readonly isCollapsed = this._isCollapsed.asReadonly();
   readonly focusedIndex = this._focusedIndex.asReadonly();
 
   // Sort state signals
@@ -1180,6 +1247,10 @@ export class ComparisonCard implements AfterViewInit {
       default:
         return 'None';
     }
+  }
+
+  toggleCollapse(): void {
+    this._isCollapsed.update((collapsed) => !collapsed);
   }
 
   // Sort application logic

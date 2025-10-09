@@ -1,0 +1,332 @@
+/**
+ * Unified Glass Morphism Design System
+ * Consistent blur effects and glass styling across all UI components
+ *
+ * Usage: Import this file in component styles or apply CSS classes directly
+ */
+
+/* ============================================
+   CSS VARIABLES - Glass Morphism System
+   ============================================ */
+:root {
+  /* Glass background gradients */
+  --glass-bg-primary: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.02)
+  );
+  --glass-bg-secondary: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.04),
+    rgba(255, 255, 255, 0.01)
+  );
+  --glass-bg-tertiary: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.03),
+    rgba(255, 255, 255, 0)
+  );
+  --glass-bg-dark: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.6),
+    rgba(0, 0, 0, 0.4)
+  );
+
+  /* Glass borders */
+  --glass-border-primary: 1px solid rgba(255, 255, 255, 0.12);
+  --glass-border-secondary: 1px solid rgba(255, 255, 255, 0.08);
+  --glass-border-tertiary: 1px solid rgba(255, 255, 255, 0.06);
+  --glass-border-accent: 1px solid rgba(0, 217, 255, 0.3);
+
+  /* Backdrop blur values */
+  --glass-blur-strong: blur(14px) saturate(1.15);
+  --glass-blur-medium: blur(12px) saturate(1.1);
+  --glass-blur-light: blur(10px) saturate(1.05);
+  --glass-blur-minimal: blur(8px);
+
+  /* Glass shadows */
+  --glass-shadow-strong:
+    0 18px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  --glass-shadow-medium:
+    0 12px 28px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --glass-shadow-light:
+    0 8px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --glass-shadow-minimal: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+  /* Border radius */
+  --glass-radius-large: 14px;
+  --glass-radius-medium: 12px;
+  --glass-radius-small: 8px;
+  --glass-radius-tiny: 6px;
+
+  /* Text colors on glass */
+  --glass-text-primary: rgba(255, 255, 255, 0.92);
+  --glass-text-secondary: rgba(255, 255, 255, 0.85);
+  --glass-text-muted: rgba(255, 255, 255, 0.7);
+  --glass-text-subtle: rgba(255, 255, 255, 0.6);
+}
+
+/* ============================================
+   UTILITY CLASSES - Glass Morphism
+   ============================================ */
+
+/* Main glass containers */
+.glass-container-primary {
+  background: var(--glass-bg-primary);
+  border: var(--glass-border-primary);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  box-shadow: var(--glass-shadow-strong);
+  border-radius: var(--glass-radius-large);
+}
+
+.glass-container-secondary {
+  background: var(--glass-bg-secondary);
+  border: var(--glass-border-secondary);
+  backdrop-filter: var(--glass-blur-medium);
+  -webkit-backdrop-filter: var(--glass-blur-medium);
+  box-shadow: var(--glass-shadow-medium);
+  border-radius: var(--glass-radius-medium);
+}
+
+.glass-container-tertiary {
+  background: var(--glass-bg-tertiary);
+  border: var(--glass-border-tertiary);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  box-shadow: var(--glass-shadow-light);
+  border-radius: var(--glass-radius-small);
+}
+
+/* Card variants */
+.glass-card {
+  background: var(--glass-bg-primary);
+  border: var(--glass-border-primary);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  box-shadow: var(--glass-shadow-strong);
+  border-radius: var(--glass-radius-medium);
+  padding: 16px 20px;
+}
+
+.glass-card-compact {
+  background: var(--glass-bg-secondary);
+  border: var(--glass-border-secondary);
+  backdrop-filter: var(--glass-blur-medium);
+  -webkit-backdrop-filter: var(--glass-blur-medium);
+  box-shadow: var(--glass-shadow-medium);
+  border-radius: var(--glass-radius-small);
+  padding: 12px 16px;
+}
+
+/* Panel/sidebar glass */
+.glass-panel {
+  background: linear-gradient(
+    180deg,
+    rgba(30, 41, 59, 0.9),
+    rgba(30, 41, 59, 0.85)
+  );
+  border: var(--glass-border-primary);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  box-shadow: var(--glass-shadow-strong);
+  border-radius: var(--glass-radius-medium);
+}
+
+/* Tooltip glass */
+.glass-tooltip {
+  background: rgba(10, 15, 30, 0.95);
+  border: var(--glass-border-accent);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(0, 217, 255, 0.2);
+  border-radius: var(--glass-radius-small);
+  padding: 8px 12px;
+}
+
+/* Button glass */
+.glass-button {
+  background: var(--glass-bg-secondary);
+  border: var(--glass-border-secondary);
+  backdrop-filter: var(--glass-blur-medium);
+  -webkit-backdrop-filter: var(--glass-blur-medium);
+  box-shadow: var(--glass-shadow-light);
+  border-radius: var(--glass-radius-small);
+  padding: 9px 14px;
+  color: var(--glass-text-secondary);
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    color 150ms ease;
+}
+
+.glass-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--glass-shadow-medium);
+  color: var(--glass-text-primary);
+}
+
+.glass-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.glass-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Input/search glass */
+.glass-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: var(--glass-border-secondary);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  border-radius: var(--glass-radius-small);
+  padding: 9px 12px;
+  color: var(--glass-text-secondary);
+  font-size: 14px;
+}
+
+.glass-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.glass-input:focus {
+  outline: none;
+  border-color: rgba(0, 217, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+}
+
+/* Dropdown/menu glass */
+.glass-dropdown {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.95));
+  border: var(--glass-border-primary);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  border-radius: var(--glass-radius-small);
+  padding: 8px;
+}
+
+/* Table/scrollable glass wrapper */
+.glass-table-wrapper {
+  background: var(--glass-bg-tertiary);
+  border: var(--glass-border-tertiary);
+  border-radius: var(--glass-radius-medium);
+  padding: 10px;
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+}
+
+/* ============================================
+   SASS MIXINS - For use in component styles
+   ============================================ */
+
+/* Primary glass container mixin */
+@mixin glass-primary {
+  background: var(--glass-bg-primary);
+  border: var(--glass-border-primary);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  box-shadow: var(--glass-shadow-strong);
+  border-radius: var(--glass-radius-large);
+}
+
+/* Secondary glass container mixin */
+@mixin glass-secondary {
+  background: var(--glass-bg-secondary);
+  border: var(--glass-border-secondary);
+  backdrop-filter: var(--glass-blur-medium);
+  -webkit-backdrop-filter: var(--glass-blur-medium);
+  box-shadow: var(--glass-shadow-medium);
+  border-radius: var(--glass-radius-medium);
+}
+
+/* Tertiary glass container mixin */
+@mixin glass-tertiary {
+  background: var(--glass-bg-tertiary);
+  border: var(--glass-border-tertiary);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  box-shadow: var(--glass-shadow-light);
+  border-radius: var(--glass-radius-small);
+}
+
+/* Glass panel mixin (for sidebars, panels) */
+@mixin glass-panel {
+  background: linear-gradient(
+    180deg,
+    rgba(30, 41, 59, 0.9),
+    rgba(30, 41, 59, 0.85)
+  );
+  border: var(--glass-border-primary);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  box-shadow: var(--glass-shadow-strong);
+  border-radius: var(--glass-radius-medium);
+}
+
+/* Glass tooltip mixin */
+@mixin glass-tooltip {
+  background: rgba(10, 15, 30, 0.95);
+  border: var(--glass-border-accent);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(0, 217, 255, 0.2);
+  border-radius: var(--glass-radius-small);
+}
+
+/* ============================================
+   HOVER & INTERACTION STATES
+   ============================================ */
+
+.glass-hover-lift {
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.glass-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.glass-hover-glow {
+  transition:
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+}
+
+.glass-hover-glow:hover {
+  border-color: rgba(0, 217, 255, 0.4);
+  box-shadow:
+    0 0 20px rgba(0, 217, 255, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+  :root {
+    /* Slightly reduce blur on mobile for better performance */
+    --glass-blur-strong: blur(12px) saturate(1.1);
+    --glass-blur-medium: blur(10px) saturate(1.05);
+    --glass-blur-light: blur(8px);
+  }
+
+  .glass-card {
+    padding: 12px 16px;
+  }
+
+  .glass-card-compact {
+    padding: 10px 14px;
+  }
+}

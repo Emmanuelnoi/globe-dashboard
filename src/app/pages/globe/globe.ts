@@ -1,67 +1,55 @@
+import { AccessibilityService } from '@/core/services/accessibility.service';
+import { GlobalErrorHandlerService } from '@/core/services/global-error-handler.service';
+import { GlobeErrorRecoveryService } from '@/core/services/globe-error-recovery.service';
+import { LoggerService } from '@/core/services/logger.service';
+import { MemoryManagementService } from '@/core/services/memory-management.service';
+import { ErrorBoundaryComponent } from '@/shared/components/error-boundary/error-boundary.component';
+import { LoadingComponent } from '@/shared/components/loading/loading.component';
 import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
+  computed,
+  effect,
   ElementRef,
-  OnDestroy,
-  ViewChild,
   HostListener,
   inject,
+  OnDestroy,
   signal,
-  effect,
+  ViewChild,
 } from '@angular/core';
+import { CountryIdTextureService } from '@lib/services/country-id-texture.service';
 import {
-  Scene,
-  Color,
-  FogExp2,
-  PerspectiveCamera,
-  TextureLoader,
-  SphereGeometry,
-  BackSide,
-  Mesh,
-  AmbientLight,
-  DirectionalLight,
-  ShaderMaterial,
-  MeshStandardMaterial,
-  AdditiveBlending,
-  WebGLRenderer,
-  SRGBColorSpace,
-  LineSegments,
-  Points,
-  Group,
-  Object3D,
-  Material,
-} from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import {
-  getStarfield,
-  getFresnelMat,
-  loadGeoJSON,
+  CountrySelectionService,
   createInteractiveCountries,
-  loadTopoJSON,
   createInteractiveCountriesFromTopo,
   disposeTopoJSONMeshes,
-  CountrySelectionService,
+  loadGeoJSON,
+  loadTopoJSON,
   type TopoJSONRenderOptions,
 } from '@lib/utils';
-import { LoadingComponent } from '@/shared/components/loading/loading.component';
-import { ErrorBoundaryComponent } from '@/shared/components/error-boundary/error-boundary.component';
-import { GlobalErrorHandlerService } from '@/core/services/global-error-handler.service';
-import { MemoryManagementService } from '@/core/services/memory-management.service';
-import { GlobeErrorRecoveryService } from '@/core/services/globe-error-recovery.service';
-import {
-  AccessibilityService,
-  CountryAccessibilityData,
-} from '@/core/services/accessibility.service';
-import { CountryIdTextureService } from '@lib/services/country-id-texture.service';
-import { TooltipPosition } from '../../layout/component/country-tooltip/country-tooltip';
+import { Group, Mesh, Object3D } from 'three';
 import { CountryDataService } from '../../core/services/country-data.service';
-import { CountryDataRecord } from '../../core/types/country-data.types';
 import { CountryHoverService } from '../../core/services/country-hover.service';
-import { CountryNameTooltipComponent } from '../../shared/components/country-name-tooltip/country-name-tooltip';
 import { InteractionModeService } from '../../core/services/interaction-mode';
 import { QuizStateService } from '../../features/quiz/services/quiz-state';
-
+import { CountryNameTooltipComponent } from '../../shared/components/country-name-tooltip/country-name-tooltip';
+import {
+  MigrationInfoCardComponent,
+  type MigrationCardData,
+} from '@/features/bird-migration/components/migration-info-card/migration-info-card';
+import { MarkerTooltipComponent } from '@/features/bird-migration/components/marker-tooltip/marker-tooltip';
+import { MigrationStateService } from '@/features/bird-migration/services/migration-state.service';
+import { NavigationStateService } from '@/core/services/navigation-state.service';
+import { GlobeAccessibilityService } from './services/globe-accessibility.service';
+import { GlobeComparisonSyncService } from './services/globe-comparison-sync.service';
+import { GlobeCountrySelectionService } from './services/globe-country-selection.service';
+import { GlobeDataLoadingService } from './services/globe-data-loading.service';
+import { GlobeMigrationService } from './services/globe-migration.service';
+import { GlobeQuizIntegrationService } from './services/globe-quiz-integration.service';
+import { GlobeSceneService } from './services/globe-scene.service';
+import { GlobeTooltipService } from './services/globe-tooltip.service';
 @Component({
   selector: 'app-globe',
   imports: [
@@ -69,277 +57,12 @@ import { QuizStateService } from '../../features/quiz/services/quiz-state';
     LoadingComponent,
     ErrorBoundaryComponent,
     CountryNameTooltipComponent,
+    MigrationInfoCardComponent,
+    MarkerTooltipComponent,
   ],
-  template: `
-    <app-error-boundary
-      #errorBoundary
-      [showDetails]="true"
-      (onRetry)="handleRetry()"
-    >
-      @if (isLoading()) {
-        <app-loading
-          variant="globe"
-          size="large"
-          [loadingText]="loadingMessage()"
-          [showProgress]="true"
-          [progress]="loadingProgress()"
-          [overlay]="true"
-        />
-      }
-
-      <div
-        #rendererContainer
-        class="scene-container"
-        role="application"
-        [attr.aria-label]="accessibility.getGlobeAriaDescription()"
-        [attr.aria-describedby]="
-          isLoading() ? 'loading-status' : 'globe-status'
-        "
-        tabindex="0"
-        (keydown)="onKeyDown($event)"
-        (focus)="onFocus()"
-        (blur)="onBlur()"
-      >
-        @if (initError()) {
-          <div
-            class="init-error"
-            role="alert"
-            aria-live="polite"
-            id="globe-error"
-          >
-            <h3>Failed to initialize 3D scene</h3>
-            <p>{{ initError() }}</p>
-            <button
-              (click)="retryInitialization()"
-              class="retry-btn"
-              aria-describedby="globe-error"
-            >
-              Try Again
-            </button>
-          </div>
-        }
-
-        <!-- Status for screen readers -->
-        <div id="globe-status" class="sr-only" aria-live="polite">
-          @if (!isLoading() && !initError()) {
-            {{ accessibility.getGlobeAriaDescription() }}
-          }
-        </div>
-
-        <div id="loading-status" class="sr-only" aria-live="polite">
-          @if (isLoading()) {
-            Loading: {{ loadingMessage() }} - {{ loadingProgress() }}% complete
-          }
-        </div>
-
-        <!-- Keyboard shortcuts help -->
-        <div id="keyboard-help" class="sr-only" aria-live="polite">
-          @if (accessibility.isKeyboardMode()) {
-            Current country:
-            {{ accessibility.currentCountry() || 'None selected' }}. Use arrow
-            keys to rotate, Tab to navigate countries, Enter to select.
-          }
-        </div>
-      </div>
-
-      <!-- Country Name Tooltip (on hover) - hidden during quiz mode -->
-      <app-country-name-tooltip
-        [visible]="
-          countryNameTooltipVisible() && !interactionModeService.isQuizMode()
-        "
-        [countryName]="hoveredCountryName()"
-        [position]="countryNameTooltipPosition()"
-      />
-
-      <!-- Fixed Position Country Details (on selection) - hidden during quiz mode -->
-      @if (selectedCountry() && !interactionModeService.isQuizMode()) {
-        <div class="fixed-country-details">
-          <div class="fixed-country-card">
-            <div class="country-header">
-              <div class="country-name">{{ selectedCountry()?.name }}</div>
-              <div class="country-code">{{ selectedCountry()?.code }}</div>
-            </div>
-
-            <div class="country-info">
-              <div class="info-row">
-                <span class="info-label">Capital:</span>
-                <span class="info-value">{{ selectedCountry()?.capital }}</span>
-              </div>
-
-              <div class="info-row">
-                <span class="info-label">Population:</span>
-                <span class="info-value">{{
-                  selectedCountry()?.populationFormatted
-                }}</span>
-              </div>
-
-              <div class="info-row">
-                <span class="info-label">GDP per capita:</span>
-                <span class="info-value">{{
-                  selectedCountry()?.gdpPerCapitaFormatted
-                }}</span>
-              </div>
-
-              <div class="info-row">
-                <span class="info-label">Life expectancy:</span>
-                <span class="info-value">{{
-                  selectedCountry()?.lifeExpectancyFormatted
-                }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      }
-    </app-error-boundary>
-  `,
-  styles: [
-    `
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-      }
-
-      .scene-container {
-        position: fixed; /* Covers the entire viewport */
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: block;
-        overflow: hidden;
-      }
-
-      .init-error {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.3);
-        border-radius: 12px;
-        padding: 2rem;
-        color: #f8fafc;
-        max-width: 400px;
-      }
-
-      .init-error h3 {
-        margin: 0 0 1rem 0;
-        color: #ef4444;
-      }
-
-      .init-error p {
-        margin: 0 0 1.5rem 0;
-        color: #cbd5e1;
-        font-size: 0.875rem;
-      }
-
-      .retry-btn {
-        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: transform 0.2s ease;
-      }
-
-      .retry-btn:hover {
-        transform: translateY(-1px);
-      }
-
-      /* Screen reader only text */
-      .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-      }
-
-      /* Focus styles for accessibility */
-      .scene-container:focus {
-        outline: 2px solid #3b82f6;
-        outline-offset: 2px;
-      }
-
-      /* Fixed position country details */
-      .fixed-country-details {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-        pointer-events: none;
-        width: auto;
-        height: auto;
-      }
-
-      .fixed-country-card {
-        background: rgba(30, 41, 59, 0.8);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        padding: 16px;
-        color: white;
-        min-width: 280px;
-        box-shadow:
-          0 8px 32px rgba(0, 0, 0, 0.3),
-          0 0 0 1px rgba(255, 255, 255, 0.05);
-        pointer-events: auto;
-      }
-
-      .fixed-country-card .country-header {
-        margin-bottom: 12px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .fixed-country-card .country-name {
-        font-size: 18px;
-        font-weight: 600;
-        color: #ffffff;
-        margin-bottom: 4px;
-      }
-
-      .fixed-country-card .country-code {
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.7);
-        font-family: 'JetBrains Mono', 'Courier New', monospace;
-      }
-
-      .fixed-country-card .country-info {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .fixed-country-card .info-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 14px;
-      }
-
-      .fixed-country-card .info-label {
-        color: rgba(255, 255, 255, 0.8);
-        font-weight: 500;
-      }
-
-      .fixed-country-card .info-value {
-        color: #00ff88;
-        font-weight: 600;
-        text-align: right;
-      }
-    `,
-  ],
+  templateUrl: './globe.component.html',
+  styleUrls: ['./globe.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Globe implements AfterViewInit, OnDestroy {
   private errorHandler = inject(GlobalErrorHandlerService);
@@ -352,73 +75,138 @@ export class Globe implements AfterViewInit, OnDestroy {
   private countryHoverService = inject(CountryHoverService);
   protected interactionModeService = inject(InteractionModeService);
   private quizStateService = inject(QuizStateService);
+
+  // New services for code organization
+  private readonly globeSceneService = inject(GlobeSceneService);
+  protected readonly globeMigrationService = inject(GlobeMigrationService);
+  readonly migrationState = inject(MigrationStateService);
+  readonly navigationStateService = inject(NavigationStateService);
+  private readonly logger = inject(LoggerService);
+  private readonly countrySelection = inject(GlobeCountrySelectionService);
+  private readonly quizIntegration = inject(GlobeQuizIntegrationService);
+  private readonly tooltipService = inject(GlobeTooltipService);
+  private readonly dataLoading = inject(GlobeDataLoadingService);
+  private readonly globeAccessibility = inject(GlobeAccessibilityService);
+  private readonly comparisonSync = inject(GlobeComparisonSyncService);
+
   @ViewChild('canvas') private canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('rendererContainer', { static: true })
   private rendererContainer!: ElementRef<HTMLDivElement>;
   @ViewChild('errorBoundary')
   private errorBoundary!: ElementRef<ErrorBoundaryComponent>;
 
-  // Loading and error states
-  protected readonly isLoading = signal(true);
-  protected readonly loadingProgress = signal(0);
-  protected readonly loadingMessage = signal('Initializing 3D scene...');
-  protected readonly initError = signal<string | null>(null);
+  // Proxy signals from services (no duplication)
+  protected get isLoading(): typeof this.dataLoading.isLoading {
+    return this.dataLoading.isLoading;
+  }
+  protected get loadingProgress(): typeof this.dataLoading.loadingProgress {
+    return this.dataLoading.loadingProgress;
+  }
+  protected get loadingMessage(): typeof this.dataLoading.loadingMessage {
+    return this.dataLoading.loadingMessage;
+  }
+  protected get initError(): typeof this.dataLoading.initError {
+    return this.dataLoading.initError;
+  }
 
-  // Tooltip states
-  protected readonly tooltipVisible = signal(false);
-  protected readonly hoveredCountry = signal<CountryDataRecord | null>(null);
-  protected readonly tooltipPosition = signal<TooltipPosition>({ x: 0, y: 0 });
+  protected get countryNameTooltipVisible(): typeof this.tooltipService.countryNameTooltipVisible {
+    return this.tooltipService.countryNameTooltipVisible;
+  }
+  protected get hoveredCountryName(): typeof this.tooltipService.hoveredCountryName {
+    return this.tooltipService.hoveredCountryName;
+  }
+  protected get countryNameTooltipPosition(): typeof this.tooltipService.countryNameTooltipPosition {
+    return this.tooltipService.countryNameTooltipPosition;
+  }
+  protected get selectedCountry(): typeof this.tooltipService.selectedCountry {
+    return this.tooltipService.selectedCountry;
+  }
 
-  // Country name tooltip states (new improved tooltip)
-  protected readonly countryNameTooltipVisible = signal(false);
-  protected readonly hoveredCountryName = signal<string>('');
-  protected readonly countryNameTooltipPosition = signal<{
-    x: number;
-    y: number;
-  }>({ x: 0, y: 0 });
+  protected get quizCandidate(): typeof this.quizIntegration.quizCandidate {
+    return this.quizIntegration.quizCandidate;
+  }
 
-  // Selected country state (for fixed position detailed tooltip)
-  protected readonly selectedCountry = signal<CountryDataRecord | null>(null);
+  // Migration info card data
+  protected readonly migrationCardData = computed<readonly MigrationCardData[]>(
+    () => {
+      const activePaths = this.migrationState.activePaths();
+      const migrations = this.migrationState.migrations();
+      const species = this.migrationState.species();
 
-  // Quiz candidate state (for quiz mode highlighting)
-  private readonly quizCandidate = signal<string | null>(null);
+      return activePaths.slice(0, 3).map((activePath) => {
+        const migration = migrations.find(
+          (m) => m.id === activePath.migrationId,
+        );
+        const speciesData = species.find((s) => s.id === migration?.speciesId);
 
-  private camera!: PerspectiveCamera;
-  private scene!: Scene;
-  private renderer!: WebGLRenderer;
-  private animationId?: number;
-  private controls!: OrbitControls;
-  private fresnelMat = getFresnelMat();
+        // Reverse geocode start and end locations to country names
+        let startCountry: string | undefined;
+        let endCountry: string | undefined;
+        let waypointCountries: string[] | undefined;
 
-  // Performance optimization properties
-  private lastFrameTime = 0;
-  private frameInterval = 16.67; // Target 60fps
-  private mouseEventThrottle = 50; // 50ms throttle for mouse events
-  private lastMouseEvent = 0;
-  private needsRender = true;
-  private isAnimating = false;
+        if (migration) {
+          startCountry = this.reverseGeocodeToCountryName(
+            migration.startLocation.lat,
+            migration.startLocation.lon,
+          );
+          endCountry = this.reverseGeocodeToCountryName(
+            migration.endLocation.lat,
+            migration.endLocation.lon,
+          );
 
-  // Camera interaction state for preventing selection during camera movement
-  private cameraInteracting = false;
-  private allowSelection = true;
+          // Reverse geocode waypoints if they exist
+          if (migration.waypoints && migration.waypoints.length > 0) {
+            waypointCountries = migration.waypoints
+              .map((wp) => this.reverseGeocodeToCountryName(wp.lat, wp.lon))
+              .filter((name): name is string => name !== undefined);
+          }
+        }
 
-  // 3D objects
-  private sphere!: LineSegments;
-  private starfield!: Points;
+        return {
+          migration: migration!,
+          activePath,
+          species: speciesData,
+          startCountry,
+          endCountry,
+          waypointCountries,
+        };
+      });
+    },
+  );
+
+  // Migration info card handlers
+  protected readonly handleClearAllMigrations = () => {
+    this.migrationState.clearAllPaths();
+  };
+
+  protected readonly handleRemoveMigration = (migrationId: string) => {
+    this.migrationState.removeActivePath(migrationId);
+  };
+
+  // 3D objects (component-specific, not managed by services)
   private countries!: Group;
-  private loader!: TextureLoader;
-  private earthMesh?: Mesh;
-  private atmosphereMesh?: Mesh;
   private lastSelectedCountryMesh: Mesh | null = null;
 
-  // Debug state
+  // Event listeners for cleanup
+  private eventListeners: Array<{
+    element: HTMLElement;
+    event: string;
+    handler: EventListener;
+  }> = [];
+
+  // Timeout constants
+  private readonly DOUBLE_CLICK_DELAY = 250;
+  private readonly HOVER_THROTTLE = 16; // ~60fps
+  private readonly TOOLTIP_HIDE_DELAY = 2000;
+  private readonly QUIZ_TOOLTIP_DELAY = 1000;
+  private readonly RETRY_INITIALIZATION_DELAY = 1000;
 
   // TopoJSON rendering configuration
   private useTopoJSON = true; // Toggle between GeoJSON and TopoJSON
   private renderingMode = signal<'geojson' | 'topojson'>('topojson');
   private topoJSONOptions: TopoJSONRenderOptions = {
-    radius: 2,
-    borderOffset: 0.001, // Slight offset to prevent z-fighting
+    radius: 2.0,
+    borderOffset: 0.001, // Minimal offset to prevent z-fighting while staying close to surface
     enableFillMeshes: true,
   };
 
@@ -435,7 +223,23 @@ export class Globe implements AfterViewInit, OnDestroy {
     // Setup effect for bi-directional linking with comparison table
     effect(() => {
       const selectedCountryCodes = this.countryDataService.selectedCountries();
-      this.syncGlobeWithComparisonTable(selectedCountryCodes);
+      if (!this.countries || this.countries.children.length === 0) {
+        return;
+      }
+
+      // Reset all country selections first
+      this.countrySelection.resetAllCountrySelections(this.countries);
+
+      // Apply selection to countries in the comparison table
+      selectedCountryCodes.forEach((countryCode) => {
+        const country = this.countryDataService.getCountryByCode(countryCode);
+        if (country) {
+          this.countrySelection.applyPersistentCountrySelection(
+            country.name,
+            this.countries,
+          );
+        }
+      });
     });
 
     // Setup effect for quiz candidate highlighting
@@ -445,7 +249,7 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       // Clear quiz highlight when candidate is cleared or game ends
       if (!selectedCandidate || gameState === 'idle' || gameState === 'ended') {
-        this.clearQuizCandidateHighlight();
+        this.quizIntegration.clearQuizCandidateHighlight();
       }
     });
   }
@@ -465,16 +269,8 @@ export class Globe implements AfterViewInit, OnDestroy {
     this.loadingMessage.set('Initializing 3D scene...');
     this.loadingProgress.set(10);
 
-    // Check WebGL support
-    if (!this.checkWebGLSupport()) {
-      throw new Error('WebGL is not supported in this browser');
-    }
-
-    this.loadingProgress.set(20);
-    this.loadingMessage.set('Setting up camera and scene...');
-
-    // Initialize basic scene components
-    await this.setupScene();
+    // Initialize GlobeSceneService (handles WebGL check, scene setup, renderer, controls)
+    await this.globeSceneService.initialize(this.rendererContainer);
 
     this.loadingProgress.set(30);
     this.loadingMessage.set('Loading country selection assets...');
@@ -482,215 +278,72 @@ export class Globe implements AfterViewInit, OnDestroy {
     // Load GPU selection assets first
     await this.countryIdTextureService.loadCountryIdAssets();
 
-    this.loadingProgress.set(50);
-    this.loadingMessage.set('Loading Earth textures...');
-
-    // Load Earth mesh with GPU selection enabled
-    await this.setupEarthMesh();
-
     this.loadingProgress.set(60);
-    this.loadingMessage.set('Adding atmospheric effects...');
-
-    // Add lighting and atmosphere
-    this.setupLighting();
-    this.setupAtmosphere();
-
-    this.loadingProgress.set(80);
-    this.loadingMessage.set('Initializing controls...');
-
-    // Setup renderer and controls
-    this.setupRenderer();
-    this.setupControls();
-    this.setupCountrySelectionInteractions();
-
-    this.loadingProgress.set(90);
     this.loadingMessage.set('Loading geographic data...');
+
+    // Get scene reference for adding countries
+    const scene = this.globeSceneService.getScene();
+    if (!scene) {
+      throw new Error('Scene not initialized');
+    }
+
+    // Setup country selection interactions
+    this.setupCountrySelectionInteractions();
 
     // Load countries data
     await this.loadAllData();
 
+    this.loadingProgress.set(80);
+    this.loadingMessage.set('Initializing migration system...');
+
+    // Initialize migration system
+    await this.initializeMigrationSystem();
+
+    // Start animation loop
+    this.globeSceneService.startAnimation();
+
     this.loadingProgress.set(100);
     this.loadingMessage.set('Complete!');
 
-    // Small delay to show completion
     setTimeout(() => {
       this.isLoading.set(false);
     }, 500);
   }
 
-  private checkWebGLSupport(): boolean {
-    return this.errorRecovery.checkWebGLSupport();
-  }
-
-  private async setupScene(): Promise<void> {
-    const width = this.rendererContainer.nativeElement.clientWidth;
-    const height = this.rendererContainer.nativeElement.clientHeight;
-
-    // Scene
-    this.scene = new Scene();
-    this.scene.background = new Color(0x000000); // Pure black background
-    this.scene.fog = new FogExp2(0x000000, 0.002); // Much lighter fog effect
-
-    // Camera
-    this.camera = new PerspectiveCamera(75, width / height, 0.1, 100);
-    this.camera.position.z = 5;
-  }
-
-  private async setupEarthMesh(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.loader = new TextureLoader();
-
-      this.loader.load(
-        '/textures/earthbump1k.jpg',
-        // '/textures/earth2048.jpg',
-        (texture) => {
-          try {
-            const geometry = new SphereGeometry(1.98, 64, 64); // Slightly smaller than countries (radius 2)
-
-            // Create realistic Earth material
-            const earthMaterial = new MeshStandardMaterial({
-              map: texture,
-              roughness: 0.8,
-              metalness: 0.1,
-              transparent: false,
-            });
-
-            const earthMesh = new Mesh(geometry, earthMaterial);
-            earthMesh.name = 'earth';
-            earthMesh.renderOrder = 0; // Ensure Earth renders first
-            this.earthMesh = earthMesh; // Store reference for later use
-            this.scene.add(earthMesh);
-
-            resolve();
-          } catch (error) {
-            reject(new Error(`Failed to create Earth mesh: ${error}`));
-          }
-        },
-        undefined, // onProgress
-        (error) => {
-          reject(new Error(`Failed to load Earth texture: ${error}`));
-        },
-      );
-    });
-  }
-
-  private setupLighting(): void {
-    // Ambient light - much lower intensity to preserve texture details
-    const ambientLight = new AmbientLight(0x404040, 0.2); // Dimmer gray ambient light
-    this.scene.add(ambientLight);
-
-    // Directional light - simulate sunlight from one side
-    const directionalLight = new DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(5, 3, 2); // More realistic sun position
-    directionalLight.castShadow = false; // Disable shadows for performance
-    this.scene.add(directionalLight);
-
-    // Add a subtle rim light from the opposite side
-    const rimLight = new DirectionalLight(0x6699ff, 0.1);
-    rimLight.position.set(-5, -2, -3);
-    this.scene.add(rimLight);
-  }
-
-  private setupAtmosphere(): void {
+  /**
+   * Initialize the bird migration visualization system
+   */
+  private async initializeMigrationSystem(): Promise<void> {
     try {
-      // Enhanced starfield background
-      this.starfield = getStarfield({ numStars: 2000 });
-      this.scene.add(this.starfield);
+      const scene = this.globeSceneService.getScene();
+      const camera = this.globeSceneService.getCamera();
 
-      // Create a subtle atmosphere glow effect
-      const atmosphereGeometry = new SphereGeometry(2.1, 64, 64);
-      const atmosphereMaterial = new ShaderMaterial({
-        vertexShader: `
-          varying vec3 vNormal;
-          void main() {
-            vNormal = normalize(normalMatrix * normal);
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-          }
-        `,
-        fragmentShader: `
-          varying vec3 vNormal;
-          void main() {
-            float intensity = pow(0.8 - dot(vNormal, vec3(0, 0, 1.0)), 2.0);
-            gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity;
-          }
-        `,
-        blending: AdditiveBlending,
-        side: BackSide,
-        transparent: true,
-      });
-
-      const atmosphereMesh = new Mesh(atmosphereGeometry, atmosphereMaterial);
-      atmosphereMesh.name = 'atmosphere';
-      this.scene.add(atmosphereMesh);
-    } catch (error) {
-      this.errorHandler.handleWebGLError(error as Error, 'atmosphere_setup');
-      // Non-critical error, continue without atmosphere
-    }
-  }
-
-  private setupRenderer(): void {
-    const width = this.rendererContainer.nativeElement.clientWidth;
-    const height = this.rendererContainer.nativeElement.clientHeight;
-
-    try {
-      // Check device capabilities for optimal settings
-      const capabilities = this.errorRecovery.getDeviceCapabilities();
-
-      this.renderer = new WebGLRenderer({
-        antialias: !capabilities.isLowEnd, // Disable antialias on low-end devices
-        alpha: false, // Disable alpha for better performance and pure black background
-        powerPreference: capabilities.isLowEnd
-          ? 'low-power'
-          : 'high-performance',
-        preserveDrawingBuffer: false, // Better performance
-        stencil: false, // Not needed for this application
-      });
-
-      this.renderer.setSize(width, height);
-
-      // Adaptive pixel ratio based on device capabilities
-      const pixelRatio = capabilities.isLowEnd
-        ? Math.min(window.devicePixelRatio, 1.5)
-        : Math.min(window.devicePixelRatio, 2);
-      this.renderer.setPixelRatio(pixelRatio);
-
-      this.renderer.setClearColor(0x000000, 1.0); // Ensure black background
-      this.renderer.outputColorSpace = SRGBColorSpace; // Better color accuracy
-
-      // Performance optimizations
-      this.renderer.info.autoReset = false; // Manual reset for better performance monitoring
-
-      // Setup error prevention measures
-      this.errorRecovery.setupErrorPrevention(this.renderer);
-
-      // Setup WebGL context loss handling
-      const canvas = this.renderer.domElement;
-      canvas.addEventListener('webglcontextlost', (event) => {
-        event.preventDefault();
-        this.errorRecovery.handleWebGLContextLoss(canvas, () =>
-          this.reinitializeScene(),
+      if (!scene || !camera || !this.rendererContainer) {
+        this.logger.warn(
+          'Cannot initialize migration system - scene not ready',
+          'GlobeComponent',
         );
-      });
+        return;
+      }
 
-      canvas.addEventListener('webglcontextrestored', () => {
-        // Context restored - renderer will continue normally
-      });
+      await this.globeMigrationService.initialize(
+        scene,
+        camera,
+        this.rendererContainer,
+        undefined, // atmosphere mesh is optional
+      );
 
-      // Add canvas to DOM
-      this.rendererContainer.nativeElement.appendChild(canvas);
-
-      // Track renderer for memory management
-      this.memoryManager.track(this.renderer);
-
-      // Start optimized animation loop
-      this.animate = this.animate.bind(this);
-      this.renderer.setAnimationLoop(this.animate);
-
-      // Initial render
-      this.needsRender = true;
+      this.logger.success(
+        'Migration system initialized successfully',
+        'GlobeComponent',
+      );
     } catch (error) {
-      this.errorRecovery.handleRendererError(error as Error);
-      throw new Error(`Failed to initialize WebGL renderer: ${error}`);
+      this.logger.error(
+        'Failed to initialize migration system:',
+        error,
+        'GlobeComponent',
+      );
+      // Don't throw - migration is optional feature
     }
   }
 
@@ -705,48 +358,12 @@ export class Globe implements AfterViewInit, OnDestroy {
       // Reinitialize everything
       await this.initializeScene();
     } catch (error) {
-      console.error('Failed to reinitialize scene:', error);
+      this.logger.error(
+        'Failed to reinitialize scene',
+        error,
+        'GlobeComponent',
+      );
       this.handleInitializationError(error);
-    }
-  }
-
-  private setupControls(): void {
-    try {
-      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-      this.controls.enableDamping = true;
-      this.controls.dampingFactor = 0.05; // Smoother damping
-      this.controls.minDistance = 2.5;
-      this.controls.maxDistance = 8;
-      this.controls.zoomSpeed = 0.8; // Faster zoom response
-      this.controls.rotateSpeed = 1.2; // Faster rotation
-      this.controls.panSpeed = 1.0;
-
-      // Performance optimizations
-      this.controls.enablePan = false; // Disable panning for better performance
-      this.controls.autoRotate = false;
-
-      // Add change listener to only render when needed
-      this.controls.addEventListener('change', () => {
-        this.needsRender = true;
-      });
-
-      // Add start/end listeners for smooth interaction and selection control
-      this.controls.addEventListener('start', () => {
-        this.isAnimating = true;
-        this.cameraInteracting = true;
-        this.allowSelection = false; // Disable selection during camera interaction
-      });
-
-      this.controls.addEventListener('end', () => {
-        this.isAnimating = false;
-        this.needsRender = true;
-        this.cameraInteracting = false;
-        // Re-enable selection immediately for better responsiveness
-        this.allowSelection = true;
-      });
-    } catch (error) {
-      this.errorHandler.handleWebGLError(error as Error, 'controls_setup');
-      throw new Error(`Failed to setup controls: ${error}`);
     }
   }
 
@@ -765,6 +382,12 @@ export class Globe implements AfterViewInit, OnDestroy {
     try {
       this.renderingMode.set('topojson');
 
+      // Get scene from service
+      const scene = this.globeSceneService.getScene();
+      if (!scene) {
+        throw new Error('Scene not initialized');
+      }
+
       // Load TopoJSON topology with retry mechanism
       const topology = await this.loadWithRetry(
         () => loadTopoJSON('/data/world.topo.json'),
@@ -779,18 +402,25 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       // Store reference and add to scene
       this.countries = countriesObject;
-      this.scene.add(countriesObject);
+      scene.add(countriesObject);
 
       // Ensure country objects have countryId in userData for selection service
-      this.ensureCountryIds();
+      this.countrySelection.ensureCountryIds(this.countries);
 
-      // Initialize all selection materials to be completely invisible
-      this.initializeSelectionMaterials();
+      // Sync with any existing comparison table selections (inline)
+      const selectedCountryCodes = this.countryDataService.selectedCountries();
+      selectedCountryCodes.forEach((countryCode) => {
+        const country = this.countryDataService.getCountryByCode(countryCode);
+        if (country) {
+          this.countrySelection.applyPersistentCountrySelection(
+            country.name,
+            this.countries,
+          );
+        }
+      });
 
-      // Sync with any existing comparison table selections
-      this.syncGlobeWithComparisonTable(
-        this.countryDataService.selectedCountries(),
-      );
+      // Force render after countries are loaded
+      this.globeSceneService.requestRender();
     } catch (error) {
       this.errorHandler.handleNetworkError(
         error as Error,
@@ -801,8 +431,9 @@ export class Globe implements AfterViewInit, OnDestroy {
       try {
         await this.loadGeoJSONData();
       } catch (fallbackError) {
-        console.warn(
-          'Both TopoJSON and GeoJSON failed, showing basic globe:',
+        this.logger.warn(
+          'Both TopoJSON and GeoJSON failed, showing basic globe',
+          'GlobeComponent',
           fallbackError,
         );
       }
@@ -827,25 +458,39 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       // Store reference and add to scene
       this.countries = countriesObject;
-      this.scene.add(countriesObject);
+      const scene = this.globeSceneService.getScene();
+      if (scene) {
+        scene.add(countriesObject);
+      }
 
       // Ensure country objects have countryId in userData for selection service
-      this.ensureCountryIds();
+      this.countrySelection.ensureCountryIds(this.countries);
 
-      // Initialize all selection materials to be completely invisible
-      this.initializeSelectionMaterials();
+      // Sync with any existing comparison table selections (inline)
+      const selectedCountryCodes = this.countryDataService.selectedCountries();
+      selectedCountryCodes.forEach((countryCode) => {
+        const country = this.countryDataService.getCountryByCode(countryCode);
+        if (country) {
+          this.countrySelection.applyPersistentCountrySelection(
+            country.name,
+            this.countries,
+          );
+        }
+      });
 
-      // Sync with any existing comparison table selections
-      this.syncGlobeWithComparisonTable(
-        this.countryDataService.selectedCountries(),
-      );
+      // Force render after countries are loaded
+      this.globeSceneService.requestRender();
     } catch (error) {
       this.errorHandler.handleNetworkError(
         error as Error,
         '/data/countries-50m.geojson',
       );
       // Continue without country data - show basic globe
-      console.warn('Failed to load country data, showing basic globe:', error);
+      this.logger.warn(
+        'Failed to load country data, showing basic globe',
+        'GlobeComponent',
+        error,
+      );
     }
   }
 
@@ -872,7 +517,7 @@ export class Globe implements AfterViewInit, OnDestroy {
   }
 
   private handleInitializationError(error: Error | unknown): void {
-    console.error('Globe initialization failed:', error);
+    this.logger.error('Globe initialization failed', error, 'GlobeComponent');
     this.isLoading.set(false);
 
     let errorMessage = 'Failed to initialize 3D scene';
@@ -907,16 +552,17 @@ export class Globe implements AfterViewInit, OnDestroy {
     if (this.useTopoJSON === useTopoJSON) return;
 
     this.useTopoJSON = useTopoJSON;
-    this.loadingMessage.set('Switching rendering mode...');
-    this.loadingProgress.set(50);
-    this.isLoading.set(true);
+    this.dataLoading.setLoading(true, 'Loading...', 50);
 
     // Remove existing countries if present
     if (this.countries) {
       if (this.renderingMode() === 'topojson') {
         disposeTopoJSONMeshes(this.countries);
       }
-      this.scene.remove(this.countries);
+      const scene = this.globeSceneService.getScene();
+      if (scene) {
+        scene.remove(this.countries);
+      }
     }
 
     try {
@@ -928,7 +574,11 @@ export class Globe implements AfterViewInit, OnDestroy {
         this.isLoading.set(false);
       }, 300);
     } catch (error) {
-      console.error('Failed to switch rendering mode:', error);
+      this.logger.error(
+        'Failed to switch rendering mode',
+        error,
+        'GlobeComponent',
+      );
       this.handleInitializationError(error);
     }
   }
@@ -954,16 +604,16 @@ export class Globe implements AfterViewInit, OnDestroy {
       this.initializeScene().catch((error) => {
         this.handleInitializationError(error);
       });
-    }, 1000);
+    }, this.RETRY_INITIALIZATION_DELAY);
   }
 
   private cleanup(): void {
     try {
-      // Stop animation
-      if (this.animationId) {
-        cancelAnimationFrame(this.animationId);
-        this.animationId = undefined;
-      }
+      // Remove event listeners to prevent memory leaks
+      this.eventListeners.forEach(({ element, event, handler }) => {
+        element.removeEventListener(event, handler);
+      });
+      this.eventListeners = [];
 
       // Dispose of countries and related meshes using memory manager
       if (this.countries) {
@@ -974,63 +624,8 @@ export class Globe implements AfterViewInit, OnDestroy {
         this.countries = undefined!;
       }
 
-      // Dispose earth mesh and atmosphere using memory manager
-      if (this.earthMesh) {
-        this.memoryManager.disposeObject3D(this.earthMesh);
-        this.earthMesh = undefined;
-      }
-
-      if (this.atmosphereMesh) {
-        this.memoryManager.disposeObject3D(this.atmosphereMesh);
-        this.atmosphereMesh = undefined;
-      }
-
-      // Dispose starfield using memory manager
-      if (this.starfield) {
-        this.memoryManager.disposeObject3D(this.starfield);
-        this.starfield = undefined!;
-      }
-
-      // Dispose sphere using memory manager
-      if (this.sphere) {
-        this.memoryManager.disposeObject3D(this.sphere);
-        this.sphere = undefined!;
-      }
-
-      // Dispose scene using memory manager
-      if (this.scene) {
-        this.memoryManager.disposeScene(this.scene);
-        this.scene = undefined!;
-      }
-
-      // Dispose controls
-      if (this.controls) {
-        this.controls.dispose();
-        this.controls = undefined!;
-      }
-
-      // Dispose renderer using memory manager
-      if (this.renderer) {
-        // Remove canvas from DOM first
-        const canvas = this.renderer.domElement;
-        if (canvas && canvas.parentNode) {
-          canvas.parentNode.removeChild(canvas);
-        }
-
-        this.memoryManager.disposeRenderer(this.renderer);
-        this.renderer = undefined!;
-      }
-
-      // Dispose loader if present
-      if (this.loader) {
-        this.loader = undefined!;
-      }
-
-      // Dispose fresnel material
-      if (this.fresnelMat) {
-        this.memoryManager.track(this.fresnelMat);
-        this.fresnelMat = undefined!;
-      }
+      // Call service cleanup method to handle scene, camera, renderer, controls, etc.
+      this.globeSceneService.cleanup();
 
       // Force garbage collection if available (development only)
       if (
@@ -1046,10 +641,10 @@ export class Globe implements AfterViewInit, OnDestroy {
         !window.location.host.includes('prod')
       ) {
         const stats = this.memoryManager.getMemoryStats();
-        console.log('Memory cleanup stats:', stats);
+        this.logger.debug('Memory cleanup stats', 'GlobeComponent', stats);
       }
     } catch (error) {
-      console.warn('Error during cleanup:', error);
+      this.logger.warn('Error during cleanup', 'GlobeComponent', error);
       this.errorRecovery.handleGeometryError(error as Error, 'cleanup');
     }
   }
@@ -1058,14 +653,17 @@ export class Globe implements AfterViewInit, OnDestroy {
    * Setup GPU-optimized country selection interactions
    */
   private setupCountrySelectionInteractions(): void {
-    const canvas = this.renderer.domElement;
+    const renderer = this.globeSceneService.getRenderer();
+    if (!renderer) return;
+
+    const canvas = renderer.domElement;
 
     // Timing variables for proper single/double-click separation
     let clickTimeout: ReturnType<typeof setTimeout> | null = null;
     let isDoubleClick = false;
 
     // Handle single clicks with proper double-click separation
-    canvas.addEventListener('click', (event) => {
+    const clickHandler = (event: MouseEvent): void => {
       // Clear any existing timeout
       if (clickTimeout) {
         clearTimeout(clickTimeout);
@@ -1080,15 +678,17 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       // Set a timeout to handle single-click after double-click detection window
       clickTimeout = setTimeout(() => {
-        if (this.allowSelection && !this.cameraInteracting) {
+        const allowSelection = this.globeSceneService.getAllowSelection();
+        const cameraInteracting = this.globeSceneService.getCameraInteracting();
+        if (allowSelection && !cameraInteracting) {
           this.handleCountryInfoDisplay(event);
         }
         clickTimeout = null;
-      }, 250); // 250ms delay to allow for double-click detection
-    });
+      }, this.DOUBLE_CLICK_DELAY);
+    };
 
     // Handle double-click for adding countries to comparison table
-    canvas.addEventListener('dblclick', (event) => {
+    const dblclickHandler = (event: MouseEvent): void => {
       // Mark as double-click to prevent single-click handler
       isDoubleClick = true;
 
@@ -1098,7 +698,9 @@ export class Globe implements AfterViewInit, OnDestroy {
         clickTimeout = null;
       }
 
-      if (this.allowSelection && !this.cameraInteracting) {
+      const allowSelection = this.globeSceneService.getAllowSelection();
+      const cameraInteracting = this.globeSceneService.getCameraInteracting();
+      if (allowSelection && !cameraInteracting) {
         this.handleCountryAddToComparison(event);
       }
 
@@ -1106,21 +708,53 @@ export class Globe implements AfterViewInit, OnDestroy {
       setTimeout(() => {
         isDoubleClick = false;
       }, 100);
-    });
+    };
 
-    // Handle mouse hover for tooltips (throttled)
-    canvas.addEventListener('mousemove', (event) => {
-      const now = Date.now();
-      if (now - this.lastMouseEvent > this.mouseEventThrottle) {
-        this.handleCountryHover(event);
-        this.lastMouseEvent = now;
+    // Handle mouse hover for tooltips (throttled for performance)
+    let hoverTimeout: ReturnType<typeof setTimeout> | null = null;
+    const mousemoveHandler = (event: MouseEvent): void => {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
       }
-    });
+      hoverTimeout = setTimeout(() => {
+        this.handleCountryHover(event);
+      }, this.HOVER_THROTTLE);
+    };
 
     // Hide tooltip when mouse leaves canvas
-    canvas.addEventListener('mouseleave', () => {
-      this.hideAllTooltips();
-    });
+    const mouseleaveHandler = (): void => {
+      this.tooltipService.hideAllTooltips();
+    };
+
+    // Add event listeners
+    canvas.addEventListener('click', clickHandler);
+    canvas.addEventListener('dblclick', dblclickHandler);
+    canvas.addEventListener('mousemove', mousemoveHandler);
+    canvas.addEventListener('mouseleave', mouseleaveHandler);
+
+    // Store for cleanup
+    this.eventListeners.push(
+      {
+        element: canvas,
+        event: 'click',
+        handler: clickHandler as EventListener,
+      },
+      {
+        element: canvas,
+        event: 'dblclick',
+        handler: dblclickHandler as EventListener,
+      },
+      {
+        element: canvas,
+        event: 'mousemove',
+        handler: mousemoveHandler as EventListener,
+      },
+      {
+        element: canvas,
+        event: 'mouseleave',
+        handler: mouseleaveHandler as EventListener,
+      },
+    );
   }
 
   /**
@@ -1147,7 +781,7 @@ export class Globe implements AfterViewInit, OnDestroy {
 
         // Get detailed country data from service (with name normalization for USA, etc.)
         const normalizedCountryName =
-          this.normalizeCountryNameForDataService(countryName);
+          this.countrySelection.normalizeCountryNameForDataService(countryName);
 
         const countryData = this.countryDataService.getCountryByName(
           normalizedCountryName,
@@ -1159,7 +793,10 @@ export class Globe implements AfterViewInit, OnDestroy {
             this.quizStateService.selectCandidate(countryData.id);
 
             // Apply quiz candidate highlighting to the globe
-            this.applyQuizCandidateHighlight(countryName);
+            this.quizIntegration.applyQuizCandidateHighlight(
+              countryName,
+              this.countries,
+            );
 
             // Show brief visual feedback tooltip
             const x = event.clientX;
@@ -1172,7 +809,7 @@ export class Globe implements AfterViewInit, OnDestroy {
             setTimeout(() => {
               this.countryNameTooltipVisible.set(false);
               this.hoveredCountryName.set('');
-            }, 1000);
+            }, this.QUIZ_TOOLTIP_DELAY);
 
             return; // Exit early - don't process explore mode logic
           }
@@ -1186,20 +823,26 @@ export class Globe implements AfterViewInit, OnDestroy {
             }
 
             // Apply visual selection highlighting (additive)
-            this.applyPersistentCountrySelection(countryName);
+            this.countrySelection.applyPersistentCountrySelection(
+              countryName,
+              this.countries,
+            );
 
             // For Shift+click, we don't change selectedCountry signal
             // Just apply visual highlighting - the info card stays on the first selected country
           } else {
             // Single-click: Select only this country (clear previous selections)
             // Clear all previous visual selections first
-            this.resetAllCountrySelections();
+            this.countrySelection.resetAllCountrySelections(this.countries);
 
             // Set the selected country to show the detailed info card
             this.selectedCountry.set(countryData);
 
             // Apply visual selection highlighting to this country only
-            this.applyPersistentCountrySelection(countryName);
+            this.countrySelection.applyPersistentCountrySelection(
+              countryName,
+              this.countries,
+            );
           }
 
           // Show immediate feedback tooltip for both cases
@@ -1209,11 +852,11 @@ export class Globe implements AfterViewInit, OnDestroy {
           this.countryNameTooltipPosition.set({ x, y });
           this.countryNameTooltipVisible.set(true);
 
-          // Hide the simple tooltip after 2 seconds
+          // Hide the simple tooltip after delay
           setTimeout(() => {
             this.countryNameTooltipVisible.set(false);
             this.hoveredCountryName.set('');
-          }, 2000);
+          }, this.TOOLTIP_HIDE_DELAY);
         } else {
           // Fallback: Just show the simple tooltip if no detailed data available
           const x = event.clientX;
@@ -1230,131 +873,35 @@ export class Globe implements AfterViewInit, OnDestroy {
       } else {
         // Clear selection when clicking on empty space (both single and shift-click)
         this.selectedCountry.set(null);
-        this.resetAllCountrySelections();
+        this.countrySelection.resetAllCountrySelections(this.countries);
       }
     } catch (error) {
-      console.error('Error in handleCountryInfoDisplay:', error);
+      this.logger.error(
+        'Error in handleCountryInfoDisplay',
+        error,
+        'GlobeComponent',
+      );
     }
   }
 
   /**
-   * Handle country selection from mouse clicks (optimized)
+   * Get normalized mouse coordinates from event
    */
-  private async handleCountrySelection(event: MouseEvent): Promise<void> {
-    event.preventDefault();
+  private getMouseCoordinates(
+    event: MouseEvent,
+  ): { x: number; y: number } | null {
+    const renderer = this.globeSceneService.getRenderer();
+    if (!renderer) return null;
 
-    // Early exit if countries not loaded
-    if (!this.countries || this.countries.children.length === 0) {
-      return;
-    }
-
-    // Get mouse coordinates relative to canvas
-    const canvas = this.renderer.domElement;
+    const canvas = renderer.domElement;
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    // Convert to normalized device coordinates (-1 to +1)
-    const mouse = {
+    return {
       x: (x / canvas.width) * 2 - 1,
       y: -(y / canvas.height) * 2 + 1,
     };
-
-    // Use optimized raycasting
-    const { Raycaster, Vector2 } = await import('three');
-    const raycaster = new Raycaster();
-    raycaster.near = 0.1;
-    raycaster.far = 10; // Limit ray distance
-    const mouseVector = new Vector2(mouse.x, mouse.y);
-    raycaster.setFromCamera(mouseVector, this.camera);
-
-    // Optimized intersection testing - only check country meshes
-    const intersects = raycaster.intersectObjects(
-      this.countries.children,
-      true,
-    );
-
-    if (intersects.length > 0) {
-      // Find first valid country mesh (optimized loop)
-      let selectedCountryMesh: Mesh | null = null;
-      let countryGroup: Object3D | null = null;
-
-      for (const intersect of intersects) {
-        const obj = intersect.object;
-
-        // Skip border lines - we want actual country meshes
-        if (
-          obj.name === 'unified-borders' ||
-          obj.userData?.['isUnifiedBorder']
-        ) {
-          continue;
-        }
-
-        // Look for country selection meshes
-        if (obj.name.startsWith('selection-mesh-') && obj.type === 'Mesh') {
-          selectedCountryMesh = obj as Mesh;
-          countryGroup = obj.parent;
-          break; // Early exit for performance
-        }
-      }
-
-      if (selectedCountryMesh && countryGroup) {
-        const countryData = countryGroup.userData;
-        const countryName =
-          countryData?.['properties']?.['NAME'] ||
-          countryData?.['name'] ||
-          selectedCountryMesh.name.replace('selection-mesh-', '').split('_')[0];
-
-        // Handle multi-selection based on modifier keys
-        if (event.shiftKey) {
-          // Add to selection - don't reset others
-          this.applyCountrySelectionToGroup(countryGroup, countryName);
-        } else if (event.ctrlKey || event.metaKey) {
-          // Toggle selection
-          const isCurrentlySelected =
-            this.isCountrySelected(selectedCountryMesh);
-          if (isCurrentlySelected) {
-            this.removeCountrySelection(selectedCountryMesh);
-          } else {
-            this.applyCountrySelectionToGroup(countryGroup, countryName);
-          }
-        } else {
-          // Regular click - only reset temporary selections, keep comparison table selections
-          this.resetTemporarySelections();
-          this.applyCountrySelectionToGroup(countryGroup, countryName);
-        }
-
-        // Store current selection
-        this.lastSelectedCountryMesh = selectedCountryMesh;
-
-        // Find detailed country data for selected country
-        const countryDataRecord = this.countryDataService
-          .getAllCountries()
-          .find((c: CountryDataRecord) => {
-            const name1 = c.name.toLowerCase();
-            const name2 = countryName.toLowerCase();
-            const code1 = c.code.toLowerCase();
-
-            return (
-              name1 === name2 ||
-              name1.includes(name2) ||
-              name2.includes(name1) ||
-              code1 === name2
-            );
-          });
-
-        // Show detailed tooltip in fixed position for selected country
-        if (countryDataRecord) {
-          this.selectedCountry.set(countryDataRecord);
-        }
-
-        // Update accessibility
-        this.updateAccessibilityCountrySelection(countryName);
-      }
-    } else {
-      // No country clicked - clear selection
-      this.selectedCountry.set(null);
-    }
   }
 
   /**
@@ -1379,251 +926,12 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       if (added) {
         // Apply visual selection to the country on globe
-        this.applyPersistentCountrySelection(countryName);
-      }
-    }
-  }
-
-  /**
-   * Apply persistent visual selection to country (for comparison table integration)
-   */
-  private applyPersistentCountrySelection(countryName: string): void {
-    if (!this.countries) return;
-
-    // Use the same approach as applyCountrySelectionToGroup - search for selection meshes directly
-    const selectionMeshes: Mesh[] = [];
-
-    this.countries.traverse((child) => {
-      if (
-        child.name &&
-        child.name.startsWith('selection-mesh-') &&
-        child.type === 'Mesh'
-      ) {
-        const meshName = child.name
-          .replace('selection-mesh-', '')
-          .split('_')[0];
-
-        // Apply the same name formatting as the country hover service
-        const formattedMeshName = this.formatCountryName(meshName);
-
-        // Enhanced matching logic for USA and other problematic countries
-        const isMatch = this.isCountryNameMatch(
+        this.countrySelection.applyPersistentCountrySelection(
           countryName,
-          meshName,
-          formattedMeshName,
+          this.countries,
         );
-
-        if (isMatch) {
-          selectionMeshes.push(child as Mesh);
-        }
       }
-    });
-
-    // Apply selection styling to all found meshes
-    selectionMeshes.forEach((mesh) => {
-      this.applyCountrySelection(mesh);
-    });
-
-    this.needsRender = true;
-  }
-
-  /**
-   * Enhanced country name matching with bidirectional logic for USA and other problematic countries
-   */
-  private isCountryNameMatch(
-    countryName: string,
-    meshName: string,
-    formattedMeshName: string,
-  ): boolean {
-    // Direct matches (case-insensitive)
-    if (
-      formattedMeshName === countryName ||
-      formattedMeshName.toLowerCase() === countryName.toLowerCase() ||
-      meshName === countryName ||
-      meshName.toLowerCase() === countryName.toLowerCase()
-    ) {
-      return true;
     }
-
-    // Special bidirectional mappings for problematic countries
-    const usaVariants = [
-      'United States',
-      'United States of America',
-      'USA',
-      'US',
-      'America',
-      'UnitedStates',
-      'UnitedStatesofAmerica',
-    ];
-
-    const mexicoVariants = [
-      'Mexico',
-      'United Mexican States',
-      'UnitedMexicanStates',
-      'Estados',
-      'MexicanRepublic',
-    ];
-
-    // Check if both country name and mesh name are USA variants
-    const isCountryUSA = usaVariants.some(
-      (variant) => variant.toLowerCase() === countryName.toLowerCase(),
-    );
-    const isMeshUSA = usaVariants.some(
-      (variant) =>
-        variant.toLowerCase() === meshName.toLowerCase() ||
-        variant.toLowerCase() === formattedMeshName.toLowerCase(),
-    );
-
-    if (isCountryUSA && isMeshUSA) {
-      return true;
-    }
-
-    // Check if both country name and mesh name are Mexico variants
-    const isCountryMexico = mexicoVariants.some(
-      (variant) => variant.toLowerCase() === countryName.toLowerCase(),
-    );
-    const isMeshMexico = mexicoVariants.some(
-      (variant) =>
-        variant.toLowerCase() === meshName.toLowerCase() ||
-        variant.toLowerCase() === formattedMeshName.toLowerCase(),
-    );
-
-    if (isCountryMexico && isMeshMexico) {
-      return true;
-    }
-
-    // Partial matching for other countries
-    const normalizedCountry = countryName.toLowerCase().replace(/[^a-z]/g, '');
-    const normalizedMesh = meshName.toLowerCase().replace(/[^a-z]/g, '');
-    const normalizedFormatted = formattedMeshName
-      .toLowerCase()
-      .replace(/[^a-z]/g, '');
-
-    return (
-      normalizedCountry.includes(normalizedMesh) ||
-      normalizedMesh.includes(normalizedCountry) ||
-      normalizedCountry.includes(normalizedFormatted) ||
-      normalizedFormatted.includes(normalizedCountry)
-    );
-  }
-
-  /**
-   * Normalize country name for CountryDataService lookup
-   * Converts detected country names to the format expected by the data service
-   */
-  private normalizeCountryNameForDataService(
-    detectedCountryName: string,
-  ): string {
-    // Normalize spaces: trim and replace multiple spaces with single space
-    const normalizedName = detectedCountryName.trim().replace(/\s+/g, ' ');
-
-    // Comprehensive country name mappings based on actual dataset and common mesh/data mismatches
-    const countryMappings: Record<string, string> = {
-      // USA variants
-      'United States of America': 'United States',
-      UnitedStatesofAmerica: 'United States',
-      UnitedStates: 'United States',
-      USA: 'United States',
-      US: 'United States',
-      America: 'United States',
-
-      // Mexico variants
-      'United Mexican States': 'Mexico',
-      UnitedMexicanStates: 'Mexico',
-      Estados: 'Mexico',
-      MexicanRepublic: 'Mexico',
-
-      // United Kingdom variants
-      UnitedKingdom: 'United Kingdom',
-      UK: 'United Kingdom',
-
-      // Czech Republic variants - CRITICAL FIX: Dataset uses "Czechia"
-      CzechRepublic: 'Czechia',
-      'Czech Republic': 'Czechia',
-      CzechoslovakianRepublic: 'Czechia',
-
-      // Multi-word countries that might have spacing issues
-      NewZealand: 'New Zealand',
-      SouthAfrica: 'South Africa',
-      SaudiArabia: 'Saudi Arabia',
-      CostaRica: 'Costa Rica',
-      PuertoRico: 'Puerto Rico',
-      SouthKorea: 'South Korea',
-      NorthKorea: 'North Korea',
-      SouthSudan: 'South Sudan',
-      WestBankandGaza: 'West Bank and Gaza',
-      BosniaandHerzegovina: 'Bosnia and Herzegovina',
-      TrinidadandTobago: 'Trinidad and Tobago',
-      PapuaNewGuinea: 'Papua New Guinea',
-      SolomonIslands: 'Solomon Islands',
-      CentralAfricanRepublic: 'Central African Republic',
-      DominicanRepublic: 'Dominican Republic',
-      EquatorialGuinea: 'Equatorial Guinea',
-      ElSalvador: 'El Salvador',
-      HongKong: 'Hong Kong',
-      IvoryCoast: 'Ivory Coast',
-      SanMarino: 'San Marino',
-      VaticanCity: 'Vatican City',
-      CapeVerde: 'Cape Verde',
-      SaintLucia: 'Saint Lucia',
-      NewCaledonia: 'New Caledonia',
-
-      // Countries with special variations
-      UnitedArabEmirates: 'United Arab Emirates',
-      RepublicoftheCongo: 'Republic of the Congo',
-      DRCongo: 'DR Congo',
-      DemocraticRepublicofCongo: 'DR Congo',
-      NorthMacedonia: 'North Macedonia',
-      GuineaBissau: 'Guinea-Bissau',
-      TimorLeste: 'Timor-Leste',
-      SierraLeone: 'Sierra Leone',
-      BurkinaFaso: 'Burkina Faso',
-      MarshallIslands: 'Marshall Islands',
-      CookIslands: 'Cook Islands',
-      NorthernMarianaIslands: 'Northern Mariana Islands',
-      SintMaarten: 'Sint Maarten',
-
-      // Common variations that might appear
-      'U S A': 'United States',
-      'U K': 'United Kingdom',
-      'U A E': 'United Arab Emirates',
-    };
-
-    // Check for exact match in mappings (case-insensitive)
-    const mappingKey = Object.keys(countryMappings).find(
-      (key) => key.toLowerCase() === normalizedName.toLowerCase(),
-    );
-
-    if (mappingKey) {
-      return countryMappings[mappingKey];
-    }
-
-    // For countries not in the mapping, return the normalized name
-    return normalizedName;
-  }
-
-  /**
-   * Format country name for matching (simplified version of country-hover.service.ts)
-   */
-  private formatCountryName(meshCountryName: string): string {
-    const nameMap: Record<string, string> = {
-      UnitedStates: 'United States',
-      UnitedStatesofAmerica: 'United States',
-      USA: 'United States',
-      America: 'United States',
-      US: 'United States',
-      Mexico: 'Mexico',
-      UnitedMexicanStates: 'Mexico',
-      Estados: 'Mexico',
-      MexicanRepublic: 'Mexico',
-    };
-
-    if (nameMap[meshCountryName]) {
-      return nameMap[meshCountryName];
-    }
-
-    // Convert camelCase to spaced format
-    return meshCountryName.replace(/([A-Z])/g, ' $1').trim();
   }
 
   /**
@@ -1632,22 +940,17 @@ export class Globe implements AfterViewInit, OnDestroy {
   private async detectCountryFromEvent(
     event: MouseEvent,
   ): Promise<{ countryName: string; countryGroup?: Object3D } | null> {
-    // Get mouse coordinates relative to canvas
-    const canvas = this.renderer.domElement;
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const camera = this.globeSceneService.getCamera();
+    if (!camera) return null;
 
-    // Convert to normalized device coordinates (-1 to +1)
-    const mouse = {
-      x: (x / canvas.width) * 2 - 1,
-      y: -(y / canvas.height) * 2 + 1,
-    };
+    // Get normalized mouse coordinates
+    const mouse = this.getMouseCoordinates(event);
+    if (!mouse) return null;
 
     // Use country hover service for detection
     const hoverResult = this.countryHoverService.detectCountryHover(
       mouse,
-      this.camera,
+      camera,
       this.countries,
     );
 
@@ -1661,522 +964,24 @@ export class Globe implements AfterViewInit, OnDestroy {
     return null;
   }
 
-  /**
-   * Debug alternative country detection method for problematic countries
-   */
-  private async debugAlternativeCountryDetection(
-    event: MouseEvent,
-  ): Promise<{ countryName: string; method: string } | null> {
-    const canvas = this.renderer.domElement;
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    // Convert to normalized device coordinates (-1 to +1)
-    const mouse = {
-      x: (x / canvas.width) * 2 - 1,
-      y: -(y / canvas.height) * 2 + 1,
-    };
-
-    // Use Three.js raycasting directly
-    const { Raycaster, Vector2 } = await import('three');
-    const raycaster = new Raycaster();
-    const mouseVector = new Vector2(mouse.x, mouse.y);
-    raycaster.setFromCamera(mouseVector, this.camera);
-
-    // Get all intersections
-    const intersects = raycaster.intersectObjects(
-      this.countries.children,
-      true,
-    );
-
-    for (let i = 0; i < intersects.length; i++) {
-      const intersect = intersects[i];
-      const obj = intersect.object;
-
-      // Try different methods to extract country name
-      let countryName = null;
-
-      // Try different methods to extract country name
-      if (obj.name && obj.name.includes('selection-mesh-')) {
-        countryName = obj.name.replace('selection-mesh-', '').split('_')[0];
-      } else if (obj.userData?.['name']) {
-        countryName = obj.userData['name'];
-      } else if (obj.parent?.userData?.['name']) {
-        countryName = obj.parent.userData['name'];
-      } else if (obj.userData?.['properties']?.['NAME']) {
-        countryName = obj.userData['properties']['NAME'];
-      } else if (obj.userData?.['properties']?.['name']) {
-        countryName = obj.userData['properties']['name'];
-      } else if (obj.userData?.['countryName']) {
-        countryName = obj.userData['countryName'];
-      }
-
-      if (countryName) {
-        return { countryName, method: 'alternative-raycasting' };
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Check if a country is currently selected
-   */
-  private isCountrySelected(mesh: Mesh): boolean {
-    const material = mesh.material as Material & {
-      emissive?: { r: number; g: number; b: number };
-    };
-    return !!(material.emissive && material.emissive.r > 0);
-  }
-
-  /**
-   * Reset temporary selections while preserving comparison table selections
-   */
-  private resetTemporarySelections(): void {
-    if (!this.countries) return;
-
-    const selectedCountryCodes = this.countryDataService.selectedCountries();
-    const selectedCountryNames = new Set(
-      selectedCountryCodes
-        .map((code) => this.countryDataService.getCountryByCode(code)?.name)
-        .filter((name) => name),
-    );
-
-    this.countries.traverse((child) => {
-      if (child.type === 'Mesh') {
-        const mesh = child as Mesh;
-        const countryName =
-          child.userData?.['name'] ||
-          child.parent?.userData?.['name'] ||
-          child.parent?.userData?.['properties']?.['NAME'];
-
-        // Only reset selection if country is NOT in the comparison table
-        if (countryName && !selectedCountryNames.has(countryName)) {
-          this.removeCountrySelection(mesh);
-        }
-      }
-    });
-  }
-
-  /**
-   * Remove selection from a country
-   */
-  private removeCountrySelection(mesh: Mesh): void {
-    const material = mesh.material as Material & {
-      transparent?: boolean;
-      opacity?: number;
-      emissive?: { setHex: (hex: number) => void };
-    };
-
-    if (material) {
-      material.transparent = true;
-      material.opacity = 0.7;
-      if (material.emissive) {
-        material.emissive.setHex(0x000000); // Remove glow
-      }
-    }
-  }
-
-  /**
-   * Apply selection visual to a country by ID
-   */
-  private applyCountrySelectionById(countryId: string): void {
-    if (!this.countries) return;
-
-    this.countries.traverse((child) => {
-      if (child.name.startsWith('selection-mesh-') && child.type === 'Mesh') {
-        const mesh = child as Mesh;
-        const countryGroup = mesh.parent;
-
-        if (countryGroup) {
-          const countryData = countryGroup.userData;
-          const countryName =
-            countryData?.['properties']?.['NAME'] ||
-            countryData?.['name'] ||
-            mesh.name.replace('selection-mesh-', '').split('_')[0];
-
-          // Check if this mesh corresponds to the selected country
-          if (this.countryMatches(countryId, countryName)) {
-            const material = mesh.material as Material & {
-              color?: { setHex: (hex: number) => void };
-              opacity?: number;
-            };
-            if (material && 'color' in material) {
-              // Apply selected color
-              material.color?.setHex(0xff6b35);
-              if ('opacity' in material) {
-                material.opacity = 0.8;
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-
-  /**
-   * Check if country ID/name matches
-   */
-  private countryMatches(countryId: string, countryName: string): boolean {
-    const id1 = countryId.toLowerCase();
-    const name1 = countryName.toLowerCase();
-
-    return id1 === name1 || id1.includes(name1) || name1.includes(id1);
-  }
-
-  /**
-   * Ensure all country objects have countryId in userData for selection service
-   */
-  private ensureCountryIds(): void {
-    if (!this.countries) return;
-
-    this.countries.traverse((child) => {
-      if (
-        child.type === 'Group' &&
-        child.userData &&
-        child.userData['properties']
-      ) {
-        // This is a country group
-        const countryName =
-          child.userData['properties']['NAME'] ||
-          child.userData['name'] ||
-          child.name;
-
-        if (countryName && !child.userData['countryId']) {
-          child.userData['countryId'] = countryName;
-        }
-      }
-    });
-  }
-
-  /**
-   * Initialize all selection materials to be completely invisible
-   * This prevents the gray overlay issue on page load
-   */
-  private initializeSelectionMaterials(): void {
-    if (!this.countries) return;
-
-    this.countries.traverse((child) => {
-      if (
-        child.name &&
-        child.name.startsWith('selection-mesh-') &&
-        child.type === 'Mesh'
-      ) {
-        const material = (child as Mesh).material as Material & {
-          color?: Color;
-          emissive?: Color;
-          transparent?: boolean;
-          opacity?: number;
-        };
-
-        if (material) {
-          // Ensure selection meshes start completely invisible
-          material.transparent = true;
-          material.opacity = 0.0;
-          material.color?.setHex(0x000000); // Black (invisible)
-          if (material.emissive) {
-            material.emissive.setHex(0x000000);
-          }
-          material.needsUpdate = true;
-        }
-      }
-    });
-  }
-
-  /**
-   * Optimized reset of country selections
-   */
-  private resetAllCountrySelections(): void {
-    if (!this.countries) return;
-
-    // Reset all selection meshes (needed for complete fill reset)
-    this.countries.traverse((child) => {
-      if (
-        child.name &&
-        child.name.startsWith('selection-mesh-') &&
-        child.type === 'Mesh'
-      ) {
-        const material = (child as Mesh).material as Material & {
-          color?: Color;
-          emissive?: Color;
-        };
-        if (material) {
-          material.transparent = true;
-          material.opacity = 0.0; // Completely invisible when not selected
-          material.color?.setHex(0x000000); // Black (invisible)
-          material.needsUpdate = true;
-
-          if (material.emissive) {
-            material.emissive.setHex(0x000000);
-          }
-        }
-      }
-    });
-
-    this.lastSelectedCountryMesh = null;
-    this.needsRender = true;
-  }
-
-  /**
-   * Apply quiz candidate highlighting to a country (distinct from explore mode selection)
-   */
-  private applyQuizCandidateHighlight(countryName: string): void {
-    if (!this.countries) return;
-
-    // Clear any previous quiz highlight first
-    this.clearQuizCandidateHighlight();
-
-    // Find selection meshes for this country
-    const selectionMeshes: Mesh[] = [];
-
-    this.countries.traverse((child) => {
-      if (
-        child.name &&
-        child.name.startsWith('selection-mesh-') &&
-        child.type === 'Mesh'
-      ) {
-        const meshName = child.name
-          .replace('selection-mesh-', '')
-          .split('_')[0];
-
-        const formattedMeshName = this.formatCountryName(meshName);
-
-        const isMatch = this.isCountryNameMatch(
-          countryName,
-          meshName,
-          formattedMeshName,
-        );
-
-        if (isMatch) {
-          selectionMeshes.push(child as Mesh);
-        }
-      }
-    });
-
-    // Apply quiz-specific styling with radial offset
-    selectionMeshes.forEach((mesh) => {
-      this.applyQuizCandidateSelection(mesh);
-    });
-
-    // Store the current quiz candidate
-    this.quizCandidate.set(countryName);
-    this.needsRender = true;
-  }
-
-  /**
-   * Apply quiz candidate selection material with distinct visual appearance
-   */
-  private applyQuizCandidateSelection(mesh: Mesh): void {
-    if (!mesh || !mesh.geometry) return;
-
-    const material = mesh.material as Material & {
-      transparent?: boolean;
-      opacity?: number;
-      color?: Color;
-      emissive?: Color;
-    };
-
-    if (material) {
-      material.transparent = true;
-      material.opacity = 0.75;
-      material.color?.setHex(0x3b82f6); // Blue quiz candidate (different from green explore)
-      if (material.emissive) {
-        material.emissive.setHex(0x1e40af); // Darker blue emissive
-      }
-      // Ensure proper depth handling with radial offset
-      material.depthTest = false;
-      material.depthWrite = false;
-      material.needsUpdate = true;
-    }
-
-    // Higher render order than explore mode (10) to distinguish quiz selections
-    mesh.renderOrder = 15;
-
-    // Add slight radial offset to avoid z-fighting
-    const scale = 1.002; // Very subtle offset, just enough to prevent z-fighting
-    mesh.scale.setScalar(scale);
-
-    mesh.visible = true;
-    this.needsRender = true;
-  }
-
-  /**
-   * Clear current quiz candidate highlighting
-   */
-  private clearQuizCandidateHighlight(): void {
-    if (!this.countries || !this.quizCandidate()) return;
-
-    const currentCandidate = this.quizCandidate();
-
-    this.countries.traverse((child) => {
-      if (
-        child.name &&
-        child.name.startsWith('selection-mesh-') &&
-        child.type === 'Mesh'
-      ) {
-        const meshName = child.name
-          .replace('selection-mesh-', '')
-          .split('_')[0];
-
-        const formattedMeshName = this.formatCountryName(meshName);
-
-        const isMatch = this.isCountryNameMatch(
-          currentCandidate!,
-          meshName,
-          formattedMeshName,
-        );
-
-        if (isMatch) {
-          const mesh = child as Mesh;
-          const material = mesh.material as Material & {
-            transparent?: boolean;
-            opacity?: number;
-            color?: Color;
-            emissive?: Color;
-          };
-
-          if (material) {
-            material.transparent = true;
-            material.opacity = 0.0; // Make invisible
-            material.color?.setHex(0x000000); // Black (invisible)
-            if (material.emissive) {
-              material.emissive.setHex(0x000000);
-            }
-            material.needsUpdate = true;
-          }
-
-          // Reset scale and render order
-          mesh.scale.setScalar(1.0);
-          mesh.renderOrder = 0;
-          mesh.visible = false;
-        }
-      }
-    });
-
-    this.quizCandidate.set(null);
-    this.needsRender = true;
-  }
-
-  /**
-   * Apply country selection to all meshes within a country group
-   */
-  private applyCountrySelectionToGroup(
-    countryGroup: Object3D,
-    countryName: string,
-  ): void {
-    // Find all selection meshes for this country
-    const selectionMeshes: Mesh[] = [];
-
-    // Search recursively for all selection meshes
-    countryGroup.traverse((child) => {
-      if (
-        child.name &&
-        child.name.startsWith('selection-mesh-') &&
-        child.type === 'Mesh'
-      ) {
-        selectionMeshes.push(child as Mesh);
-      }
-    });
-
-    // Also search in the parent selection meshes group
-    if (this.countries) {
-      this.countries.traverse((child) => {
-        if (
-          child.name &&
-          child.name.startsWith('selection-mesh-') &&
-          child.type === 'Mesh'
-        ) {
-          const meshName = child.name
-            .replace('selection-mesh-', '')
-            .split('_')[0];
-          if (
-            meshName === countryName ||
-            meshName.toLowerCase() === countryName.toLowerCase()
-          ) {
-            selectionMeshes.push(child as Mesh);
-          }
-        }
-      });
-    }
-
-    // Apply selection styling to all found meshes
-    selectionMeshes.forEach((mesh) => {
-      this.applyCountrySelection(mesh);
-    });
-
-    this.needsRender = true;
-  }
-
-  /**
-   * Apply simple country selection with geometry offset + render order backup
-   */
-  private applyCountrySelection(mesh: Mesh): void {
-    if (!mesh || !mesh.geometry) return;
-
-    const material = mesh.material as Material & {
-      transparent?: boolean;
-      opacity?: number;
-      color?: Color;
-      emissive?: Color;
-    };
-    if (material) {
-      material.transparent = true;
-      material.opacity = 0.85;
-      material.color?.setHex(0x00ff88); // Green selection
-      if (material.emissive) {
-        material.emissive.setHex(0x006644);
-      }
-      // Ensure no depth testing for selected materials
-      material.depthTest = false;
-      material.depthWrite = false;
-      material.needsUpdate = true;
-    }
-
-    // Add render order as backup to geometry offset - higher value for large countries
-    mesh.renderOrder = 10; // Much higher render order to ensure countries render on top
-
-    mesh.visible = true;
-    this.needsRender = true;
-  }
-
-  private animate(currentTime: number = 0): void {
-    // Frame rate limiting - only render if enough time has passed
-    if (
-      currentTime - this.lastFrameTime < this.frameInterval &&
-      !this.needsRender &&
-      !this.isAnimating
-    ) {
-      return;
-    }
-
-    this.lastFrameTime = currentTime;
-
-    // Only update controls if they need updating
-    const controlsNeedUpdate =
-      this.controls.enableDamping &&
-      (this.isAnimating || this.controls.autoRotate);
-    if (controlsNeedUpdate) {
-      this.controls.update();
-    }
-
-    // Only render if scene has changed
-    if (this.needsRender || this.isAnimating) {
-      this.renderer.render(this.scene, this.camera);
-      this.needsRender = false;
-    }
+  private animate(_currentTime: number = 0): void {
+    // Animation is now handled by GlobeSceneService
+    // This method is kept for backwards compatibility but delegates to service
+    // Note: The service's animation loop is started in initializeScene()
   }
 
   @HostListener('window:resize')
   onWindowResize(): void {
-    if (!this.camera || !this.renderer) return;
+    const camera = this.globeSceneService.getCamera();
+    const renderer = this.globeSceneService.getRenderer();
+    if (!camera || !renderer) return;
 
     const width = this.rendererContainer.nativeElement.clientWidth;
     const height = this.rendererContainer.nativeElement.clientHeight;
 
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(width, height);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
   }
 
   /**
@@ -2190,27 +995,24 @@ export class Globe implements AfterViewInit, OnDestroy {
         this.countries.children.length === 0 ||
         this.interactionModeService.isQuizMode()
       ) {
-        this.hideAllTooltips();
+        this.tooltipService.hideAllTooltips();
         return;
       }
 
-      const canvas = this.renderer.domElement;
-      const rect = canvas.getBoundingClientRect();
+      const camera = this.globeSceneService.getCamera();
+      const renderer = this.globeSceneService.getRenderer();
+      if (!camera || !renderer) return;
 
-      // Get mouse coordinates relative to canvas
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
+      // Get normalized mouse coordinates
+      const mouse = this.getMouseCoordinates(event);
+      if (!mouse) return;
 
-      // Convert to normalized device coordinates
-      const mouse = {
-        x: (x / canvas.width) * 2 - 1,
-        y: -(y / canvas.height) * 2 + 1,
-      };
+      const canvas = renderer.domElement;
 
       // Use the specialized hover service that understands TopoJSON structure
       const hoverResult = this.countryHoverService.detectCountryHover(
         mouse,
-        this.camera,
+        camera,
         this.countries,
       );
 
@@ -2226,53 +1028,17 @@ export class Globe implements AfterViewInit, OnDestroy {
         canvas.style.cursor = 'pointer';
       } else {
         // No country found - hide name tooltip only
-        this.hideNameTooltip();
+        this.tooltipService.hideNameTooltip();
         canvas.style.cursor = 'default';
       }
     } catch (error) {
-      console.warn('⚠️ Error in country hover handler:', error);
-      this.hideNameTooltip();
+      this.logger.warn(
+        'Error in country hover handler',
+        'GlobeComponent',
+        error,
+      );
+      this.tooltipService.hideNameTooltip();
     }
-  }
-
-  /**
-   * Hide only the country name tooltip (for hover)
-   */
-  private hideNameTooltip(): void {
-    this.countryNameTooltipVisible.set(false);
-    this.hoveredCountryName.set('');
-  }
-
-  /**
-   * Hide all tooltips (for mouse leave - keeps selected country tooltip)
-   */
-  private hideAllTooltips(): void {
-    this.hideNameTooltip();
-    // Keep selected country tooltip visible even on mouse leave
-  }
-
-  /**
-   * Sync globe visual state with comparison table selections
-   */
-  private syncGlobeWithComparisonTable(
-    selectedCountryCodes: readonly string[],
-  ): void {
-    if (!this.countries || this.countries.children.length === 0) {
-      return;
-    }
-
-    // Reset all country selections first
-    this.resetAllCountrySelections();
-
-    // Apply selection to countries in the comparison table
-    selectedCountryCodes.forEach((countryCode, _index) => {
-      const country = this.countryDataService.getCountryByCode(countryCode);
-      if (country) {
-        this.applyPersistentCountrySelection(country.name);
-      } else {
-        console.warn(`Could not find country data for code: ${countryCode}`);
-      }
-    });
   }
 
   /**
@@ -2284,10 +1050,14 @@ export class Globe implements AfterViewInit, OnDestroy {
       return;
     }
 
+    const camera = this.globeSceneService.getCamera();
+    const controls = this.globeSceneService.getControls();
+    if (!camera || !controls) return;
+
     const handled = this.accessibility.handleKeyboardNavigation(
       event,
-      this.camera,
-      this.controls,
+      camera,
+      controls,
       this.countries,
     );
 
@@ -2317,48 +1087,80 @@ export class Globe implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Update country selection for accessibility
+   * Reverse geocode coordinates to nearest country name
+   * Uses Haversine formula to find the closest country by comparing to country centroids
    */
-  private updateAccessibilityCountrySelection(
-    countryName: string | null,
-  ): void {
-    this.accessibility.updateCountrySelection(countryName);
-
-    // Update available countries for navigation
-    if (this.countries) {
-      const countryData = this.extractCountriesForAccessibility(this.countries);
-      this.accessibility.updateAvailableCountries(countryData);
+  private reverseGeocodeToCountryName(
+    lat: number,
+    lon: number,
+  ): string | undefined {
+    const allCountries = this.countryDataService.getAllCountries();
+    if (allCountries.length === 0) {
+      return undefined;
     }
-  }
 
-  /**
-   * Extract country data for accessibility navigation
-   */
-  private extractCountriesForAccessibility(
-    countriesGroup: Group,
-  ): CountryAccessibilityData[] {
-    const countries: CountryAccessibilityData[] = [];
+    // Find the nearest country using Haversine distance formula
+    let nearestCountry = allCountries[0];
+    let minDistance = this.calculateDistance(
+      lat,
+      lon,
+      nearestCountry.latitude,
+      nearestCountry.longitude,
+    );
 
-    countriesGroup.traverse((object) => {
-      if (object.userData?.['isCountry'] && object.userData?.['name']) {
-        const countryName = object.userData['name'];
-        countries.push(
-          this.accessibility.getCountryAccessibilityInfo(countryName),
-        );
+    for (const country of allCountries) {
+      const distance = this.calculateDistance(
+        lat,
+        lon,
+        country.latitude,
+        country.longitude,
+      );
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestCountry = country;
       }
-    });
+    }
 
-    return countries;
+    // Only return the country if it's reasonably close (within ~1000km)
+    // This prevents assigning a country to ocean coordinates
+    if (minDistance < 1000) {
+      return nearestCountry.name;
+    }
+
+    return undefined;
   }
 
   /**
-   * Update accessibility state when loading
+   * Calculate distance between two coordinates using Haversine formula
+   * Returns distance in kilometers
    */
-  private updateAccessibilityLoadingState(
-    message: string,
-    progress?: number,
-  ): void {
-    this.accessibility.announceLoadingState(message, progress);
+  private calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
+    const R = 6371; // Earth's radius in km
+    const dLat = this.toRadians(lat2 - lat1);
+    const dLon = this.toRadians(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) *
+        Math.cos(this.toRadians(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  /**
+   * Convert degrees to radians
+   */
+  private toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
   }
 
   ngOnDestroy(): void {

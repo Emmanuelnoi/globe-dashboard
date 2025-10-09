@@ -1,4 +1,10 @@
-import { Component, Input, signal, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  signal,
+  output,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface ErrorInfo {
@@ -13,6 +19,7 @@ export interface ErrorInfo {
   selector: 'app-error-boundary',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (hasError()) {
       <div class="error-boundary-container">

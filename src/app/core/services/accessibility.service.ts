@@ -1,6 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { Vector3, Raycaster, Camera, Object3D, Group } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { LoggerService } from './logger.service';
 
 /**
  * Service for managing accessibility features of the 3D globe
@@ -9,6 +10,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
   providedIn: 'root',
 })
 export class AccessibilityService {
+  // Logger service
+  private readonly logger = inject(LoggerService);
+
   // Current accessibility state
   public readonly currentCountry = signal<string | null>(null);
   public readonly globeDescription = signal<string>(
@@ -458,7 +462,11 @@ export class AccessibilityService {
           (window as Window & { webkitAudioContext?: typeof AudioContext })
             .webkitAudioContext)();
       } catch (error) {
-        console.warn('Web Audio API not supported:', error);
+        this.logger.warn(
+          'Web Audio API not supported',
+          'AccessibilityService',
+          error,
+        );
       }
     }
   }
@@ -485,7 +493,7 @@ export class AccessibilityService {
       oscillator.start(this.audioContext.currentTime);
       oscillator.stop(this.audioContext.currentTime + 0.1);
     } catch (error) {
-      console.warn('Audio feedback failed:', error);
+      this.logger.warn('Audio feedback failed', 'AccessibilityService', error);
     }
   }
 
@@ -516,7 +524,11 @@ export class AccessibilityService {
         this.audioEnabled = preferences.audioEnabled || false;
         this.rotationStep = preferences.rotationStep || 0.05;
       } catch (error) {
-        console.warn('Failed to load accessibility preferences:', error);
+        this.logger.warn(
+          'Failed to load accessibility preferences',
+          'AccessibilityService',
+          error,
+        );
       }
     }
   }

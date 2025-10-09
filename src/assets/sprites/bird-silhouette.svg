@@ -1,0 +1,34 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <!-- Arctic Tern Bird Silhouette -->
+  <!-- Simple, recognizable silhouette for 3D sprite rendering -->
+
+  <!-- Body -->
+  <ellipse cx="64" cy="70" rx="20" ry="28" fill="#ffffff" opacity="0.95"/>
+
+  <!-- Head -->
+  <circle cx="64" cy="45" r="12" fill="#ffffff" opacity="0.95"/>
+
+  <!-- Beak -->
+  <path d="M 64 45 L 78 43 L 64 47 Z" fill="#ff4444" opacity="0.9"/>
+
+  <!-- Wings (extended, in flight) -->
+  <!-- Left wing -->
+  <path d="M 44 65 Q 15 55 8 70 Q 12 72 20 70 Q 30 68 44 72 Z" fill="#ffffff" opacity="0.9"/>
+
+  <!-- Right wing -->
+  <path d="M 84 65 Q 113 55 120 70 Q 116 72 108 70 Q 98 68 84 72 Z" fill="#ffffff" opacity="0.9"/>
+
+  <!-- Tail (forked, characteristic of terns) -->
+  <!-- Left tail feather -->
+  <path d="M 58 95 Q 50 110 48 120 Q 52 118 56 108 Z" fill="#ffffff" opacity="0.85"/>
+
+  <!-- Right tail feather -->
+  <path d="M 70 95 Q 78 110 80 120 Q 76 118 72 108 Z" fill="#ffffff" opacity="0.85"/>
+
+  <!-- Eye detail -->
+  <circle cx="67" cy="43" r="2" fill="#333333"/>
+
+  <!-- Wing tips (darker for depth) -->
+  <path d="M 8 70 Q 10 75 15 72 Q 12 70 8 70 Z" fill="#cccccc" opacity="0.6"/>
+  <path d="M 120 70 Q 118 75 113 72 Q 116 70 120 70 Z" fill="#cccccc" opacity="0.6"/>
+</svg>

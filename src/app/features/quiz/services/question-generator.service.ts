@@ -7,6 +7,7 @@ import {
 } from '../models/quiz.models';
 import { CountryDataService } from '../../../core/services/country-data.service';
 import { CountryDataRecord } from '../../../core/types/country-data.types';
+import { LoggerService } from '../../../core/services/logger.service';
 
 /**
  * Question Generation Service
@@ -22,6 +23,7 @@ import { CountryDataRecord } from '../../../core/types/country-data.types';
 })
 export class QuestionGeneratorService {
   private readonly countryDataService = inject(CountryDataService);
+  private readonly logger = inject(LoggerService);
 
   // Distractor count by difficulty
   private readonly CHOICE_COUNTS = {
@@ -85,8 +87,9 @@ export class QuestionGeneratorService {
       case 'facts-guess':
         return this.generateFactsGuessQuestions(difficulty, questionCount);
       default:
-        console.warn(
+        this.logger.warn(
           `Question generation for mode '${mode}' not implemented yet`,
+          'QuestionGeneratorService',
         );
         return this.generateStubQuestions(mode, difficulty, questionCount);
     }
@@ -101,7 +104,11 @@ export class QuestionGeneratorService {
     const allCountries = this.countryDataService.getAllCountries();
 
     if (allCountries.length === 0) {
-      console.error('No countries available for quiz generation');
+      this.logger.error(
+        'No countries available for quiz generation',
+        null,
+        'QuestionGeneratorService',
+      );
       return this.generateStubQuestions('find-country', difficulty, count);
     }
 
@@ -111,8 +118,9 @@ export class QuestionGeneratorService {
     );
 
     if (eligibleCountries.length === 0) {
-      console.warn(
+      this.logger.warn(
         'No eligible countries for difficulty, falling back to stub questions',
+        'QuestionGeneratorService',
       );
       return this.generateStubQuestions('find-country', difficulty, count);
     }

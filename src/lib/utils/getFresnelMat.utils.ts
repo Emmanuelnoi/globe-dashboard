@@ -4,6 +4,9 @@ import { Color, ShaderMaterial, AdditiveBlending } from 'three';
 interface FresnelMatProps {
   rimHex?: number;
   facingHex?: number;
+  fresnelBias?: number;
+  fresnelScale?: number;
+  fresnelPower?: number;
 }
 
 /**
@@ -14,13 +17,16 @@ interface FresnelMatProps {
 function getFresnelMat({
   rimHex = 0x0088ff,
   facingHex = 0x000000,
+  fresnelBias = 0.1,
+  fresnelScale = 0.5,
+  fresnelPower = 4.5,
 }: FresnelMatProps = {}): ShaderMaterial {
   const uniforms = {
     color1: { value: new Color(rimHex) },
     color2: { value: new Color(facingHex) },
-    fresnelBias: { value: 0.1 },
-    fresnelScale: { value: 0.7 },
-    fresnelPower: { value: 3.0 },
+    fresnelBias: { value: fresnelBias },
+    fresnelScale: { value: fresnelScale },
+    fresnelPower: { value: fresnelPower },
   };
 
   const vs: string = `

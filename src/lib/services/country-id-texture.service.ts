@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import {
   Texture,
   CanvasTexture,
@@ -6,6 +6,7 @@ import {
   RGBAFormat,
   ClampToEdgeWrapping,
 } from 'three';
+import { LoggerService } from '../../app/core/services/logger.service';
 
 /**
  * Country lookup data interface
@@ -73,6 +74,9 @@ export class CountryIdTextureService {
   // Performance settings
   private readonly useHighResolution: boolean;
 
+  // Logger service
+  private readonly logger = inject(LoggerService);
+
   constructor() {
     // Determine resolution based on device capabilities
     this.useHighResolution = this.detectDeviceCapabilities();
@@ -103,8 +107,9 @@ export class CountryIdTextureService {
       // Create selection mask canvas
       this.createSelectionMask(idMapImage.width, idMapImage.height);
 
-      console.log(
-        `✅ Country ID textures loaded: ${Object.keys(lookupData.countries).length} countries`,
+      this.logger.success(
+        `Country ID textures loaded: ${Object.keys(lookupData.countries).length} countries`,
+        'CountryIdTextureService',
       );
       this.isLoaded.set(true);
     } catch (error) {
@@ -112,7 +117,11 @@ export class CountryIdTextureService {
         error instanceof Error
           ? error.message
           : 'Unknown error loading country ID assets';
-      console.error('❌ Failed to load country ID assets:', error);
+      this.logger.error(
+        'Failed to load country ID assets',
+        error,
+        'CountryIdTextureService',
+      );
       this.loadError.set(errorMessage);
     } finally {
       this.isLoading.set(false);
@@ -124,7 +133,10 @@ export class CountryIdTextureService {
    */
   updateSelectionMask(selectedIds: Set<string>): void {
     if (!this.selectionMaskContext || !this.countryLookup) {
-      console.warn('Selection mask not initialized');
+      this.logger.warn(
+        'Selection mask not initialized',
+        'CountryIdTextureService',
+      );
       return;
     }
 
@@ -303,6 +315,11 @@ export class CountryIdTextureService {
     }
     this.selectionMaskContext = context;
 
+    // CRITICAL FIX: Initialize canvas with transparent black to prevent uninitialized memory
+    context.clearRect(0, 0, width, height);
+    context.fillStyle = 'rgba(0, 0, 0, 0)';
+    context.fillRect(0, 0, width, height);
+
     // Create THREE.js texture from canvas
     this.selectionMaskTexture = new CanvasTexture(this.selectionMaskCanvas);
     this.selectionMaskTexture.format = RGBAFormat;
@@ -311,6 +328,7 @@ export class CountryIdTextureService {
     this.selectionMaskTexture.wrapS = ClampToEdgeWrapping;
     this.selectionMaskTexture.wrapT = ClampToEdgeWrapping;
     this.selectionMaskTexture.generateMipmaps = false;
+    this.selectionMaskTexture.needsUpdate = true;
   }
 
   private paintSelectionMaskBitmap(selectedIds: Set<string>): void {

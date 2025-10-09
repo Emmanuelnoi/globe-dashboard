@@ -38,6 +38,12 @@ export default [
       "no-unused-vars": "off", // Turned off in favor of @typescript-eslint rule
       "@typescript-eslint/explicit-function-return-type": "error",
       "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unsafe-assignment": "warn",
+      "@typescript-eslint/no-unsafe-member-access": "warn",
+      "@typescript-eslint/no-unsafe-call": "warn",
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "max-lines": ["warn", { max: 800, skipComments: true }],
+      complexity: ["warn", { max: 20 }],
       "prefer-const": "error",
       "no-var": "error",
       "no-undef": "off", // TypeScript handles this

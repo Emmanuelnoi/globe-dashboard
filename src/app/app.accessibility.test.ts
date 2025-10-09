@@ -87,7 +87,7 @@ describe('App Accessibility', () => {
   it('should have proper ARIA landmarks', () => {
     fixture.detectChanges();
 
-    const compiled = fixture.nativeElement;
+    const compiled: HTMLElement = fixture.nativeElement as HTMLElement;
 
     // Check for application role
     const appContainer = compiled.querySelector('[role="application"]');
@@ -110,7 +110,7 @@ describe('App Accessibility', () => {
   it('should have skip to main content link', () => {
     fixture.detectChanges();
 
-    const compiled = fixture.nativeElement;
+    const compiled: HTMLElement = fixture.nativeElement as HTMLElement;
     const skipLink = compiled.querySelector('.skip-link');
 
     expect(skipLink).toBeTruthy();
@@ -122,7 +122,7 @@ describe('App Accessibility', () => {
   it('should have screen reader description', () => {
     fixture.detectChanges();
 
-    const compiled = fixture.nativeElement;
+    const compiled: HTMLElement = fixture.nativeElement as HTMLElement;
     const description = compiled.querySelector('#globe-description');
 
     expect(description).toBeTruthy();
@@ -135,7 +135,7 @@ describe('App Accessibility', () => {
   it('should have proper heading structure', () => {
     fixture.detectChanges();
 
-    const compiled = fixture.nativeElement;
+    const compiled: HTMLElement = fixture.nativeElement as HTMLElement;
 
     // The main app should not have conflicting headings
     // Sidebar and comparison card should have their own proper heading structure
@@ -148,12 +148,12 @@ describe('App Accessibility', () => {
   it('should have accessible focus management', () => {
     fixture.detectChanges();
 
-    const compiled = fixture.nativeElement;
+    const compiled: HTMLElement = fixture.nativeElement as HTMLElement;
     const skipLink = compiled.querySelector('.skip-link');
     const main = compiled.querySelector('main');
 
     // Skip link should be focusable
-    expect(skipLink?.tabIndex).not.toBe(-1);
+    expect((skipLink as HTMLElement | null)?.tabIndex).not.toBe(-1);
 
     // Main content should be focusable for skip link target
     expect(main?.hasAttribute('tabindex')).toBeFalsy(); // No explicit tabindex needed for main
@@ -162,7 +162,7 @@ describe('App Accessibility', () => {
   it('should provide semantic structure', () => {
     fixture.detectChanges();
 
-    const compiled = fixture.nativeElement;
+    const compiled: HTMLElement = fixture.nativeElement as HTMLElement;
 
     // Check that we have proper semantic elements
     expect(compiled.querySelector('main')).toBeTruthy();
@@ -180,7 +180,7 @@ describe('App Accessibility', () => {
   it('should have proper ARIA relationships', () => {
     fixture.detectChanges();
 
-    const compiled = fixture.nativeElement;
+    const compiled: HTMLElement = fixture.nativeElement as HTMLElement;
     const main = compiled.querySelector('main');
     const description = compiled.querySelector('#globe-description');
 
@@ -195,7 +195,7 @@ describe('App Accessibility', () => {
     // This test verifies that our CSS includes reduced motion support
     // The actual media query is tested through CSS, but we can verify
     // that the structure supports it
-    const compiled = fixture.nativeElement;
+    const compiled: HTMLElement = fixture.nativeElement as HTMLElement;
     const appContainer = compiled.querySelector('.app-container');
 
     expect(appContainer).toBeTruthy();

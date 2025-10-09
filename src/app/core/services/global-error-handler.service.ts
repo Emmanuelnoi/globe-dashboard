@@ -1,4 +1,10 @@
-import { Injectable, ErrorHandler, NgZone, inject } from '@angular/core';
+import {
+  Injectable,
+  ErrorHandler,
+  NgZone,
+  inject,
+  OnDestroy,
+} from '@angular/core';
 import { Router } from '@angular/router';
 
 export interface ErrorContext {
@@ -24,7 +30,7 @@ export interface ProcessedError {
 @Injectable({
   providedIn: 'root',
 })
-export class GlobalErrorHandlerService implements ErrorHandler {
+export class GlobalErrorHandlerService implements ErrorHandler, OnDestroy {
   private ngZone = inject(NgZone);
   private router = inject(Router);
 
@@ -32,10 +38,19 @@ export class GlobalErrorHandlerService implements ErrorHandler {
   private readonly maxQueueSize = 50;
   private readonly batchSize = 10;
   private readonly flushInterval = 30000; // 30 seconds
+  private batchProcessingInterval: number | null = null;
 
   constructor() {
     this.startBatchProcessing();
     this.setupUnhandledRejectionHandler();
+  }
+
+  ngOnDestroy(): void {
+    // Clean up interval to prevent memory leaks
+    if (this.batchProcessingInterval !== null) {
+      clearInterval(this.batchProcessingInterval);
+      this.batchProcessingInterval = null;
+    }
   }
 
   handleError(error: Error | unknown): void {
@@ -267,7 +282,7 @@ export class GlobalErrorHandlerService implements ErrorHandler {
   }
 
   private startBatchProcessing(): void {
-    setInterval(() => {
+    this.batchProcessingInterval = window.setInterval(() => {
       if (this.errorQueue.length >= this.batchSize) {
         const batch = this.errorQueue.splice(0, this.batchSize);
         this.sendErrorToService(batch);

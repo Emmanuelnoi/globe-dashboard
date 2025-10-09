@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import {
   Material,
   Mesh,
@@ -10,6 +10,7 @@ import {
   Object3D,
   LineSegments,
 } from 'three';
+import { LoggerService } from './logger.service';
 
 /**
  * Service for managing Three.js memory and preventing memory leaks
@@ -18,6 +19,7 @@ import {
   providedIn: 'root',
 })
 export class MemoryManagementService implements OnDestroy {
+  private readonly logger = inject(LoggerService);
   private disposables: Set<Disposable> = new Set();
   private tracked3DObjects: Set<Object3D> = new Set();
 
@@ -189,7 +191,11 @@ export class MemoryManagementService implements OnDestroy {
       try {
         disposable.dispose();
       } catch (error) {
-        console.warn('Error disposing resource:', error);
+        this.logger.warn(
+          'Error disposing resource',
+          'MemoryManagementService',
+          error,
+        );
       }
     });
     this.disposables.clear();
@@ -203,7 +209,11 @@ export class MemoryManagementService implements OnDestroy {
     try {
       material.dispose();
     } catch (error) {
-      console.warn('Error disposing material:', error);
+      this.logger.warn(
+        'Error disposing material',
+        'MemoryManagementService',
+        error,
+      );
     }
   }
 
@@ -211,7 +221,11 @@ export class MemoryManagementService implements OnDestroy {
     try {
       geometry.dispose();
     } catch (error) {
-      console.warn('Error disposing geometry:', error);
+      this.logger.warn(
+        'Error disposing geometry',
+        'MemoryManagementService',
+        error,
+      );
     }
   }
 
@@ -245,7 +259,11 @@ export class MemoryManagementService implements OnDestroy {
         try {
           (texture as { dispose: () => void }).dispose();
         } catch (error) {
-          console.warn(`Error disposing texture ${prop}:`, error);
+          this.logger.warn(
+            `Error disposing texture ${prop}`,
+            'MemoryManagementService',
+            error,
+          );
         }
       }
     });

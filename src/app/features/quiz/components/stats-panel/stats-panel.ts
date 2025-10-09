@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   inject,
   ElementRef,
@@ -31,6 +32,7 @@ interface ExportedStatsData {
   selector: 'app-stats-panel',
   standalone: true,
   imports: [DecimalPipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="stats-modal-card"
@@ -832,8 +834,6 @@ export class StatsPanelComponent {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
-      console.log('📥 Statistics exported successfully');
     } catch (error) {
       console.error('❌ Failed to export statistics:', error);
       alert('Failed to export statistics. Please try again.');
@@ -885,7 +885,6 @@ export class StatsPanelComponent {
       }
 
       await this.userStatsService.importData(data);
-      console.log('📤 Statistics imported successfully');
       alert('Statistics imported successfully!');
     } catch (error) {
       console.error('❌ Failed to import statistics:', error);

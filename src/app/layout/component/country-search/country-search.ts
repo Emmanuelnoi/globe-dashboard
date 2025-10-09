@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
@@ -20,6 +21,7 @@ import { CountryDataService } from '../../../core/services/country-data.service'
   selector: 'app-country-search',
   standalone: true,
   imports: [CommonModule, FormsModule, IconComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="country-search" [class.collapsed]="collapsed()">
       <!-- Search Input -->

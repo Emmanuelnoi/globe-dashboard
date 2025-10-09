@@ -1,0 +1,88 @@
+<div
+  class="migration-hub"
+  [class.collapsed]="isCollapsed()"
+  role="region"
+  aria-label="Bird Migration Visualization"
+>
+  <div class="migration-content">
+    <!-- Compact Header with Collapse Button -->
+    <header class="migration-header">
+      <h2 id="migration-title">🐦 Bird Migration</h2>
+      <button
+        type="button"
+        class="collapse-btn"
+        (click)="toggleCollapse()"
+        [attr.aria-expanded]="!isCollapsed()"
+        aria-label="{{ isCollapsed() ? 'Expand panel' : 'Collapse panel' }}"
+      >
+        {{ isCollapsed() ? "▲" : "▼" }}
+      </button>
+    </header>
+
+    <!-- Collapsible Content -->
+    @if (!isCollapsed()) {
+      <!-- Loading State -->
+      @if (isLoading()) {
+        <div class="loading-state">
+          <p>📦 Loading migration data...</p>
+        </div>
+      }
+
+      <!-- Data Loaded Content -->
+      @if (dataLoaded() && !isLoading()) {
+        <!-- Compact Single-Line Instructions -->
+        <div class="compact-instructions">
+          <span class="instruction-item">🖱️ Hover markers</span>
+          <span class="instruction-item">👆 Click to activate paths</span>
+          <span class="instruction-item">🐦 Watch migration</span>
+        </div>
+
+        <!-- Compact Species Grid -->
+        <div class="species-grid">
+          <button class="species-badge" (click)="selectSpecies('Arctic Tern')">
+            Arctic Tern
+          </button>
+          <button
+            class="species-badge"
+            (click)="selectSpecies('Bar-tailed Godwit')"
+          >
+            Bar-tailed Godwit
+          </button>
+          <button
+            class="species-badge"
+            (click)="selectSpecies('Ruby-throated Hummingbird')"
+          >
+            Ruby-throated Hummingbird
+          </button>
+          <button class="species-badge" (click)="selectSpecies('Barn Swallow')">
+            Barn Swallow
+          </button>
+          <button class="species-badge" (click)="selectSpecies('Red Knot')">
+            Red Knot
+          </button>
+          <button class="species-badge" (click)="selectSpecies('Common Crane')">
+            Common Crane
+          </button>
+          <button
+            class="species-badge"
+            (click)="selectSpecies('Oriental Honey Buzzard')"
+          >
+            Oriental Honey Buzzard
+          </button>
+          <button class="species-badge" (click)="selectSpecies('White Stork')">
+            White Stork
+          </button>
+          <button class="species-badge" (click)="selectSpecies('Barn Owl')">
+            Barn Owl
+          </button>
+          <button
+            class="species-badge"
+            (click)="selectSpecies('Rufous Hummingbird')"
+          >
+            Rufous Hummingbird
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>

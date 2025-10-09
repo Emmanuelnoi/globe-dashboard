@@ -3,6 +3,7 @@ import { StatsPanelComponent } from './stats-panel';
 import { UserStatsService } from '../../../../core/services/user-stats.service';
 import { GameSession, GameConfiguration } from '../../models/quiz.models';
 import { vi } from 'vitest';
+import 'fake-indexeddb/auto';
 
 /**
  * StatsPanelComponent Integration Tests

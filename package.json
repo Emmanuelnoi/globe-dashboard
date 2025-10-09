@@ -27,10 +27,10 @@
     "format:check": "prettier --check .",
     "prepare": "husky install",
     "data:fetch": "npx tsx scripts/fetch-country-data-robust.ts",
-    "data:update": "npm run data:fetch && npm run format",
+    "data:update": "pnpm run data:fetch && pnpm run format",
     "geo:convert": "node scripts/geo/convert-geojson-to-topo.mjs",
     "geo:convert:verbose": "node scripts/geo/convert-geojson-to-topo.mjs --verbose",
-    "prebuild": "npm run data:fetch && npm run geo:convert"
+    "prebuild": "pnpm run data:fetch && pnpm run geo:convert"
   },
   "prettier": {
     "overrides": [
@@ -78,6 +78,7 @@
     "@types/node": "^24.4.0",
     "@types/three": "^0.179.0",
     "@types/topojson-client": "^3.1.4",
+    "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "angular-eslint": "20.1.1",
     "autoprefixer": "^10.4.21",
@@ -86,6 +87,7 @@
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
+    "fake-indexeddb": "^6.2.2",
     "gl": "^8.1.6",
     "globals": "^16.4.0",
     "headless-gl": "^3.0.7",

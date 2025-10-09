@@ -1,0 +1,369 @@
+{
+  "migrations": [
+    {
+      "id": "arctic-tern-2024",
+      "speciesId": "arctic-tern",
+      "startLocation": {
+        "lat": 80.0,
+        "lon": -20.0,
+        "name": "Greenland",
+        "date": "2024-05-15T00:00:00.000Z"
+      },
+      "endLocation": {
+        "lat": -77.0,
+        "lon": 166.0,
+        "name": "Antarctica",
+        "date": "2024-10-01T00:00:00.000Z"
+      },
+      "waypoints": [
+        { "lat": 65.0, "lon": -25.0, "name": "Iceland" },
+        { "lat": 50.0, "lon": -30.0, "name": "North Atlantic" },
+        { "lat": 30.0, "lon": -35.0, "name": "Mid Atlantic" },
+        { "lat": 0.0, "lon": -40.0, "name": "Equator" },
+        { "lat": -30.0, "lon": -45.0, "name": "South Atlantic" },
+        { "lat": -60.0, "lon": 0.0, "name": "Southern Ocean" }
+      ],
+      "distanceKm": 44000,
+      "durationDays": 139,
+      "flyway": "Atlantic Americas",
+      "isSensitive": false
+    },
+    {
+      "id": "bar-tailed-godwit-2024",
+      "speciesId": "bar-tailed-godwit",
+      "startLocation": {
+        "lat": 64.0,
+        "lon": -165.0,
+        "name": "Alaska",
+        "date": "2024-09-01T00:00:00.000Z"
+      },
+      "endLocation": {
+        "lat": -41.0,
+        "lon": 174.0,
+        "name": "New Zealand",
+        "date": "2024-09-10T00:00:00.000Z"
+      },
+      "waypoints": [
+        { "lat": 50.0, "lon": -175.0, "name": "North Pacific" },
+        { "lat": 30.0, "lon": 175.0, "name": "Mid Pacific" },
+        { "lat": 0.0, "lon": 170.0, "name": "Equatorial Pacific" },
+        { "lat": -20.0, "lon": 175.0, "name": "South Pacific" }
+      ],
+      "distanceKm": 11000,
+      "durationDays": 9,
+      "flyway": "Pacific Americas",
+      "isSensitive": false
+    },
+    {
+      "id": "ruby-throated-hummingbird-2024",
+      "speciesId": "ruby-throated-hummingbird",
+      "startLocation": {
+        "lat": 43.0,
+        "lon": -79.0,
+        "name": "Ontario, Canada",
+        "date": "2024-09-15T00:00:00.000Z"
+      },
+      "endLocation": {
+        "lat": 15.0,
+        "lon": -90.0,
+        "name": "Guatemala",
+        "date": "2024-10-15T00:00:00.000Z"
+      },
+      "waypoints": [
+        { "lat": 38.0, "lon": -85.0, "name": "Kentucky" },
+        { "lat": 30.0, "lon": -90.0, "name": "Louisiana" },
+        { "lat": 25.0, "lon": -90.0, "name": "Gulf of Mexico" },
+        { "lat": 20.0, "lon": -90.0, "name": "Yucatan Peninsula" }
+      ],
+      "distanceKm": 3200,
+      "durationDays": 30,
+      "flyway": "Mississippi Americas",
+      "isSensitive": false
+    },
+    {
+      "id": "barn-swallow-2024",
+      "speciesId": "barn-swallow",
+      "startLocation": {
+        "lat": 55.0,
+        "lon": 12.0,
+        "name": "Denmark",
+        "date": "2024-08-20T00:00:00.000Z"
+      },
+      "endLocation": {
+        "lat": -26.0,
+        "lon": 28.0,
+        "name": "South Africa",
+        "date": "2024-11-01T00:00:00.000Z"
+      },
+      "waypoints": [
+        { "lat": 45.0, "lon": 15.0, "name": "Italy" },
+        { "lat": 35.0, "lon": 10.0, "name": "Tunisia" },
+        { "lat": 20.0, "lon": 15.0, "name": "Chad" },
+        { "lat": 0.0, "lon": 20.0, "name": "Democratic Republic of Congo" },
+        { "lat": -15.0, "lon": 25.0, "name": "Zambia" }
+      ],
+      "distanceKm": 9600,
+      "durationDays": 73,
+      "flyway": "East Atlantic",
+      "isSensitive": false
+    },
+    {
+      "id": "red-knot-2024",
+      "speciesId": "red-knot",
+      "startLocation": {
+        "lat": 75.0,
+        "lon": -95.0,
+        "name": "Canadian Arctic",
+        "date": "2024-08-10T00:00:00.000Z"
+      },
+      "endLocation": {
+        "lat": -55.0,
+        "lon": -68.0,
+        "name": "Tierra del Fuego",
+        "date": "2024-11-15T00:00:00.000Z"
+      },
+      "waypoints": [
+        { "lat": 52.0, "lon": -78.0, "name": "James Bay, Canada" },
+        { "lat": 42.0, "lon": -74.0, "name": "Delaware Bay, USA" },
+        { "lat": 10.0, "lon": -60.0, "name": "Suriname" },
+        { "lat": -15.0, "lon": -50.0, "name": "Brazil" },
+        { "lat": -35.0, "lon": -57.0, "name": "Argentina" }
+      ],
+      "distanceKm": 15000,
+      "durationDays": 97,
+      "flyway": "Atlantic Americas",
+      "isSensitive": false
+    },
+    {
+      "id": "common-crane-2024",
+      "speciesId": "common-crane",
+      "startLocation": {
+        "lat": 60.0,
+        "lon": 25.0,
+        "name": "Finland",
+        "date": "2024-09-20T00:00:00.000Z"
+      },
+      "endLocation": {
+        "lat": 28.0,
+        "lon": 77.0,
+        "name": "India",
+        "date": "2024-11-10T00:00:00.000Z"
+      },
+      "waypoints": [
+        { "lat": 52.0, "lon": 35.0, "name": "Ukraine" },
+        { "lat": 42.0, "lon": 45.0, "name": "Georgia" },
+        { "lat": 35.0, "lon": 55.0, "name": "Iran" },
+        { "lat": 32.0, "lon": 65.0, "name": "Afghanistan" }
+      ],
+      "distanceKm": 5500,
+      "durationDays": 51,
+      "flyway": "Central Asian",
+      "isSensitive": false
+    },
+    {
+      "id": "oriental-honey-buzzard-2024",
+      "speciesId": "oriental-honey-buzzard",
+      "startLocation": {
+        "lat": 45.0,
+        "lon": 127.0,
+        "name": "Northeast China",
+        "date": "2024-09-01T00:00:00.000Z"
+      },
+      "endLocation": {
+        "lat": -8.0,
+        "lon": 115.0,
+        "name": "Indonesia",
+        "date": "2024-10-20T00:00:00.000Z"
+      },
+      "waypoints": [
+        { "lat": 35.0, "lon": 120.0, "name": "East China" },
+        { "lat": 22.0, "lon": 114.0, "name": "Hong Kong" },
+        { "lat": 10.0, "lon": 105.0, "name": "Vietnam" },
+        { "lat": 0.0, "lon": 110.0, "name": "Borneo" }
+      ],
+      "distanceKm": 6200,
+      "durationDays": 49,
+      "flyway": "East Asia-Australasian",
+      "isSensitive": false
+    },
+    {
+      "id": "white-stork-2024",
+      "speciesId": "white-stork",
+      "startLocation": {
+        "lat": 52.0,
+        "lon": 13.0,
+        "name": "Germany",
+        "date": "2024-08-25T00:00:00.000Z"
+      },
+      "endLocation": {
+        "lat": -26.0,
+        "lon": 28.0,
+        "name": "South Africa",
+        "date": "2024-11-10T00:00:00.000Z"
+      },
+      "waypoints": [
+        { "lat": 42.0, "lon": 20.0, "name": "Balkans" },
+        { "lat": 32.0, "lon": 30.0, "name": "Egypt" },
+        { "lat": 15.0, "lon": 35.0, "name": "Sudan" },
+        { "lat": 0.0, "lon": 35.0, "name": "Kenya" },
+        { "lat": -15.0, "lon": 30.0, "name": "Tanzania" }
+      ],
+      "distanceKm": 10000,
+      "durationDays": 77,
+      "flyway": "Black Sea/Mediterranean",
+      "isSensitive": false
+    },
+    {
+      "id": "barn-owl-2024",
+      "speciesId": "barn-owl",
+      "startLocation": {
+        "lat": 52.0,
+        "lon": -2.0,
+        "name": "United Kingdom",
+        "date": "2024-10-01T00:00:00.000Z"
+      },
+      "endLocation": {
+        "lat": 36.0,
+        "lon": -5.0,
+        "name": "Spain",
+        "date": "2024-11-15T00:00:00.000Z"
+      },
+      "waypoints": [
+        { "lat": 49.0, "lon": -2.0, "name": "Northern France" },
+        { "lat": 44.0, "lon": -1.0, "name": "Southwest France" }
+      ],
+      "distanceKm": 1800,
+      "durationDays": 45,
+      "flyway": "East Atlantic",
+      "isSensitive": false
+    },
+    {
+      "id": "rufous-hummingbird-2024",
+      "speciesId": "rufous-hummingbird",
+      "startLocation": {
+        "lat": 61.0,
+        "lon": -149.0,
+        "name": "Alaska",
+        "date": "2024-07-15T00:00:00.000Z"
+      },
+      "endLocation": {
+        "lat": 19.0,
+        "lon": -99.0,
+        "name": "Mexico",
+        "date": "2024-09-30T00:00:00.000Z"
+      },
+      "waypoints": [
+        { "lat": 50.0, "lon": -120.0, "name": "British Columbia" },
+        { "lat": 40.0, "lon": -115.0, "name": "Nevada" },
+        { "lat": 30.0, "lon": -110.0, "name": "Arizona" },
+        { "lat": 25.0, "lon": -105.0, "name": "Northern Mexico" }
+      ],
+      "distanceKm": 5000,
+      "durationDays": 77,
+      "flyway": "Pacific Americas",
+      "isSensitive": false
+    }
+  ],
+  "species": [
+    {
+      "id": "arctic-tern",
+      "commonName": "Arctic Tern",
+      "scientificName": "Sterna paradisaea",
+      "description": "Arctic Terns hold the record for the longest migration, traveling from Arctic to Antarctic and back each year.",
+      "conservationStatus": "LC",
+      "funFact": "Arctic Terns see more daylight than any other animal, experiencing two summers per year!",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Arctic_tern",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Arctic_tern.jpg/400px-Arctic_tern.jpg"
+    },
+    {
+      "id": "bar-tailed-godwit",
+      "commonName": "Bar-tailed Godwit",
+      "scientificName": "Limosa lapponica",
+      "description": "Bar-tailed Godwits make the longest non-stop flight of any bird, flying from Alaska to New Zealand without rest.",
+      "conservationStatus": "LC",
+      "funFact": "Bar-tailed Godwits can fly non-stop for over 7,000 miles without food or water!",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Bar-tailed_godwit",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Bar-tailed_Godwit.jpg/400px-Bar-tailed_Godwit.jpg"
+    },
+    {
+      "id": "ruby-throated-hummingbird",
+      "commonName": "Ruby-throated Hummingbird",
+      "scientificName": "Archilochus colubris",
+      "description": "Ruby-throated Hummingbirds are the only hummingbird species that breeds in Eastern North America.",
+      "conservationStatus": "LC",
+      "funFact": "Ruby-throated Hummingbirds fly 500 miles non-stop across the Gulf of Mexico!",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Ruby-throated_hummingbird",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Ruby-throated_Hummingbird_%28male%29.jpg/400px-Ruby-throated_Hummingbird_%28male%29.jpg"
+    },
+    {
+      "id": "barn-swallow",
+      "commonName": "Barn Swallow",
+      "scientificName": "Hirundo rustica",
+      "description": "Barn Swallows are one of the most widespread and common bird species in the world.",
+      "conservationStatus": "LC",
+      "funFact": "Barn Swallows can travel up to 200 miles per day during migration!",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Barn_swallow",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Barn_Swallow.jpg/400px-Barn_Swallow.jpg"
+    },
+    {
+      "id": "red-knot",
+      "commonName": "Red Knot",
+      "scientificName": "Calidris canutus",
+      "description": "Red Knots are champion long-distance migrants, relying on a few critical stopover sites along their route.",
+      "conservationStatus": "NT",
+      "funFact": "Red Knots can detect magnetic fields to navigate during migration!",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Red_knot",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Red_Knot.jpg/400px-Red_Knot.jpg"
+    },
+    {
+      "id": "common-crane",
+      "commonName": "Common Crane",
+      "scientificName": "Grus grus",
+      "description": "Common Cranes migrate in large flocks, flying in distinctive V-formations across continents.",
+      "conservationStatus": "LC",
+      "funFact": "Common Cranes can fly at altitudes up to 33,000 feet during migration!",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Common_crane",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Common_Crane_%28Grus_grus%29.jpg/400px-Common_Crane_%28Grus_grus%29.jpg"
+    },
+    {
+      "id": "oriental-honey-buzzard",
+      "commonName": "Oriental Honey Buzzard",
+      "scientificName": "Pernis ptilorhynchus",
+      "description": "Oriental Honey Buzzards migrate through narrow land corridors, creating spectacular bottleneck sightings.",
+      "conservationStatus": "LC",
+      "funFact": "Over 100,000 Oriental Honey Buzzards can be seen migrating through Taiwan in autumn!",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Oriental_honey_buzzard",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Pernis_ptilorhynchus_-_Mae_Wong.jpg/400px-Pernis_ptilorhynchus_-_Mae_Wong.jpg"
+    },
+    {
+      "id": "white-stork",
+      "commonName": "White Stork",
+      "scientificName": "Ciconia ciconia",
+      "description": "White Storks are iconic migrants, using thermal updrafts to soar efficiently over long distances.",
+      "conservationStatus": "LC",
+      "funFact": "White Storks have been tracked migrating over 10,000 miles from Europe to Africa!",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/White_stork",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/White_Stork_%28Ciconia_ciconia%29_..._%2851318611478%29.jpg/400px-White_Stork_%28Ciconia_ciconia%29_..._%2851318611478%29.jpg"
+    },
+    {
+      "id": "barn-owl",
+      "commonName": "Barn Owl",
+      "scientificName": "Tyto alba",
+      "description": "While many Barn Owls are sedentary, some populations undertake short migrations to warmer climates.",
+      "conservationStatus": "LC",
+      "funFact": "Barn Owls can hunt in complete darkness using their exceptional hearing!",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Barn_owl",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Tyto_alba_-British_Wildlife_Centre%2C_Surrey%2C_England-8a_%282%29.jpg/400px-Tyto_alba_-British_Wildlife_Centre%2C_Surrey%2C_England-8a_%282%29.jpg"
+    },
+    {
+      "id": "rufous-hummingbird",
+      "commonName": "Rufous Hummingbird",
+      "scientificName": "Selasphorus rufus",
+      "description": "Rufous Hummingbirds have the longest migration route of any hummingbird relative to body size.",
+      "conservationStatus": "LC",
+      "funFact": "Rufous Hummingbirds travel 3,000+ miles despite weighing only 3-4 grams!",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Rufous_hummingbird",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Rufous_Hummingbird_%28male%29.jpg/400px-Rufous_Hummingbird_%28male%29.jpg"
+    }
+  ]
+}

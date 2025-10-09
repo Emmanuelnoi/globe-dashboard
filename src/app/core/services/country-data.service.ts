@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import {
   CountryDataRecord,
   CountryFilter,
@@ -13,6 +13,7 @@ import {
   COUNTRIES_BY_REGION,
   TOP_COUNTRIES,
 } from '../../../assets/data/country-data';
+import { LoggerService } from './logger.service';
 
 /**
  * High-Performance Country Data Service
@@ -31,6 +32,8 @@ import {
   providedIn: 'root',
 })
 export class CountryDataService {
+  private logger = inject(LoggerService);
+
   // Private signals for internal state management
   private readonly _selectedCountries = signal<string[]>([]);
   private readonly _currentFilter = signal<CountryFilter | null>(null);
@@ -439,7 +442,10 @@ export class CountryDataService {
     }
 
     if (!country) {
-      console.warn(`Country not found after fuzzy matching: ${countryName}`);
+      this.logger.warn(
+        `Country not found after fuzzy matching: ${countryName}`,
+        'CountryDataService',
+      );
       return false;
     }
 
@@ -509,8 +515,9 @@ export class CountryDataService {
       }
     }
 
-    console.warn(
+    this.logger.warn(
       `❌ No fuzzy match found for: "${meshName}" (normalized: "${normalizedMeshName}")`,
+      'CountryDataService',
     );
     return undefined;
   }

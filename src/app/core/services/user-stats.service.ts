@@ -5,12 +5,13 @@ import {
   inject,
   DestroyRef,
 } from '@angular/core';
-import { openDB, IDBPDatabase } from 'idb';
+import { openDB, IDBPDatabase, IDBPObjectStore } from 'idb';
 import {
   GameSession,
   UserStatsV1,
   GameMode,
 } from '../../features/quiz/models/quiz.models';
+import { LoggerService } from './logger.service';
 
 /**
  * User Statistics Service with IndexedDB Persistence
@@ -28,6 +29,7 @@ import {
 })
 export class UserStatsService {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly logger = inject(LoggerService);
   private db: IDBPDatabase | null = null;
   private readonly DB_NAME = 'quiz-stats-db';
   private readonly DB_VERSION = 1;
@@ -91,7 +93,7 @@ export class UserStatsService {
         },
       });
 
-      console.log('📊 IndexedDB initialized successfully');
+      this.logger.debug('📊 IndexedDB initialized successfully');
 
       // Load initial data
       await this.loadStats();
@@ -99,7 +101,7 @@ export class UserStatsService {
 
       this._isLoading.set(false);
     } catch (error) {
-      console.error('❌ Failed to initialize IndexedDB:', error);
+      this.logger.error('❌ Failed to initialize IndexedDB:', error);
       this._lastError.set(
         error instanceof Error
           ? error.message
@@ -116,7 +118,7 @@ export class UserStatsService {
    */
   async saveSession(session: GameSession): Promise<void> {
     if (!this.db) {
-      console.warn('Database not initialized, cannot save session');
+      this.logger.warn('Database not initialized, cannot save session');
       return;
     }
 
@@ -142,13 +144,13 @@ export class UserStatsService {
       // Complete transaction
       await tx.done;
 
-      console.log('💾 Session saved successfully:', session.id);
+      this.logger.debug('💾 Session saved successfully:', session.id);
 
       // Update reactive signals
       this._stats.set(updatedStats);
       await this.loadRecentSessions();
     } catch (error) {
-      console.error('❌ Failed to save session:', error);
+      this.logger.error('❌ Failed to save session:', error);
       this._lastError.set(
         error instanceof Error ? error.message : 'Failed to save session',
       );
@@ -170,7 +172,7 @@ export class UserStatsService {
    */
   async getStats(): Promise<UserStatsV1 | null> {
     if (!this.db) {
-      console.warn('Database not initialized');
+      this.logger.warn('Database not initialized');
       return null;
     }
 
@@ -180,7 +182,7 @@ export class UserStatsService {
         .objectStore('meta');
       return await this.getStatsFromDatabase(metaStore);
     } catch (error) {
-      console.error('❌ Failed to get stats:', error);
+      this.logger.error('❌ Failed to get stats:', error);
       this._lastError.set(
         error instanceof Error ? error.message : 'Failed to load stats',
       );
@@ -193,7 +195,7 @@ export class UserStatsService {
    */
   async getRecentSessions(limit: number = 20): Promise<GameSession[]> {
     if (!this.db) {
-      console.warn('Database not initialized');
+      this.logger.warn('Database not initialized');
       return [];
     }
 
@@ -213,7 +215,7 @@ export class UserStatsService {
         )
         .slice(0, limit);
     } catch (error) {
-      console.error('❌ Failed to get recent sessions:', error);
+      this.logger.error('❌ Failed to get recent sessions:', error);
       this._lastError.set(
         error instanceof Error
           ? error.message
@@ -236,7 +238,7 @@ export class UserStatsService {
 
       return await index.getAll(mode);
     } catch (error) {
-      console.error(`❌ Failed to get sessions for mode ${mode}:`, error);
+      this.logger.error(`❌ Failed to get sessions for mode ${mode}:`, error);
       return [];
     }
   }
@@ -253,14 +255,14 @@ export class UserStatsService {
       await tx.objectStore('meta').clear();
       await tx.done;
 
-      console.log('🗑️ All data cleared successfully');
+      this.logger.debug('🗑️ All data cleared successfully');
 
       // Reset signals
       this._stats.set(null);
       this._recentSessions.set([]);
       this._lastError.set(null);
     } catch (error) {
-      console.error('❌ Failed to clear data:', error);
+      this.logger.error('❌ Failed to clear data:', error);
       this._lastError.set(
         error instanceof Error ? error.message : 'Failed to clear data',
       );
@@ -283,7 +285,7 @@ export class UserStatsService {
 
       return { sessions, stats };
     } catch (error) {
-      console.error('❌ Failed to export data:', error);
+      this.logger.error('❌ Failed to export data:', error);
       this._lastError.set(
         error instanceof Error ? error.message : 'Failed to export data',
       );
@@ -324,13 +326,13 @@ export class UserStatsService {
 
       await tx.done;
 
-      console.log('📥 Data imported successfully');
+      this.logger.debug('📥 Data imported successfully');
 
       // Refresh reactive signals
       await this.loadStats();
       await this.loadRecentSessions();
     } catch (error) {
-      console.error('❌ Failed to import data:', error);
+      this.logger.error('❌ Failed to import data:', error);
       this._lastError.set(
         error instanceof Error ? error.message : 'Failed to import data',
       );
@@ -350,10 +352,15 @@ export class UserStatsService {
   }
 
   private async getStatsFromDatabase(
-    metaStore: any,
+    metaStore: IDBPObjectStore<
+      unknown,
+      string[],
+      'meta',
+      'readonly' | 'readwrite'
+    >,
   ): Promise<UserStatsV1 | null> {
     const result = await metaStore.get('user_stats_v1');
-    return result?.data || null;
+    return (result as { data?: UserStatsV1 })?.data || null;
   }
 
   private calculateUpdatedStats(
@@ -450,7 +457,7 @@ export class UserStatsService {
     if (this.db) {
       this.db.close();
       this.db = null;
-      console.log('🔌 IndexedDB connection closed');
+      this.logger.debug('🔌 IndexedDB connection closed');
     }
   }
 }

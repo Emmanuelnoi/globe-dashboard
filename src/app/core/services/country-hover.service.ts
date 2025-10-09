@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Raycaster, Vector2, Camera, Group, Object3D } from 'three';
+import { LoggerService } from './logger.service';
 
 export interface CountryHoverResult {
   countryName: string;
@@ -12,6 +13,7 @@ export interface CountryHoverResult {
   providedIn: 'root',
 })
 export class CountryHoverService {
+  private readonly logger = inject(LoggerService);
   private raycaster = new Raycaster();
 
   /**
@@ -124,7 +126,11 @@ export class CountryHoverService {
 
       return null;
     } catch (error) {
-      console.warn('❌ Country hover detection failed:', error);
+      this.logger.warn(
+        'Country hover detection failed',
+        'CountryHoverService',
+        error,
+      );
       return null;
     }
   }
@@ -156,8 +162,9 @@ export class CountryHoverService {
       });
     }
 
-    console.log(
-      `🔍 Found ${selectionMeshes.length} selection meshes for raycasting`,
+    this.logger.debug(
+      `Found ${selectionMeshes.length} selection meshes for raycasting`,
+      'CountryHoverService',
     );
     return selectionMeshes;
   }
@@ -193,8 +200,9 @@ export class CountryHoverService {
     // Convert camelCase or handle special cases
     const formattedName = this.formatCountryName(countryName);
 
-    console.log(
-      `🎯 Extracted country name: "${countryName}" -> "${formattedName}"`,
+    this.logger.debug(
+      `Extracted country name: "${countryName}" -> "${formattedName}"`,
+      'CountryHoverService',
     );
     return formattedName;
   }

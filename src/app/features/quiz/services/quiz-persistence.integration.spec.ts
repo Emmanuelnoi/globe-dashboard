@@ -11,6 +11,7 @@ import {
   QuestionResult,
 } from '../models/quiz.models';
 import { vi } from 'vitest';
+import 'fake-indexeddb/auto';
 
 /**
  * Quiz Persistence Integration Tests
@@ -32,27 +33,8 @@ describe('Quiz Persistence Integration', () => {
   let mockCountryDataService: any;
 
   beforeEach(async () => {
-    // Mock IndexedDB for test environment
-    const mockIndexedDB = {
-      open: vi.fn().mockResolvedValue({
-        result: {
-          createObjectStore: vi.fn(),
-          transaction: vi.fn().mockReturnValue({
-            objectStore: vi.fn().mockReturnValue({
-              put: vi.fn(),
-              get: vi.fn(),
-              getAll: vi.fn().mockResolvedValue([]),
-              delete: vi.fn(),
-              clear: vi.fn(),
-            }),
-            complete: Promise.resolve(),
-          }),
-        },
-      }),
-    };
+    // fake-indexeddb is automatically set up via import 'fake-indexeddb/auto'
 
-    // @ts-ignore
-    global.indexedDB = mockIndexedDB;
     // Mock InteractionModeService
     mockInteractionModeService = {
       enableQuizMode: vi.fn(),
@@ -135,7 +117,7 @@ describe('Quiz Persistence Integration', () => {
       quizStateService.startGame(config);
 
       // Verify initial state
-      expect(quizStateService.gameState()).toBe('playing');
+      expect(quizStateService.gameState()).toBe('question');
       expect(quizStateService.currentSession()).toBeTruthy();
       expect(quizStateService.questions().length).toBe(3);
 
@@ -229,7 +211,7 @@ describe('Quiz Persistence Integration', () => {
           case 'incorrect':
             // Select wrong answer (any option that's not correct)
             const wrongAnswer =
-              question.options.find((opt) => opt !== question.correctAnswer) ||
+              question.choices?.find((opt) => opt !== question.correctAnswer) ||
               'WRONG';
             quizStateService.selectCandidate(wrongAnswer);
             quizStateService.confirmCandidate();

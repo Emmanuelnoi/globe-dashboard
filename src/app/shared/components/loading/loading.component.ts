@@ -1,4 +1,11 @@
-import { Component, Input, signal, OnInit, OnChanges } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  signal,
+  OnInit,
+  OnChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export type LoadingVariant =
@@ -13,6 +20,7 @@ export type LoadingSize = 'small' | 'medium' | 'large';
   selector: 'app-loading',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="loading-container"

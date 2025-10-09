@@ -1,6 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { BehaviorSubject, Observable, timer } from 'rxjs';
 import { WebGLRenderer } from 'three';
+import { LoggerService } from './logger.service';
 
 /**
  * Service for handling globe-specific errors and recovery mechanisms
@@ -9,6 +10,7 @@ import { WebGLRenderer } from 'three';
   providedIn: 'root',
 })
 export class GlobeErrorRecoveryService {
+  private readonly logger = inject(LoggerService);
   private readonly maxRetryAttempts = 3;
   private readonly retryDelayMs = 2000;
 
@@ -29,7 +31,10 @@ export class GlobeErrorRecoveryService {
     canvas: HTMLCanvasElement,
     onRecover: () => Promise<void>,
   ): void {
-    console.warn('WebGL context lost, attempting recovery...');
+    this.logger.warn(
+      'WebGL context lost, attempting recovery...',
+      'GlobeErrorRecoveryService',
+    );
 
     this.hasWebGLError.set(true);
     this.isRecovering.set(true);
@@ -47,13 +52,20 @@ export class GlobeErrorRecoveryService {
         this.isRecovering.set(false);
         this.errorMessage.set(null);
 
-        console.log('WebGL context successfully restored');
+        this.logger.success(
+          'WebGL context successfully restored',
+          'GlobeErrorRecoveryService',
+        );
         canvas.removeEventListener(
           'webglcontextrestored',
           handleContextRestore,
         );
       } catch (error) {
-        console.error('Failed to recover from WebGL context loss:', error);
+        this.logger.error(
+          'Failed to recover from WebGL context loss',
+          error,
+          'GlobeErrorRecoveryService',
+        );
         this.setFatalError(
           'Failed to restore 3D rendering. Please refresh the page.',
         );
@@ -74,7 +86,7 @@ export class GlobeErrorRecoveryService {
    * Handle data loading errors with retry mechanism
    */
   handleDataLoadingError(error: Error, retryFn: () => Promise<void>): void {
-    console.error('Data loading error:', error);
+    this.logger.error('Data loading error', error, 'GlobeErrorRecoveryService');
 
     const currentRetries = this.dataRetrySubject.value;
 
@@ -105,7 +117,11 @@ export class GlobeErrorRecoveryService {
    * Handle renderer initialization errors
    */
   handleRendererError(error: Error): void {
-    console.error('Renderer initialization error:', error);
+    this.logger.error(
+      'Renderer initialization error',
+      error,
+      'GlobeErrorRecoveryService',
+    );
 
     if (error.message.includes('WebGL')) {
       this.setFatalError(
@@ -122,8 +138,9 @@ export class GlobeErrorRecoveryService {
    * Handle geometry processing errors
    */
   handleGeometryError(error: Error, countryName?: string): void {
-    console.warn(
-      `Geometry processing error${countryName ? ` for ${countryName}` : ''}:`,
+    this.logger.warn(
+      `Geometry processing error${countryName ? ` for ${countryName}` : ''}`,
+      'GlobeErrorRecoveryService',
       error,
     );
 
@@ -178,7 +195,7 @@ export class GlobeErrorRecoveryService {
     const canvas = renderer.domElement;
     canvas.addEventListener('webglcontextlost', (event) => {
       event.preventDefault();
-      console.warn('WebGL context lost');
+      this.logger.warn('WebGL context lost', 'GlobeErrorRecoveryService');
     });
   }
 
@@ -244,7 +261,11 @@ export class GlobeErrorRecoveryService {
   private setFatalError(message: string): void {
     this.errorMessage.set(message);
     this.isRecovering.set(false);
-    console.error('Fatal globe error:', message);
+    this.logger.error(
+      'Fatal globe error',
+      message,
+      'GlobeErrorRecoveryService',
+    );
   }
 
   private showTemporaryWarning(message: string): void {

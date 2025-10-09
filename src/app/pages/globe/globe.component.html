@@ -1,0 +1,140 @@
+<app-error-boundary
+  #errorBoundary
+  [showDetails]="true"
+  (onRetry)="handleRetry()"
+>
+  @if (isLoading()) {
+    <app-loading
+      variant="globe"
+      size="large"
+      [loadingText]="loadingMessage()"
+      [showProgress]="true"
+      [progress]="loadingProgress()"
+      [overlay]="true"
+    />
+  }
+
+  <div
+    #rendererContainer
+    class="scene-container"
+    role="application"
+    [attr.aria-label]="accessibility.getGlobeAriaDescription()"
+    [attr.aria-describedby]="isLoading() ? 'loading-status' : 'globe-status'"
+    tabindex="0"
+    (keydown)="onKeyDown($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+  >
+    @if (initError()) {
+      <div class="init-error" role="alert" aria-live="polite" id="globe-error">
+        <h3>Failed to initialize 3D scene</h3>
+        <p>{{ initError() }}</p>
+        <button
+          (click)="retryInitialization()"
+          class="retry-btn"
+          aria-describedby="globe-error"
+        >
+          Try Again
+        </button>
+      </div>
+    }
+
+    <!-- Status for screen readers -->
+    <div id="globe-status" class="sr-only" aria-live="polite">
+      @if (!isLoading() && !initError()) {
+        {{ accessibility.getGlobeAriaDescription() }}
+      }
+    </div>
+
+    <div id="loading-status" class="sr-only" aria-live="polite">
+      @if (isLoading()) {
+        Loading: {{ loadingMessage() }} - {{ loadingProgress() }}% complete
+      }
+    </div>
+
+    <!-- Keyboard shortcuts help -->
+    <div id="keyboard-help" class="sr-only" aria-live="polite">
+      @if (accessibility.isKeyboardMode()) {
+        Current country:
+        {{ accessibility.currentCountry() || "None selected" }}. Use arrow keys
+        to rotate, Tab to navigate countries, Enter to select.
+      }
+    </div>
+  </div>
+
+  <!-- Country Name Tooltip (on hover) - hidden during quiz mode -->
+  <app-country-name-tooltip
+    [visible]="
+      countryNameTooltipVisible() && !interactionModeService.isQuizMode()
+    "
+    [countryName]="hoveredCountryName()"
+    [position]="countryNameTooltipPosition()"
+  />
+
+  <!-- Bird Migration Marker Tooltip (on marker hover) - shown only in bird migration mode -->
+  @if (
+    navigationStateService.isBirdMigrationActive() &&
+    migrationState.hoveredMarker()
+  ) {
+    <app-marker-tooltip
+      [position]="globeMigrationService.getMigrationTooltipPosition()"
+      [markerType]="globeMigrationService.getHoveredMarkerType()"
+    />
+  }
+
+  <!-- Fixed Position Country Details (on selection) - hidden during quiz mode and bird migration -->
+  @if (
+    selectedCountry() &&
+    !interactionModeService.isQuizMode() &&
+    !navigationStateService.isBirdMigrationActive()
+  ) {
+    <div class="fixed-country-details">
+      <div class="fixed-country-card">
+        <div class="country-header">
+          <div class="country-name">{{ selectedCountry()?.name }}</div>
+          <div class="country-code">{{ selectedCountry()?.code }}</div>
+        </div>
+
+        <div class="country-info">
+          <div class="info-row">
+            <span class="info-label">Capital:</span>
+            <span class="info-value">{{ selectedCountry()?.capital }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Population:</span>
+            <span class="info-value">{{
+              selectedCountry()?.populationFormatted
+            }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">GDP per capita:</span>
+            <span class="info-value">{{
+              selectedCountry()?.gdpPerCapitaFormatted
+            }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Life expectancy:</span>
+            <span class="info-value">{{
+              selectedCountry()?.lifeExpectancyFormatted
+            }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Migration Info Card - shows selected bird migrations -->
+  @if (
+    navigationStateService.isBirdMigrationActive() &&
+    migrationState.activePaths().length > 0
+  ) {
+    <app-migration-info-card
+      [migrationData]="migrationCardData()"
+      [onClearAll]="handleClearAllMigrations"
+      [onRemovePath]="handleRemoveMigration"
+    />
+  }
+</app-error-boundary>

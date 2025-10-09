@@ -1,0 +1,310 @@
+{
+  "id": "arctic-tern-migration",
+  "title": "Arctic Tern: The Ultimate Migration",
+  "description": "Follow the Arctic Tern on the longest migration journey of any animal on Earth - a 44,000-mile round trip from pole to pole.",
+  "species": {
+    "commonName": "Arctic Tern",
+    "scientificName": "Sterna paradisaea",
+    "gbifKey": 2481363,
+    "conservationStatus": "LC",
+    "funFacts": [
+      "Arctic Terns experience two summers per year, seeing more daylight than any other creature on Earth",
+      "They can live up to 30 years, traveling over 1.5 million miles in their lifetime",
+      "Their migration route follows a zigzag pattern to take advantage of prevailing winds",
+      "Some individuals fly up to 56,000 miles per year - equivalent to three trips to the Moon over their lifetime"
+    ]
+  },
+  "estimatedDuration": 180000,
+  "totalDistance": 44000,
+  "keyframes": [
+    {
+      "id": "breeding-grounds-iceland",
+      "timestamp": 0,
+      "camera": {
+        "latitude": 64.9631,
+        "longitude": -19.0208,
+        "distance": 1.5,
+        "azimuth": 45,
+        "elevation": 30,
+        "fov": 60
+      },
+      "pathProgress": 0,
+      "displayHotspots": ["start-iceland"]
+    },
+    {
+      "id": "north-atlantic-departure",
+      "timestamp": 30000,
+      "camera": {
+        "latitude": 55.0,
+        "longitude": -25.0,
+        "distance": 2.5,
+        "azimuth": 90,
+        "elevation": 45,
+        "fov": 70
+      },
+      "pathProgress": 0.15,
+      "displayHotspots": ["north-atlantic"]
+    },
+    {
+      "id": "west-africa-stopover",
+      "timestamp": 60000,
+      "camera": {
+        "latitude": 15.0,
+        "longitude": -17.0,
+        "distance": 1.8,
+        "azimuth": 120,
+        "elevation": 35,
+        "fov": 65
+      },
+      "pathProgress": 0.35,
+      "displayHotspots": ["west-africa"]
+    },
+    {
+      "id": "southern-ocean-crossing",
+      "timestamp": 90000,
+      "camera": {
+        "latitude": -45.0,
+        "longitude": 10.0,
+        "distance": 3.0,
+        "azimuth": 180,
+        "elevation": 50,
+        "fov": 75
+      },
+      "pathProgress": 0.55,
+      "displayHotspots": ["southern-ocean"]
+    },
+    {
+      "id": "antarctica-arrival",
+      "timestamp": 120000,
+      "camera": {
+        "latitude": -68.0,
+        "longitude": -67.0,
+        "distance": 1.5,
+        "azimuth": 225,
+        "elevation": 30,
+        "fov": 60
+      },
+      "pathProgress": 0.75,
+      "displayHotspots": ["antarctica"]
+    },
+    {
+      "id": "return-journey-overview",
+      "timestamp": 150000,
+      "camera": {
+        "latitude": -20.0,
+        "longitude": -40.0,
+        "distance": 4.0,
+        "azimuth": 270,
+        "elevation": 60,
+        "fov": 80
+      },
+      "pathProgress": 0.9,
+      "displayHotspots": []
+    },
+    {
+      "id": "breeding-grounds-return",
+      "timestamp": 180000,
+      "camera": {
+        "latitude": 64.9631,
+        "longitude": -19.0208,
+        "distance": 1.2,
+        "azimuth": 0,
+        "elevation": 25,
+        "fov": 55
+      },
+      "pathProgress": 1.0,
+      "displayHotspots": ["end-iceland"]
+    }
+  ],
+  "transitions": [
+    {
+      "fromKeyframeId": "breeding-grounds-iceland",
+      "toKeyframeId": "north-atlantic-departure",
+      "duration": 30000,
+      "easing": "easeInOutCubic"
+    },
+    {
+      "fromKeyframeId": "north-atlantic-departure",
+      "toKeyframeId": "west-africa-stopover",
+      "duration": 30000,
+      "easing": "easeInOutQuad"
+    },
+    {
+      "fromKeyframeId": "west-africa-stopover",
+      "toKeyframeId": "southern-ocean-crossing",
+      "duration": 30000,
+      "easing": "easeOutCubic"
+    },
+    {
+      "fromKeyframeId": "southern-ocean-crossing",
+      "toKeyframeId": "antarctica-arrival",
+      "duration": 30000,
+      "easing": "easeInOutCubic"
+    },
+    {
+      "fromKeyframeId": "antarctica-arrival",
+      "toKeyframeId": "return-journey-overview",
+      "duration": 30000,
+      "easing": "easeInCubic"
+    },
+    {
+      "fromKeyframeId": "return-journey-overview",
+      "toKeyframeId": "breeding-grounds-return",
+      "duration": 30000,
+      "easing": "easeOutCubic"
+    }
+  ],
+  "hotspots": [
+    {
+      "id": "start-iceland",
+      "title": "Breeding Grounds - Iceland",
+      "content": "Arctic Terns breed in the Arctic and sub-Arctic regions during the Northern Hemisphere summer. Iceland's coastal areas provide ideal nesting sites with abundant fish and long daylight hours.",
+      "location": {
+        "latitude": 64.9631,
+        "longitude": -19.0208
+      },
+      "category": "breeding",
+      "importance": "critical",
+      "media": {
+        "type": "info",
+        "caption": "Arctic Tern colonies can contain thousands of nesting pairs"
+      }
+    },
+    {
+      "id": "north-atlantic",
+      "title": "North Atlantic Departure",
+      "content": "After breeding, Arctic Terns begin their epic journey south. They follow the coastlines and oceanic currents, feeding on small fish and krill along the way. The North Atlantic leg takes advantage of favorable winds.",
+      "location": {
+        "latitude": 55.0,
+        "longitude": -25.0
+      },
+      "category": "stopover",
+      "importance": "moderate",
+      "media": {
+        "type": "info",
+        "caption": "Terns can travel 500+ miles per day during migration"
+      }
+    },
+    {
+      "id": "west-africa",
+      "title": "West African Coast",
+      "content": "The nutrient-rich waters off West Africa provide crucial feeding opportunities. Arctic Terns often follow the productive upwelling zones where cold, nutrient-dense water rises to the surface, supporting abundant marine life.",
+      "location": {
+        "latitude": 15.0,
+        "longitude": -17.0
+      },
+      "category": "stopover",
+      "importance": "high",
+      "media": {
+        "type": "info",
+        "caption": "Upwelling zones are vital refueling stations for migrating seabirds"
+      }
+    },
+    {
+      "id": "southern-ocean",
+      "title": "Southern Ocean Crossing",
+      "content": "The vast Southern Ocean presents both challenges and opportunities. Arctic Terns navigate by the sun and stars, and likely use Earth's magnetic field. They often follow a zigzag pattern to exploit the strongest tailwinds.",
+      "location": {
+        "latitude": -45.0,
+        "longitude": 10.0
+      },
+      "category": "passage",
+      "importance": "moderate",
+      "media": {
+        "type": "info",
+        "caption": "The Southern Ocean's westerly winds provide crucial flight assistance"
+      }
+    },
+    {
+      "id": "antarctica",
+      "title": "Antarctic Waters - Wintering Grounds",
+      "content": "Arctic Terns reach Antarctic waters to experience the Southern Hemisphere summer. Pack ice edges provide rich feeding grounds where they hunt for Antarctic krill and small fish, building up energy reserves for the return journey.",
+      "location": {
+        "latitude": -68.0,
+        "longitude": -67.0
+      },
+      "category": "wintering",
+      "importance": "critical",
+      "media": {
+        "type": "info",
+        "caption": "Arctic Terns experience 24-hour daylight in both polar summers"
+      }
+    },
+    {
+      "id": "end-iceland",
+      "title": "Journey Complete",
+      "content": "After 9-12 months, Arctic Terns return to their breeding grounds, often to the exact same nesting site. This incredible journey of up to 56,000 miles demonstrates one of nature's most remarkable feats of endurance and navigation.",
+      "location": {
+        "latitude": 64.9631,
+        "longitude": -19.0208
+      },
+      "category": "breeding",
+      "importance": "critical",
+      "media": {
+        "type": "info",
+        "caption": "Site fidelity ensures terns return to successful breeding locations year after year"
+      }
+    }
+  ],
+  "pathConfig": {
+    "style": "glow",
+    "color": "#00aaff",
+    "glowIntensity": 1.2,
+    "opacity": 0.85,
+    "tubeRadius": 0.008,
+    "tubeSegments": 8,
+    "heightOffset": 0.05,
+    "tension": 0.5,
+    "animationSpeed": 1.0,
+    "showStartMarker": true,
+    "showEndMarker": true,
+    "markerConfig": {
+      "startColor": "#00ff00",
+      "endColor": "#ff0000",
+      "size": 0.03
+    }
+  },
+  "birdSpriteConfig": {
+    "texturePath": "/assets/sprites/bird-silhouette.svg",
+    "size": 0.08,
+    "animationSpeed": 0.6,
+    "opacity": 0.9,
+    "glowEffect": true,
+    "flappingAmplitude": 0.2
+  },
+  "hotspotMarkerConfig": {
+    "radius": 0.04,
+    "color": "#ffaa00",
+    "glowIntensity": 0.9,
+    "pulse": true,
+    "showLabel": true,
+    "labelFontSize": 14
+  },
+  "metadata": {
+    "author": "3D Global Dashboard",
+    "version": "1.0.0",
+    "created": "2025-09-30",
+    "dataSources": [
+      "GBIF (Global Biodiversity Information Facility)",
+      "BTO (British Trust for Ornithology) tracking data",
+      "Published research: Egevang et al. (2010) - Tracking of Arctic terns reveals longest animal migration"
+    ],
+    "license": "CC BY 4.0",
+    "references": [
+      {
+        "title": "Tracking of Arctic terns Sterna paradisaea reveals longest animal migration",
+        "authors": [
+          "Carsten Egevang",
+          "Iain J. Stenhouse",
+          "Richard A. Phillips",
+          "Aevar Petersen",
+          "James W. Fox",
+          "Janet R. D. Silk"
+        ],
+        "journal": "Proceedings of the National Academy of Sciences",
+        "year": 2010,
+        "doi": "10.1073/pnas.0909493107"
+      }
+    ]
+  }
+}

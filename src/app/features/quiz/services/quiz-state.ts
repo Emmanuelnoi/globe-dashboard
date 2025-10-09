@@ -19,6 +19,7 @@ import { CountryDataService } from '../../../core/services/country-data.service'
 import { CountryDataRecord } from '../../../core/types/country-data.types';
 import { QuestionGeneratorService } from './question-generator.service';
 import { UserStatsService } from '../../../core/services/user-stats.service';
+import { LoggerService } from '../../../core/services/logger.service';
 
 // Timer configuration
 const QUESTION_TIME_LIMITS = {
@@ -43,6 +44,7 @@ export class QuizStateService {
   private readonly countryDataService = inject(CountryDataService);
   private readonly questionGeneratorService = inject(QuestionGeneratorService);
   private readonly userStatsService = inject(UserStatsService);
+  private readonly logger = inject(LoggerService);
   private timerAnimationFrame?: number;
   private questionStartTime = 0;
   private sessionStartTime = 0;
@@ -112,7 +114,7 @@ export class QuizStateService {
    */
   startGame(config: GameConfiguration): void {
     if (this._gameState() !== 'idle') {
-      console.warn('Cannot start game: already in progress');
+      this.logger.warn('Cannot start game: already in progress', 'QuizState');
       return;
     }
 
@@ -158,12 +160,18 @@ export class QuizStateService {
    */
   selectCandidate(countryId: string): void {
     if (this._gameState() !== 'question') {
-      console.warn('Cannot select candidate: not in question state');
+      this.logger.warn(
+        'Cannot select candidate: not in question state',
+        'QuizState',
+      );
       return;
     }
 
     if (this._isConfirmLocked()) {
-      console.warn('Cannot select candidate: confirmation locked');
+      this.logger.warn(
+        'Cannot select candidate: confirmation locked',
+        'QuizState',
+      );
       return;
     }
 
@@ -189,7 +197,7 @@ export class QuizStateService {
     const currentQuestion = this._currentQuestion();
 
     if (!this.canConfirm() || !selectedCandidate || !currentQuestion) {
-      console.warn('Cannot confirm: invalid state');
+      this.logger.warn('Cannot confirm: invalid state', 'QuizState');
       return;
     }
 
@@ -265,7 +273,7 @@ export class QuizStateService {
     this.transitionToState('evaluating');
     // Handle async call properly for skip
     this.proceedAfterResult().catch((error) => {
-      console.error('Error proceeding after skip:', error);
+      this.logger.error('Error proceeding after skip', error, 'QuizState');
     });
   }
 
@@ -296,9 +304,16 @@ export class QuizStateService {
     // Save session to persistent storage
     try {
       await this.userStatsService.saveSession(finalSession);
-      console.log('📊 Session saved to IndexedDB successfully');
+      this.logger.success(
+        'Session saved to IndexedDB successfully',
+        'QuizState',
+      );
     } catch (error) {
-      console.error('❌ Failed to save session to IndexedDB:', error);
+      this.logger.error(
+        'Failed to save session to IndexedDB',
+        error,
+        'QuizState',
+      );
       // Don't block the UI flow if saving fails
     }
 
@@ -348,7 +363,11 @@ export class QuizStateService {
     };
 
     if (!validTransitions[currentState].includes(newState)) {
-      console.error(`Invalid state transition: ${currentState} -> ${newState}`);
+      this.logger.error(
+        `Invalid state transition: ${currentState} -> ${newState}`,
+        undefined,
+        'QuizState',
+      );
       return;
     }
 

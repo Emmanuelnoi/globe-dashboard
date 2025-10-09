@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { UserStatsService } from '../../../core/services/user-stats.service';
 import { GameSession, UserStatsV1 } from '../models/quiz.models';
 import { vi } from 'vitest';
+import 'fake-indexeddb/auto';
 
 /**
  * Stats Persistence Integration Tests
@@ -13,59 +14,7 @@ describe('Stats Persistence Integration', () => {
   let userStatsService: UserStatsService;
 
   beforeEach(async () => {
-    // Mock IndexedDB for test environment
-    const mockObjectStore = {
-      put: vi.fn().mockResolvedValue(undefined),
-      get: vi.fn(),
-      getAll: vi.fn().mockResolvedValue([]),
-      delete: vi.fn().mockResolvedValue(undefined),
-      clear: vi.fn().mockResolvedValue(undefined),
-      createIndex: vi.fn(),
-      index: vi.fn().mockReturnValue({
-        getAll: vi.fn().mockResolvedValue([]),
-      }),
-    };
-
-    const mockTransaction = {
-      objectStore: vi.fn().mockReturnValue(mockObjectStore),
-      oncomplete: null,
-      onerror: null,
-      onabort: null,
-      commit: vi.fn(),
-      abort: vi.fn(),
-    };
-
-    const mockDB = {
-      transaction: vi.fn().mockReturnValue(mockTransaction),
-      createObjectStore: vi.fn().mockReturnValue(mockObjectStore),
-      deleteObjectStore: vi.fn(),
-      version: 1,
-      name: 'QuizStatsDB',
-      close: vi.fn(),
-    };
-
-    const mockOpenDBRequest = {
-      result: mockDB,
-      error: null,
-      onsuccess: null,
-      onerror: null,
-      onupgradeneeded: null,
-    };
-
-    // Mock idb library functions
-    vi.doMock('idb', () => ({
-      openDB: vi.fn().mockResolvedValue(mockDB),
-    }));
-
-    // Set up global IndexedDB mock
-    Object.defineProperty(global, 'indexedDB', {
-      value: {
-        open: vi.fn().mockReturnValue(mockOpenDBRequest),
-        deleteDatabase: vi.fn(),
-        cmp: vi.fn(),
-      },
-      writable: true,
-    });
+    // fake-indexeddb is automatically set up via import 'fake-indexeddb/auto'
 
     await TestBed.configureTestingModule({
       providers: [UserStatsService],

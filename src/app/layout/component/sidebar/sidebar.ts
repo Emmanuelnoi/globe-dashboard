@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   ElementRef,
   QueryList,
@@ -31,6 +32,7 @@ interface Item {
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule, IconComponent, TableKeyboardDirective], // Updated imports
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <aside
       class="sidebar"
@@ -158,8 +160,8 @@ interface Item {
         justify-content: center;
         cursor: pointer;
         color: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
+        /* TEMP DISABLED FOR DEBUG: backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px); */
       }
       .toggle:focus {
         outline: 2px solid rgba(255, 255, 255, 0.12);
@@ -177,8 +179,8 @@ interface Item {
         border-radius: 14px;
         padding: 18px;
         flex: 0 0 auto;
-        backdrop-filter: blur(14px) saturate(1.25);
-        -webkit-backdrop-filter: blur(14px) saturate(1.25);
+        /* TEMP DISABLED FOR DEBUG: backdrop-filter: blur(14px) saturate(1.25);
+        -webkit-backdrop-filter: blur(14px) saturate(1.25); */
         background: linear-gradient(
           180deg,
           rgba(255, 255, 255, 0.06),
@@ -397,8 +399,8 @@ interface Item {
         box-shadow:
           0 8px 24px rgba(0, 0, 0, 0.45),
           inset 0 1px 0 rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(10px) saturate(1.15);
-        -webkit-backdrop-filter: blur(10px) saturate(1.15);
+        /* TEMP DISABLED FOR DEBUG: backdrop-filter: blur(10px) saturate(1.15);
+        -webkit-backdrop-filter: blur(10px) saturate(1.15); */
         pointer-events: none;
         overflow: hidden;
         z-index: 0;

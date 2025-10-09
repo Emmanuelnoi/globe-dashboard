@@ -5,6 +5,7 @@ import {
   ViewChild,
   AfterViewInit,
   inject,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { Sidebar } from './layout/component/sidebar/sidebar';
 import { ComparisonCard } from './layout/component/comparison-card/comparison-card';
@@ -12,10 +13,19 @@ import { NavigationStateService } from './core/services/navigation-state.service
 import { NotificationToast } from './shared/components/notification-toast/notification-toast';
 import { GameHub } from './features/quiz/components/game-hub/game-hub';
 import { QuizStateService } from './features/quiz/services/quiz-state';
+import { MigrationHubComponent } from './features/bird-migration/components/migration-hub/migration-hub';
+import { LoggerService } from './core/services/logger.service';
 
 @Component({
   selector: 'app-root',
-  imports: [Sidebar, ComparisonCard, NotificationToast, GameHub],
+  imports: [
+    Sidebar,
+    ComparisonCard,
+    NotificationToast,
+    GameHub,
+    MigrationHubComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
       class="app-container"
@@ -58,12 +68,7 @@ import { QuizStateService } from './features/quiz/services/quiz-state';
       }
 
       @if (navigationService.isBirdMigrationActive()) {
-        <div class="placeholder-view" role="region" aria-label="Bird Migration">
-          <div class="placeholder-content">
-            <h2>🐦 Bird Migration</h2>
-            <p>Coming Soon - Animated bird migration patterns</p>
-          </div>
-        </div>
+        <app-migration-hub />
       }
 
       @if (navigationService.isCropCuisineMapperActive()) {
@@ -78,9 +83,6 @@ import { QuizStateService } from './features/quiz/services/quiz-state';
           </div>
         </div>
       }
-
-      <!-- Performance Monitor -->
-      <!-- <app-performance-monitor /> -->
 
       <!-- Notification Toast -->
       <app-notification-toast></app-notification-toast>
@@ -212,11 +214,32 @@ export class App implements AfterViewInit {
   // Inject navigation service for template access
   protected readonly navigationService = inject(NavigationStateService);
   protected readonly quizStateService = inject(QuizStateService);
+  private readonly logger = inject(LoggerService);
   protected readonly title = signal('global-dashboard');
 
   async ngAfterViewInit(): Promise<void> {
-    // Lazy load the Globe component
-    const { Globe } = await import('./pages/globe/globe');
-    const _componentRef = this.globeContainer.createComponent(Globe);
+    this.logger.debug('APP COMPONENT: ngAfterViewInit called', 'AppComponent');
+
+    try {
+      this.logger.debug(
+        'Starting dynamic import of Globe component',
+        'AppComponent',
+      );
+      // Lazy load the Globe component
+      const { Globe } = await import('./pages/globe/globe');
+      this.logger.success(
+        'Globe component imported successfully',
+        'AppComponent',
+      );
+
+      const _componentRef = this.globeContainer.createComponent(Globe);
+      this.logger.debug('Globe component instance created', 'AppComponent');
+    } catch (error) {
+      this.logger.error(
+        'Failed to load Globe component',
+        error,
+        'AppComponent',
+      );
+    }
   }
 }

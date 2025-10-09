@@ -1,6 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
 @use "tailwindcss";
 
+/* Import unified glass morphism design system */
+@import "styles/glass-morphism.scss";
+
 /* Global CSS Reset and Dark Theme */
 * {
   box-sizing: border-box;

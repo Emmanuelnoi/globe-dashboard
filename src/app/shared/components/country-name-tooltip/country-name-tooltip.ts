@@ -1,4 +1,9 @@
-import { Component, input, computed } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  computed,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface CountryTooltipPosition {
@@ -10,6 +15,7 @@ export interface CountryTooltipPosition {
   selector: 'app-country-name-tooltip',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (visible() && countryName()) {
       <div

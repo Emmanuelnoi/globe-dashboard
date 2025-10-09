@@ -1,4 +1,9 @@
-import { Component, inject, computed } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  computed,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { QuizStateService } from '../../services/quiz-state';
 
@@ -6,6 +11,7 @@ import { QuizStateService } from '../../services/quiz-state';
   selector: 'app-results-panel',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="results-panel" role="region" aria-label="Quiz Results">
       <!-- Results Header -->
