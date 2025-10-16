@@ -63,7 +63,8 @@ export function triangulateWithValidation(
       : earcut(vertices2D);
 
   if (triangles.length === 0) {
-    console.warn(`❌ Triangulation failed for ${name}: no triangles generated`);
+    // This is expected for degenerate polygons (e.g., tiny islands in MultiPolygon countries)
+    // Silently skip - this is normal behavior for complex island nations
     return null;
   }
 

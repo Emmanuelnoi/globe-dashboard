@@ -434,35 +434,34 @@ export class CountrySearch {
   }
 
   private setupKeyboardNavigation(): void {
-    // Handle keyboard navigation
-    effect(() => {
-      if (this.showResults() && this.filteredCountries().length > 0) {
-        const handleKeydown = (event: KeyboardEvent) => {
-          switch (event.key) {
-            case 'ArrowDown':
-              event.preventDefault();
-              this.navigateResults(1);
-              break;
-            case 'ArrowUp':
-              event.preventDefault();
-              this.navigateResults(-1);
-              break;
-            case 'Enter':
-              event.preventDefault();
-              this.selectFocusedCountry();
-              break;
-            case 'Escape':
-              event.preventDefault();
-              this.hideResults();
-              break;
-          }
-        };
+    // Setup single keyboard event listener outside effect to prevent memory leaks
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event: KeyboardEvent) => {
+        // Only handle keyboard events when results are shown
+        if (!this.showResults() || this.filteredCountries().length === 0) {
+          return;
+        }
 
-        fromEvent<KeyboardEvent>(document, 'keydown')
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe(handleKeydown);
-      }
-    });
+        switch (event.key) {
+          case 'ArrowDown':
+            event.preventDefault();
+            this.navigateResults(1);
+            break;
+          case 'ArrowUp':
+            event.preventDefault();
+            this.navigateResults(-1);
+            break;
+          case 'Enter':
+            event.preventDefault();
+            this.selectFocusedCountry();
+            break;
+          case 'Escape':
+            event.preventDefault();
+            this.hideResults();
+            break;
+        }
+      });
   }
 
   private setupClickOutside(): void {

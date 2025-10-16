@@ -1,11 +1,13 @@
 /**
  * Globe Comparison Sync Service
- * Syncs globe selections with comparison table
- * Extracted from globe.ts (~80 lines reduction)
+ * Handles bi-directional synchronization between globe visual selections and comparison table
+ * Extracted from globe.ts for better separation of concerns
  */
 
 import { Injectable, inject, effect } from '@angular/core';
+import { Group } from 'three';
 import { GlobeCountrySelectionService } from './globe-country-selection.service';
+import { CountryDataService } from '../../../core/services/country-data.service';
 import { LoggerService } from '../../../core/services/logger.service';
 
 @Injectable({
@@ -15,82 +17,134 @@ export class GlobeComparisonSyncService {
   private readonly countrySelectionService = inject(
     GlobeCountrySelectionService,
   );
+  private readonly countryDataService = inject(CountryDataService);
   private readonly logger = inject(LoggerService);
 
-  constructor() {
-    // Set up sync effect
-    this.setupComparisonTableSync();
-  }
+  // Flag to prevent infinite loops during bi-directional sync
+  private isSyncing = false;
 
   /**
-   * Set up comparison table synchronization
+   * Setup bi-directional synchronization between comparison table and globe
+   * This should be called once after countries are loaded
+   *
+   * @param countries - The Three.js Group containing all country meshes
    */
-  private setupComparisonTableSync(): void {
-    effect(() => {
-      const state = this.countrySelectionService.selectionState();
-      this.logger.debug(
-        `Comparison table has ${state.selectedMeshes.size} countries`,
+  setupBiDirectionalSync(countries: Group): void {
+    if (!countries) {
+      this.logger.warn(
+        'Cannot setup bi-directional sync - countries not loaded',
         'ComparisonSync',
       );
-    });
-  }
+      return;
+    }
 
-  /**
-   * Sync globe with comparison table
-   */
-  syncGlobeWithComparisonTable(
-    applySelectionCallback: (countryName: string) => void,
-  ): void {
-    const state = this.countrySelectionService.selectionState();
+    // Effect: Watch comparison table changes → update globe visual selections
+    effect(() => {
+      // Prevent infinite loops
+      if (this.isSyncing) {
+        return;
+      }
 
-    this.logger.debug(
-      `Syncing globe with ${state.selectedMeshes.size} countries from comparison table`,
-      'ComparisonSync',
-    );
+      const selectedCountryCodes = this.countryDataService.selectedCountries();
 
-    // Apply selections from comparison table to globe
-    state.selectedMeshes.forEach((mesh) => {
-      const countryName = mesh.name;
-      if (countryName) {
-        applySelectionCallback(countryName);
+      this.logger.debug(
+        `Comparison table changed: ${selectedCountryCodes.length} countries selected`,
+        'ComparisonSync',
+      );
+
+      // Early exit if countries not ready
+      if (!countries || countries.children.length === 0) {
+        return;
+      }
+
+      // Set sync flag to prevent circular updates
+      this.isSyncing = true;
+
+      try {
+        // Reset all country selections first
+        this.countrySelectionService.resetAllCountrySelections(countries);
+
+        // Apply selection to countries in the comparison table
+        selectedCountryCodes.forEach((countryCode) => {
+          const country = this.countryDataService.getCountryByCode(countryCode);
+          if (country) {
+            this.countrySelectionService.applyPersistentCountrySelection(
+              country.name,
+              countries,
+              false, // Don't reset - we already reset above
+            );
+
+            this.logger.debug(
+              `Applied visual selection to: ${country.name}`,
+              'ComparisonSync',
+            );
+          } else {
+            this.logger.warn(
+              `Could not find country data for code: ${countryCode}`,
+              'ComparisonSync',
+            );
+          }
+        });
+
+        this.logger.success(
+          `Globe synced with comparison table (${selectedCountryCodes.length} countries)`,
+          'ComparisonSync',
+        );
+      } finally {
+        // Always reset sync flag
+        this.isSyncing = false;
       }
     });
-  }
 
-  /**
-   * Add country to comparison
-   */
-  addToComparison(countryName: string): void {
-    this.logger.debug(`Adding ${countryName} to comparison`, 'ComparisonSync');
-    // Logic to add country to comparison table
-    // This would typically interact with a comparison service
-  }
-
-  /**
-   * Remove country from comparison
-   */
-  removeFromComparison(countryName: string): void {
-    this.logger.debug(
-      `Removing ${countryName} from comparison`,
+    this.logger.success(
+      'Bi-directional sync initialized successfully',
       'ComparisonSync',
     );
-    // Logic to remove country from comparison table
   }
 
   /**
-   * Get selected countries from comparison table
+   * Manually sync globe with comparison table (for initial load or manual refresh)
+   *
+   * @param countries - The Three.js Group containing all country meshes
    */
-  getSelectedCountries(): Set<any> {
-    return this.countrySelectionService.selectionState().selectedMeshes;
-  }
+  syncGlobeWithComparisonTable(countries: Group): void {
+    if (!countries || countries.children.length === 0) {
+      this.logger.warn('Cannot sync - countries not loaded', 'ComparisonSync');
+      return;
+    }
 
-  /**
-   * Check if country is in comparison table
-   */
-  isInComparison(countryName: string): boolean {
-    const state = this.countrySelectionService.selectionState();
-    return Array.from(state.selectedMeshes).some(
-      (mesh) => mesh.name === countryName,
+    const selectedCountryCodes = this.countryDataService.selectedCountries();
+
+    this.logger.debug(
+      `Manual sync: ${selectedCountryCodes.length} countries from comparison table`,
+      'ComparisonSync',
     );
+
+    // Reset all country selections first
+    this.countrySelectionService.resetAllCountrySelections(countries);
+
+    // Apply selection to countries in the comparison table
+    selectedCountryCodes.forEach((countryCode) => {
+      const country = this.countryDataService.getCountryByCode(countryCode);
+      if (country) {
+        this.countrySelectionService.applyPersistentCountrySelection(
+          country.name,
+          countries,
+          false, // Don't reset - we already reset above
+        );
+      }
+    });
+
+    this.logger.success(
+      `Manual sync complete (${selectedCountryCodes.length} countries)`,
+      'ComparisonSync',
+    );
+  }
+
+  /**
+   * Check if currently syncing (to prevent infinite loops)
+   */
+  isSyncingNow(): boolean {
+    return this.isSyncing;
   }
 }

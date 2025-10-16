@@ -187,6 +187,12 @@ export class Globe implements AfterViewInit, OnDestroy {
   private countries!: Group;
   private lastSelectedCountryMesh: Mesh | null = null;
 
+  // Flag to prevent infinite loops during bi-directional sync
+  private isSyncingFromTable = false;
+
+  // Track previous selection state to detect removals
+  private previousSelectedCodes: Set<string> = new Set();
+
   // Event listeners for cleanup
   private eventListeners: Array<{
     element: HTMLElement;
@@ -220,28 +226,6 @@ export class Globe implements AfterViewInit, OnDestroy {
       }
     });
 
-    // Setup effect for bi-directional linking with comparison table
-    effect(() => {
-      const selectedCountryCodes = this.countryDataService.selectedCountries();
-      if (!this.countries || this.countries.children.length === 0) {
-        return;
-      }
-
-      // Reset all country selections first
-      this.countrySelection.resetAllCountrySelections(this.countries);
-
-      // Apply selection to countries in the comparison table
-      selectedCountryCodes.forEach((countryCode) => {
-        const country = this.countryDataService.getCountryByCode(countryCode);
-        if (country) {
-          this.countrySelection.applyPersistentCountrySelection(
-            country.name,
-            this.countries,
-          );
-        }
-      });
-    });
-
     // Setup effect for quiz candidate highlighting
     effect(() => {
       const selectedCandidate = this.quizStateService.selectedCandidate();
@@ -250,6 +234,95 @@ export class Globe implements AfterViewInit, OnDestroy {
       // Clear quiz highlight when candidate is cleared or game ends
       if (!selectedCandidate || gameState === 'idle' || gameState === 'ended') {
         this.quizIntegration.clearQuizCandidateHighlight();
+      }
+    });
+
+    // Setup bi-directional sync: comparison table → globe visual selections
+    // Using a manual check approach instead of effects to avoid infinite loops
+    effect(() => {
+      const selectedCountryCodes = this.countryDataService.selectedCountries();
+
+      // Prevent infinite loops - skip if we're in the middle of syncing
+      if (this.isSyncingFromTable) {
+        return;
+      }
+
+      // Early exit if countries not loaded yet
+      if (!this.countries || this.countries.children.length === 0) {
+        return;
+      }
+
+      // Convert to Set for easy comparison
+      const currentCodes = new Set(selectedCountryCodes);
+
+      // Find removed countries (were in previous, not in current)
+      const removedCodes = Array.from(this.previousSelectedCodes).filter(
+        (code) => !currentCodes.has(code),
+      );
+
+      // Find added countries (in current, not in previous)
+      const addedCodes = selectedCountryCodes.filter(
+        (code) => !this.previousSelectedCodes.has(code),
+      );
+
+      // Only process if there are actual changes
+      if (removedCodes.length === 0 && addedCodes.length === 0) {
+        return;
+      }
+
+      // Set flag to prevent re-entry
+      this.isSyncingFromTable = true;
+
+      try {
+        // Handle removals - remove visual selection from globe
+        if (removedCodes.length > 0) {
+          removedCodes.forEach((countryCode) => {
+            const country =
+              this.countryDataService.getCountryByCode(countryCode);
+            if (country) {
+              this.countrySelection.removeCountrySelectionByName(
+                country.name,
+                this.countries,
+              );
+
+              this.logger.debug(
+                `Removed visual selection: ${country.name}`,
+                'GlobeComponent',
+              );
+            }
+          });
+        }
+
+        // Handle additions - add visual selection to globe
+        if (addedCodes.length > 0) {
+          addedCodes.forEach((countryCode) => {
+            const country =
+              this.countryDataService.getCountryByCode(countryCode);
+            if (country) {
+              this.countrySelection.applyPersistentCountrySelection(
+                country.name,
+                this.countries,
+                false, // Don't reset - additive
+              );
+
+              this.logger.debug(
+                `Added visual selection: ${country.name}`,
+                'GlobeComponent',
+              );
+            }
+          });
+        }
+
+        // Update previous state
+        this.previousSelectedCodes = currentCodes;
+
+        this.logger.debug(
+          `Synced globe: +${addedCodes.length} -${removedCodes.length}`,
+          'GlobeComponent',
+        );
+      } finally {
+        // Always reset flag, even if error occurs
+        this.isSyncingFromTable = false;
       }
     });
   }
@@ -409,6 +482,10 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       // Sync with any existing comparison table selections (inline)
       const selectedCountryCodes = this.countryDataService.selectedCountries();
+
+      // Initialize previous state to prevent effect from triggering on first load
+      this.previousSelectedCodes = new Set(selectedCountryCodes);
+
       selectedCountryCodes.forEach((countryCode) => {
         const country = this.countryDataService.getCountryByCode(countryCode);
         if (country) {
@@ -468,6 +545,10 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       // Sync with any existing comparison table selections (inline)
       const selectedCountryCodes = this.countryDataService.selectedCountries();
+
+      // Initialize previous state to prevent effect from triggering on first load
+      this.previousSelectedCodes = new Set(selectedCountryCodes);
+
       selectedCountryCodes.forEach((countryCode) => {
         const country = this.countryDataService.getCountryByCode(countryCode);
         if (country) {
@@ -698,11 +779,9 @@ export class Globe implements AfterViewInit, OnDestroy {
         clickTimeout = null;
       }
 
-      const allowSelection = this.globeSceneService.getAllowSelection();
-      const cameraInteracting = this.globeSceneService.getCameraInteracting();
-      if (allowSelection && !cameraInteracting) {
-        this.handleCountryAddToComparison(event);
-      }
+      // Double-click should always work - don't check allowSelection
+      // (allowSelection is often false during double-click due to camera interaction)
+      this.handleCountryAddToComparison(event);
 
       // Reset double-click flag after a short delay
       setTimeout(() => {
@@ -759,13 +838,15 @@ export class Globe implements AfterViewInit, OnDestroy {
 
   /**
    * Handle country info display on single-click (WITH visual selection and detailed info card)
-   * Single-click: Select only one country
+   * Single-click: Select only one country (clears others)
    * Shift+click: Add to existing selection (multiple countries)
+   * Ctrl/Cmd+click: Toggle selection (deselect if already selected)
    */
   private async handleCountryInfoDisplay(event: MouseEvent): Promise<void> {
     event.preventDefault();
 
     const isShiftClick = event.shiftKey;
+    const isCtrlClick = event.ctrlKey || event.metaKey; // Ctrl on Windows/Linux, Cmd on Mac
 
     // Early exit if countries not loaded
     if (!this.countries || this.countries.children.length === 0) {
@@ -783,9 +864,19 @@ export class Globe implements AfterViewInit, OnDestroy {
         const normalizedCountryName =
           this.countrySelection.normalizeCountryNameForDataService(countryName);
 
+        console.log(
+          `🔍 [Globe] Detected country: "${countryName}" -> normalized: "${normalizedCountryName}"`,
+        );
+
         const countryData = this.countryDataService.getCountryByName(
           normalizedCountryName,
         );
+
+        console.log(
+          `📊 [Globe] Country data lookup result:`,
+          countryData ? 'FOUND' : 'NOT FOUND',
+        );
+
         if (countryData) {
           // Check if we're in quiz mode - if so, forward to quiz service instead of explore mode logic
           if (this.interactionModeService.isQuizMode()) {
@@ -814,38 +905,69 @@ export class Globe implements AfterViewInit, OnDestroy {
             return; // Exit early - don't process explore mode logic
           }
 
-          // Explore mode logic continues below
-          if (isShiftClick) {
+          // Explore mode logic - handle three different selection modes
+          if (isCtrlClick) {
+            // Ctrl/Cmd+click: Toggle selection
+            const isSelected = this.countrySelection.isCountryNameSelected(
+              countryName,
+              this.countries,
+            );
+
+            if (isSelected) {
+              // Deselect this country
+              this.countrySelection.removeCountrySelectionByName(
+                countryName,
+                this.countries,
+              );
+              console.log(`🔄 [Globe] Toggled OFF: "${countryName}"`);
+            } else {
+              // Add to selection (don't reset others)
+              this.countrySelection.applyPersistentCountrySelection(
+                countryName,
+                this.countries,
+                false, // Don't reset - additive
+              );
+              console.log(`🔄 [Globe] Toggled ON: "${countryName}"`);
+            }
+
+            // For toggle, we don't change selectedCountry signal
+            // Keep the info card on the first selected country
+          } else if (isShiftClick) {
             // Shift+click: Add to existing selection (multiple countries)
             // Check if country is already selected
             if (this.selectedCountry()?.code === countryData.code) {
               return; // Don't add duplicate
             }
 
-            // Apply visual selection highlighting (additive)
+            // Apply visual selection highlighting (additive - don't reset)
             this.countrySelection.applyPersistentCountrySelection(
               countryName,
               this.countries,
+              false, // Don't reset - additive
             );
+
+            console.log(`➕ [Globe] Added to selection: "${countryName}"`);
 
             // For Shift+click, we don't change selectedCountry signal
             // Just apply visual highlighting - the info card stays on the first selected country
           } else {
             // Single-click: Select only this country (clear previous selections)
-            // Clear all previous visual selections first
-            this.countrySelection.resetAllCountrySelections(this.countries);
-
             // Set the selected country to show the detailed info card
             this.selectedCountry.set(countryData);
 
-            // Apply visual selection highlighting to this country only
+            // Apply visual selection highlighting with reset
             this.countrySelection.applyPersistentCountrySelection(
               countryName,
               this.countries,
+              true, // Reset others first
+            );
+
+            console.log(
+              `🎯 [Globe] Selected (cleared others): "${countryName}"`,
             );
           }
 
-          // Show immediate feedback tooltip for both cases
+          // Show immediate feedback tooltip for all cases
           const x = event.clientX;
           const y = event.clientY;
           this.hoveredCountryName.set(countryName);
@@ -906,6 +1028,7 @@ export class Globe implements AfterViewInit, OnDestroy {
 
   /**
    * Handle adding country to comparison table from double-click events
+   * Double-click adds the country to comparison table AND applies visual selection (additive)
    */
   private async handleCountryAddToComparison(event: MouseEvent): Promise<void> {
     event.preventDefault();
@@ -921,15 +1044,43 @@ export class Globe implements AfterViewInit, OnDestroy {
     if (countryResult?.countryName) {
       const countryName = countryResult.countryName;
 
-      // Add country to comparison table via CountryDataService
-      const added = this.countryDataService.addCountryFromGlobe(countryName);
+      // Normalize the country name for data service lookup
+      const normalizedCountryName =
+        this.countrySelection.normalizeCountryNameForDataService(countryName);
 
-      if (added) {
-        // Apply visual selection to the country on globe
-        this.countrySelection.applyPersistentCountrySelection(
-          countryName,
-          this.countries,
+      // Set sync flag BEFORE adding to prevent the effect from running
+      this.isSyncingFromTable = true;
+
+      try {
+        // Add country to comparison table via CountryDataService
+        const added = this.countryDataService.addCountryFromGlobe(
+          normalizedCountryName,
         );
+
+        if (added) {
+          // Get the country code to update previousSelectedCodes
+          const country = this.countryDataService.getCountryByName(
+            normalizedCountryName,
+          );
+          if (country) {
+            this.previousSelectedCodes.add(country.code);
+          }
+
+          // Apply visual selection to the country on globe (additive - don't reset others)
+          this.countrySelection.applyPersistentCountrySelection(
+            countryName,
+            this.countries,
+            false, // Don't reset - keep other selected countries
+          );
+
+          this.logger.debug(
+            `Double-click: Added "${countryName}" to comparison table`,
+            'GlobeComponent',
+          );
+        }
+      } finally {
+        // Always reset the sync flag
+        this.isSyncingFromTable = false;
       }
     }
   }

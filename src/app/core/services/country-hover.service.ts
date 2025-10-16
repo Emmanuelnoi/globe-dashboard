@@ -240,10 +240,16 @@ export class CountryHoverService {
    * Format country name for display
    */
   private formatCountryName(meshCountryName: string): string {
+    // If the name already has spaces, it's from TopoJSON and already formatted
+    // Don't apply camelCase conversion - just return it as-is
+    if (meshCountryName.includes(' ')) {
+      return meshCountryName;
+    }
+
     // Handle common cases with comprehensive mapping for problematic countries
     const nameMap: Record<string, string> = {
       UnitedStates: 'United States',
-      UnitedStatesofAmerica: 'United States',
+      UnitedStatesofAmerica: 'United States of America',
       USA: 'United States',
       America: 'United States',
       US: 'United States',
@@ -277,7 +283,7 @@ export class CountryHoverService {
       return nameMap[meshCountryName];
     }
 
-    // Convert camelCase to spaced format
+    // Convert camelCase to spaced format (only for names without spaces)
     const spacedName = meshCountryName.replace(/([A-Z])/g, ' $1').trim();
 
     // Handle special cases like "U S A" -> "USA"

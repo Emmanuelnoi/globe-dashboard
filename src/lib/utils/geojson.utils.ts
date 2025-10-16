@@ -281,6 +281,8 @@ export const COUNTRY_MATERIALS = {
       opacity: 0.8,
       side: DoubleSide,
       fog: true,
+      depthTest: false, // Disable depth testing to prevent occlusion gaps in MultiPolygon countries
+      depthWrite: false, // Disable depth writing to prevent depth buffer conflicts
     }),
     border: new LineBasicMaterial({
       color: 0x34d399, // Lighter emerald for selected border
@@ -583,8 +585,12 @@ export function createCountrySelectionMeshes(
           return;
         }
 
+        // Try both uppercase and lowercase 'name' property (different TopoJSON sources use different casing)
         const countryName = String(
-          geometry.properties?.['NAME'] || geometry.id || `country_${index}`,
+          geometry.properties?.['name'] ||
+            geometry.properties?.['NAME'] ||
+            geometry.id ||
+            `country_${index}`,
         );
         const countryMesh = createCountrySelectionMesh(
           geoJsonFeature,
@@ -715,8 +721,9 @@ function createPolygonSelectionMesh(
       radius,
     );
 
+    // Always log triangulation data for debugging (matches 275bcf7 behavior)
     console.log(
-      `📊 Triangulation data: ${vertices2D.length / 2} vertices, ${holeIndices.length} holes at indices [${holeIndices.join(', ')}]`,
+      `📊 [${name}] Triangulation data: ${vertices2D.length / 2} vertices, ${holeIndices.length} holes${holeIndices.length > 0 ? ` at indices [${holeIndices.join(', ')}]` : ''}`,
     );
 
     // Triangulate with validation using extracted utility
@@ -791,7 +798,9 @@ function createPolygonSelectionMesh(
           polygonOffsetUnits: -4,
         });
 
-    // Apply radial offset using extracted utility
+    // Apply radial offset to prevent z-fighting with Earth surface
+    // Using 0.003 (proven working value from commit 275bcf7)
+    // Combined with depthTest=false in material to prevent occlusion gaps
     applyRadialOffset(safeGeometry, 0.003);
 
     const mesh = new Mesh(safeGeometry, material);
