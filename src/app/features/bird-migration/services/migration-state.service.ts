@@ -438,7 +438,7 @@ export class MigrationStateService {
               return {
                 ...p,
                 selectionIndex: p.selectionIndex + 1,
-                opacity: 0.3,
+                opacity: 0.5,
               };
             }
           })
@@ -461,7 +461,7 @@ export class MigrationStateService {
     const updatedOldPaths = newPaths.map((p) => ({
       ...p,
       selectionIndex: p.selectionIndex + 1,
-      opacity: 0.3, // Older paths get 30% opacity
+      opacity: 0.5, // Older paths get 50% opacity
       isAnimating: false,
     }));
 
@@ -589,7 +589,7 @@ export class MigrationStateService {
           const fadeProgress =
             (timeSinceInteraction - FADE_START) /
             (INACTIVE_THRESHOLD - FADE_START);
-          const opacity = Math.max(0.3, 1.0 - fadeProgress * 0.7);
+          const opacity = Math.max(0.5, 1.0 - fadeProgress * 0.5);
           return { ...path, opacity, isAnimating: false };
         }
 

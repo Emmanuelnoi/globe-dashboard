@@ -18,7 +18,7 @@ export class GlobeQuizIntegrationService {
 
   // Quiz candidate state
   readonly quizCandidate = signal<string | null>(null);
-  private quizCandidateMesh: Mesh | null = null;
+  private quizCandidateMeshes: Mesh[] = []; // Store ALL meshes for MultiPolygon countries
   private quizCandidateMaterial: Material | null = null;
 
   constructor() {
@@ -44,17 +44,48 @@ export class GlobeQuizIntegrationService {
 
     this.clearQuizCandidateHighlight();
 
+    // Counter for matched meshes
+    let matchedCount = 0;
+
+    // Debug: collect sample mesh names for troubleshooting
+    const sampleMeshNames: string[] = [];
+    let sampleCount = 0;
+
     countriesGroup.traverse((object: any) => {
       if (object instanceof Mesh) {
         const meshCountryName = object.name;
+
+        // Collect samples for debugging (first 5 meshes that partially match)
         if (
-          this.normalizeCountryName(meshCountryName) ===
-          this.normalizeCountryName(countryName)
+          sampleCount < 5 &&
+          meshCountryName
+            .toLowerCase()
+            .includes(countryName.toLowerCase().substring(0, 3))
         ) {
+          sampleMeshNames.push(meshCountryName);
+          sampleCount++;
+        }
+
+        // Use the same matching logic as GlobeCountrySelectionService
+        if (this.isCountryNameMatch(meshCountryName, countryName)) {
           this.applyQuizCandidateSelection(object);
+          matchedCount++;
         }
       }
     });
+
+    // Log results with samples for debugging
+    if (matchedCount === 0 && sampleMeshNames.length > 0) {
+      this.logger.warn(
+        `No meshes matched for "${countryName}". Sample mesh names: ${sampleMeshNames.join(', ')}`,
+        'QuizIntegration',
+      );
+    } else {
+      this.logger.debug(
+        `Applied quiz candidate highlight to "${countryName}": ${matchedCount} meshes matched`,
+        'QuizIntegration',
+      );
+    }
   }
 
   /**
@@ -70,38 +101,64 @@ export class GlobeQuizIntegrationService {
 
     // Apply quiz candidate material
     mesh.material = this.quizCandidateMaterial;
-    this.quizCandidateMesh = mesh;
 
-    this.logger.debug(
-      `Applied quiz candidate highlight to: ${mesh.name}`,
-      'QuizIntegration',
-    );
+    // Store in array to track ALL highlighted meshes
+    this.quizCandidateMeshes.push(mesh);
   }
 
   /**
    * Clear quiz candidate highlight
    */
   clearQuizCandidateHighlight(): void {
-    if (this.quizCandidateMesh) {
-      // Restore original material
-      if (this.quizCandidateMesh.userData['originalMaterial']) {
-        this.quizCandidateMesh.material =
-          this.quizCandidateMesh.userData['originalMaterial'];
-        delete this.quizCandidateMesh.userData['originalMaterial'];
+    // Restore original materials for ALL highlighted meshes
+    this.quizCandidateMeshes.forEach((mesh) => {
+      if (mesh.userData['originalMaterial']) {
+        mesh.material = mesh.userData['originalMaterial'];
+        delete mesh.userData['originalMaterial'];
       }
+    });
 
-      this.quizCandidateMesh = null;
-    }
+    // Clear the array
+    this.quizCandidateMeshes = [];
   }
 
   /**
-   * Normalize country name for comparison
+   * Check if country names match with enhanced logic for TopoJSON mesh names
+   * Uses the same logic as GlobeCountrySelectionService for consistency
    */
-  private normalizeCountryName(name: string): string {
-    return name
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]/g, '');
+  private isCountryNameMatch(meshName: string, targetName: string): boolean {
+    // Normalize function that handles prefixes, suffixes, and special characters
+    const normalize = (name: string) =>
+      name
+        .toLowerCase()
+        .trim()
+        .replace(/^selection-mesh-/i, '') // Strip "selection-mesh-" prefix
+        .replace(/^selection-/i, '') // Strip "selection-" prefix
+        .replace(/_\d+$/i, '') // Strip "_0", "_1", "_2" suffixes (for MultiPolygon parts)
+        .replace(/[\s.''\-]/g, '') // Remove spaces, dots, apostrophes, hyphens
+        .replace(/[^a-z0-9]/g, ''); // Remove all non-alphanumeric characters
+
+    const meshNormalized = normalize(meshName);
+    const targetNormalized = normalize(targetName);
+
+    // Direct match
+    if (meshNormalized === targetNormalized) {
+      return true;
+    }
+
+    // Partial match: check if one is contained in the other (for abbreviated names)
+    // Only if the shorter name is at least 4 characters to avoid false positives
+    const minLength = Math.min(meshNormalized.length, targetNormalized.length);
+    if (minLength >= 4) {
+      if (
+        meshNormalized.includes(targetNormalized) ||
+        targetNormalized.includes(meshNormalized)
+      ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -124,7 +181,7 @@ export class GlobeQuizIntegrationService {
    */
   cleanup(): void {
     this.clearQuizCandidateHighlight();
-    this.quizCandidateMesh = null;
+    this.quizCandidateMeshes = [];
     this.quizCandidateMaterial = null;
   }
 }

@@ -35,6 +35,10 @@ export class GameHub {
   readonly isStarting = signal<boolean>(false);
   readonly showStats = signal<boolean>(false);
 
+  // Collapse state
+  private readonly _isCollapsed = signal<boolean>(false);
+  readonly isCollapsed = this._isCollapsed.asReadonly();
+
   // Available options
   readonly availableModes: Array<{
     value: GameMode;
@@ -208,6 +212,11 @@ export class GameHub {
 
   hideStats(): void {
     this.showStats.set(false);
+  }
+
+  // Collapse methods
+  toggleCollapse(): void {
+    this._isCollapsed.update((collapsed) => !collapsed);
   }
 
   // Quiz HUD computed values

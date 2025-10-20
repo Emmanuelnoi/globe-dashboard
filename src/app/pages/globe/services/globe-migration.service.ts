@@ -278,11 +278,27 @@ export class GlobeMigrationService {
           `🎨 Active paths changed (${activePaths.length}), updating renderers`,
           'GlobeMigrationService',
         );
+
+        if (activePaths.length === 0) {
+          this.logger.debug(
+            '🧹 NO ACTIVE PATHS - All paths should be removed from scene',
+            'GlobeMigrationService',
+          );
+        }
+
         if (this.pathsRenderer) {
           this.pathsRenderer.updatePaths(activePaths);
+          this.logger.debug(
+            `✅ Paths renderer updated`,
+            'GlobeMigrationService',
+          );
         }
         if (this.particlesRenderer) {
           this.particlesRenderer.updateParticleSystems(activePaths);
+          this.logger.debug(
+            `✅ Particles renderer updated`,
+            'GlobeMigrationService',
+          );
         }
       });
     });

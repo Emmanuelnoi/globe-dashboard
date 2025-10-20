@@ -176,7 +176,22 @@ export class Globe implements AfterViewInit, OnDestroy {
 
   // Migration info card handlers
   protected readonly handleClearAllMigrations = () => {
+    this.logger.debug('🧹 Clear All Paths button clicked', 'GlobeComponent');
+    this.logger.debug(
+      `📊 Active paths BEFORE clear: ${this.migrationState.activePaths().length}`,
+      'GlobeComponent',
+    );
+
     this.migrationState.clearAllPaths();
+
+    this.logger.debug(
+      `📊 Active paths AFTER clear: ${this.migrationState.activePaths().length}`,
+      'GlobeComponent',
+    );
+    this.logger.debug(
+      `📊 Migration card data length: ${this.migrationCardData().length}`,
+      'GlobeComponent',
+    );
   };
 
   protected readonly handleRemoveMigration = (migrationId: string) => {
@@ -192,6 +207,12 @@ export class Globe implements AfterViewInit, OnDestroy {
 
   // Track previous selection state to detect removals
   private previousSelectedCodes: Set<string> = new Set();
+
+  // Track previous quiz state to prevent infinite loops
+  private previousWasInQuizView = false;
+
+  // Track previous bird migration state to prevent infinite loops
+  private previousWasInBirdMigrationView = false;
 
   // Event listeners for cleanup
   private eventListeners: Array<{
@@ -235,6 +256,59 @@ export class Globe implements AfterViewInit, OnDestroy {
       if (!selectedCandidate || gameState === 'idle' || gameState === 'ended') {
         this.quizIntegration.clearQuizCandidateHighlight();
       }
+    });
+
+    // Setup effect to clear all selections when entering quiz view OR quiz mode
+    effect(() => {
+      const isQuizMode = this.interactionModeService.isQuizMode();
+      const isGameQuizView = this.navigationStateService.isGameQuizActive();
+      const isInQuizView = isQuizMode || isGameQuizView;
+
+      // Only trigger when ENTERING quiz view (not when already in it)
+      if (isInQuizView && !this.previousWasInQuizView) {
+        // Clear selected country data tooltip and name tooltip (always, even if countries not loaded)
+        this.tooltipService.hideAllTooltips();
+        this.selectedCountry.set(null);
+
+        // Clear all visual selections on globe (only if countries are loaded)
+        if (this.countries) {
+          this.countrySelection.resetAllCountrySelections(this.countries);
+        }
+
+        this.logger.debug(
+          `Cleared all selections and tooltips (quiz mode: ${isQuizMode}, quiz view: ${isGameQuizView})`,
+          'GlobeComponent',
+        );
+      }
+
+      // Update previous state
+      this.previousWasInQuizView = isInQuizView;
+    });
+
+    // Setup effect to clear all selections when entering bird migration view
+    effect(() => {
+      const isBirdMigrationView =
+        this.navigationStateService.isBirdMigrationActive();
+
+      // Only trigger when ENTERING bird migration view (not when already in it)
+      if (isBirdMigrationView && !this.previousWasInBirdMigrationView) {
+        // Clear selected country data tooltip and name tooltip
+        this.tooltipService.hideAllTooltips();
+        this.selectedCountry.set(null);
+
+        // Clear all visual selections on globe (only if countries are loaded)
+        if (this.countries) {
+          this.countrySelection.resetAllCountrySelections(this.countries);
+        }
+
+        this.logger.debug(
+          `Cleared all selections and tooltips (bird migration view active)`,
+          'GlobeComponent',
+        );
+      }
+
+      // Update previous state
+      this.previousWasInBirdMigrationView = isBirdMigrationView;
     });
 
     // Setup bi-directional sync: comparison table → globe visual selections
@@ -362,6 +436,10 @@ export class Globe implements AfterViewInit, OnDestroy {
 
     // Setup country selection interactions
     this.setupCountrySelectionInteractions();
+
+    // Initialize quiz materials (import COUNTRY_MATERIALS)
+    const { COUNTRY_MATERIALS } = await import('@lib/utils');
+    this.quizIntegration.initializeQuizMaterials(COUNTRY_MATERIALS.quiz.fill);
 
     // Load countries data
     await this.loadAllData();
@@ -841,9 +919,15 @@ export class Globe implements AfterViewInit, OnDestroy {
    * Single-click: Select only one country (clears others)
    * Shift+click: Add to existing selection (multiple countries)
    * Ctrl/Cmd+click: Toggle selection (deselect if already selected)
+   * DISABLED IN QUIZ MODE, GAME QUIZ VIEW, AND BIRD MIGRATION VIEW
    */
   private async handleCountryInfoDisplay(event: MouseEvent): Promise<void> {
     event.preventDefault();
+
+    // Early exit if in bird migration view - no selection allowed
+    if (this.navigationStateService.isBirdMigrationActive()) {
+      return;
+    }
 
     const isShiftClick = event.shiftKey;
     const isCtrlClick = event.ctrlKey || event.metaKey; // Ctrl on Windows/Linux, Cmd on Mac
@@ -889,18 +973,7 @@ export class Globe implements AfterViewInit, OnDestroy {
               this.countries,
             );
 
-            // Show brief visual feedback tooltip
-            const x = event.clientX;
-            const y = event.clientY;
-            this.hoveredCountryName.set(countryName);
-            this.countryNameTooltipPosition.set({ x, y });
-            this.countryNameTooltipVisible.set(true);
-
-            // Hide tooltip quickly since quiz HUD will show selection
-            setTimeout(() => {
-              this.countryNameTooltipVisible.set(false);
-              this.hoveredCountryName.set('');
-            }, this.QUIZ_TOOLTIP_DELAY);
+            // NO TOOLTIPS in quiz mode - the quiz HUD shows the selection
 
             return; // Exit early - don't process explore mode logic
           }
@@ -1029,9 +1102,19 @@ export class Globe implements AfterViewInit, OnDestroy {
   /**
    * Handle adding country to comparison table from double-click events
    * Double-click adds the country to comparison table AND applies visual selection (additive)
+   * DISABLED IN QUIZ MODE, GAME QUIZ VIEW, AND BIRD MIGRATION VIEW
    */
   private async handleCountryAddToComparison(event: MouseEvent): Promise<void> {
     event.preventDefault();
+
+    // Early exit if in quiz mode, game quiz view, or bird migration view - double-click is disabled
+    if (
+      this.interactionModeService.isQuizMode() ||
+      this.navigationStateService.isGameQuizActive() ||
+      this.navigationStateService.isBirdMigrationActive()
+    ) {
+      return;
+    }
 
     // Early exit if countries not loaded
     if (!this.countries || this.countries.children.length === 0) {
@@ -1137,14 +1220,17 @@ export class Globe implements AfterViewInit, OnDestroy {
 
   /**
    * Enhanced country hover handling using specialized service
+   * DISABLED IN QUIZ MODE AND GAME QUIZ VIEW ONLY
+   * ENABLED in bird migration view to show country names
    */
   private async handleCountryHover(event: MouseEvent): Promise<void> {
     try {
-      // Early exit if countries not loaded or in quiz mode
+      // Early exit if countries not loaded, in quiz mode, or on game quiz view
       if (
         !this.countries ||
         this.countries.children.length === 0 ||
-        this.interactionModeService.isQuizMode()
+        this.interactionModeService.isQuizMode() ||
+        this.navigationStateService.isGameQuizActive()
       ) {
         this.tooltipService.hideAllTooltips();
         return;

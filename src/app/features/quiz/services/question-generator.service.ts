@@ -437,7 +437,22 @@ export class QuestionGeneratorService {
     count: number,
   ): Question[] {
     const questions: Question[] = [];
-    const factTypes = ['population', 'area', 'gdp', 'density'];
+
+    // Expanded fact types with fun and interesting categories
+    const factTypes = [
+      'population',
+      'area',
+      'gdp',
+      'density',
+      'coastline',
+      'neighbors',
+      'timezones',
+      'languages',
+      'lifeExpectancy',
+      'happiness',
+      'landlocked',
+      'islands',
+    ];
 
     for (let i = 0; i < count; i++) {
       const factType = factTypes[Math.floor(Math.random() * factTypes.length)];
@@ -478,6 +493,54 @@ export class QuestionGeneratorService {
         );
       case 'density':
         return this.generateDensityFactsQuestion(
+          allCountries,
+          difficulty,
+          questionNumber,
+        );
+      case 'coastline':
+        return this.generateCoastlineFactsQuestion(
+          allCountries,
+          difficulty,
+          questionNumber,
+        );
+      case 'neighbors':
+        return this.generateNeighborsFactsQuestion(
+          allCountries,
+          difficulty,
+          questionNumber,
+        );
+      case 'timezones':
+        return this.generateTimezonesFactsQuestion(
+          allCountries,
+          difficulty,
+          questionNumber,
+        );
+      case 'languages':
+        return this.generateLanguagesFactsQuestion(
+          allCountries,
+          difficulty,
+          questionNumber,
+        );
+      case 'lifeExpectancy':
+        return this.generateLifeExpectancyFactsQuestion(
+          allCountries,
+          difficulty,
+          questionNumber,
+        );
+      case 'happiness':
+        return this.generateHappinessFactsQuestion(
+          allCountries,
+          difficulty,
+          questionNumber,
+        );
+      case 'landlocked':
+        return this.generateLandlockedFactsQuestion(
+          allCountries,
+          difficulty,
+          questionNumber,
+        );
+      case 'islands':
+        return this.generateIslandsFactsQuestion(
           allCountries,
           difficulty,
           questionNumber,
@@ -646,6 +709,473 @@ export class QuestionGeneratorService {
         factType: 'density',
         factValue: correctAnswer.density,
         isHighest,
+        difficulty,
+      },
+    };
+  }
+
+  // ========== NEW INTERESTING FACT TYPES ==========
+
+  private generateCoastlineFactsQuestion(
+    countries: readonly CountryDataRecord[],
+    difficulty: Difficulty,
+    questionNumber: number,
+  ): Question {
+    // Approximate coastline data (publicly available information)
+    const coastlineData: { [key: string]: number } = {
+      Canada: 202080,
+      Norway: 83281,
+      Indonesia: 54716,
+      Russia: 37653,
+      Philippines: 36289,
+      Japan: 29751,
+      Australia: 25760,
+      'United States': 19924,
+      Antarctica: 17968,
+      Greece: 13676,
+      'United Kingdom': 12429,
+      Mexico: 9330,
+      Italy: 7600,
+      India: 7516,
+      China: 14500,
+      Denmark: 7314,
+      Turkey: 7200,
+      Chile: 6435,
+      Brazil: 7491,
+      Finland: 31119,
+    };
+
+    const eligibleCountries = countries.filter(
+      (country) => coastlineData[country.name] !== undefined,
+    );
+
+    const countriesWithCoastline = eligibleCountries.map((country) => ({
+      ...country,
+      coastline: coastlineData[country.name],
+    }));
+
+    const sortedByCoastline = countriesWithCoastline.sort(
+      (a, b) => b.coastline - a.coastline,
+    );
+
+    const choiceCount = this.CHOICE_COUNTS[difficulty];
+    const selectedCountries = sortedByCoastline.slice(0, choiceCount);
+    const correctAnswer = selectedCountries[0];
+    const shuffledChoices = this.shuffleArray(
+      selectedCountries.map((c) => c.name),
+    );
+
+    return {
+      id: `facts_coastline_${questionNumber}`,
+      type: 'facts-guess' as GameMode,
+      prompt: `Which country has the longest coastline?`,
+      correctAnswer: correctAnswer.name,
+      choices: shuffledChoices,
+      metadata: {
+        factType: 'coastline',
+        factValue: correctAnswer.coastline,
+        difficulty,
+      },
+    };
+  }
+
+  private generateNeighborsFactsQuestion(
+    countries: readonly CountryDataRecord[],
+    difficulty: Difficulty,
+    questionNumber: number,
+  ): Question {
+    // Number of land border neighbors (publicly available data)
+    const neighborsData: { [key: string]: number } = {
+      China: 14,
+      Russia: 14,
+      Brazil: 10,
+      'Democratic Republic of the Congo': 9,
+      Germany: 9,
+      Austria: 8,
+      France: 8,
+      Serbia: 8,
+      Tanzania: 8,
+      Turkey: 8,
+      Zambia: 8,
+      Hungary: 7,
+      Poland: 7,
+      Ukraine: 7,
+      Bolivia: 5,
+      'Burkina Faso': 6,
+      Mali: 7,
+      Niger: 7,
+      Sudan: 7,
+      'United States': 2,
+      Canada: 1,
+      Mexico: 2,
+      India: 6,
+      Spain: 5,
+      Italy: 6,
+    };
+
+    const eligibleCountries = countries.filter(
+      (country) => neighborsData[country.name] !== undefined,
+    );
+
+    const countriesWithNeighbors = eligibleCountries.map((country) => ({
+      ...country,
+      neighbors: neighborsData[country.name],
+    }));
+
+    const sortedByNeighbors = countriesWithNeighbors.sort(
+      (a, b) => b.neighbors - a.neighbors,
+    );
+
+    const choiceCount = this.CHOICE_COUNTS[difficulty];
+    const selectedCountries = sortedByNeighbors.slice(0, choiceCount);
+    const correctAnswer = selectedCountries[0];
+    const shuffledChoices = this.shuffleArray(
+      selectedCountries.map((c) => c.name),
+    );
+
+    return {
+      id: `facts_neighbors_${questionNumber}`,
+      type: 'facts-guess' as GameMode,
+      prompt: `Which country shares borders with the most countries?`,
+      correctAnswer: correctAnswer.name,
+      choices: shuffledChoices,
+      metadata: {
+        factType: 'neighbors',
+        factValue: correctAnswer.neighbors,
+        difficulty,
+      },
+    };
+  }
+
+  private generateTimezonesFactsQuestion(
+    countries: readonly CountryDataRecord[],
+    difficulty: Difficulty,
+    questionNumber: number,
+  ): Question {
+    const eligibleCountries = countries.filter(
+      (country) => country.timezones && country.timezones.length > 0,
+    );
+
+    const sortedByTimezones = [...eligibleCountries].sort(
+      (a, b) => b.timezones.length - a.timezones.length,
+    );
+
+    const choiceCount = this.CHOICE_COUNTS[difficulty];
+    const selectedCountries = sortedByTimezones.slice(0, choiceCount);
+    const correctAnswer = selectedCountries[0];
+    const shuffledChoices = this.shuffleArray(
+      selectedCountries.map((c) => c.name),
+    );
+
+    return {
+      id: `facts_timezones_${questionNumber}`,
+      type: 'facts-guess' as GameMode,
+      prompt: `Which country spans the most time zones?`,
+      correctAnswer: correctAnswer.name,
+      choices: shuffledChoices,
+      metadata: {
+        factType: 'timezones',
+        factValue: correctAnswer.timezones.length,
+        difficulty,
+      },
+    };
+  }
+
+  private generateLanguagesFactsQuestion(
+    countries: readonly CountryDataRecord[],
+    difficulty: Difficulty,
+    questionNumber: number,
+  ): Question {
+    // Approximate number of languages spoken (publicly available data)
+    const languagesData: { [key: string]: number } = {
+      'Papua New Guinea': 840,
+      Indonesia: 710,
+      Nigeria: 524,
+      India: 780,
+      Mexico: 364,
+      Cameroon: 280,
+      Australia: 260,
+      'Democratic Republic of the Congo': 214,
+      China: 302,
+      'United States': 430,
+      Brazil: 228,
+      Philippines: 183,
+      Malaysia: 137,
+      Canada: 200,
+      Ethiopia: 90,
+      'South Africa': 35,
+      Russia: 105,
+      Peru: 93,
+      Tanzania: 126,
+      Colombia: 101,
+    };
+
+    const eligibleCountries = countries.filter(
+      (country) => languagesData[country.name] !== undefined,
+    );
+
+    const countriesWithLanguages = eligibleCountries.map((country) => ({
+      ...country,
+      languages: languagesData[country.name],
+    }));
+
+    const sortedByLanguages = countriesWithLanguages.sort(
+      (a, b) => b.languages - a.languages,
+    );
+
+    const choiceCount = this.CHOICE_COUNTS[difficulty];
+    const selectedCountries = sortedByLanguages.slice(0, choiceCount);
+    const correctAnswer = selectedCountries[0];
+    const shuffledChoices = this.shuffleArray(
+      selectedCountries.map((c) => c.name),
+    );
+
+    return {
+      id: `facts_languages_${questionNumber}`,
+      type: 'facts-guess' as GameMode,
+      prompt: `Which country has the most spoken languages?`,
+      correctAnswer: correctAnswer.name,
+      choices: shuffledChoices,
+      metadata: {
+        factType: 'languages',
+        factValue: correctAnswer.languages,
+        difficulty,
+      },
+    };
+  }
+
+  private generateLifeExpectancyFactsQuestion(
+    countries: readonly CountryDataRecord[],
+    difficulty: Difficulty,
+    questionNumber: number,
+  ): Question {
+    const eligibleCountries = countries.filter(
+      (country) => country.lifeExpectancy && country.lifeExpectancy > 0,
+    );
+
+    const sortedByLifeExpectancy = [...eligibleCountries].sort(
+      (a, b) => (b.lifeExpectancy || 0) - (a.lifeExpectancy || 0),
+    );
+
+    const choiceCount = this.CHOICE_COUNTS[difficulty];
+    const isHighest = Math.random() < 0.5;
+
+    const selectedCountries = isHighest
+      ? sortedByLifeExpectancy.slice(0, choiceCount)
+      : sortedByLifeExpectancy.slice(-choiceCount).reverse();
+
+    const correctAnswer = selectedCountries[0];
+    const shuffledChoices = this.shuffleArray(
+      selectedCountries.map((c) => c.name),
+    );
+
+    return {
+      id: `facts_life_expectancy_${questionNumber}`,
+      type: 'facts-guess' as GameMode,
+      prompt: `Which country has the ${isHighest ? 'highest' : 'lowest'} life expectancy?`,
+      correctAnswer: correctAnswer.name,
+      choices: shuffledChoices,
+      metadata: {
+        factType: 'lifeExpectancy',
+        factValue: correctAnswer.lifeExpectancy,
+        isHighest,
+        difficulty,
+      },
+    };
+  }
+
+  private generateHappinessFactsQuestion(
+    countries: readonly CountryDataRecord[],
+    difficulty: Difficulty,
+    questionNumber: number,
+  ): Question {
+    const eligibleCountries = countries.filter(
+      (country) => country.happiness && country.happiness > 0,
+    );
+
+    const sortedByHappiness = [...eligibleCountries].sort(
+      (a, b) => (b.happiness || 0) - (a.happiness || 0),
+    );
+
+    const choiceCount = this.CHOICE_COUNTS[difficulty];
+    const selectedCountries = sortedByHappiness.slice(0, choiceCount);
+    const correctAnswer = selectedCountries[0];
+    const shuffledChoices = this.shuffleArray(
+      selectedCountries.map((c) => c.name),
+    );
+
+    return {
+      id: `facts_happiness_${questionNumber}`,
+      type: 'facts-guess' as GameMode,
+      prompt: `Which country ranks highest on the World Happiness Index?`,
+      correctAnswer: correctAnswer.name,
+      choices: shuffledChoices,
+      metadata: {
+        factType: 'happiness',
+        factValue: correctAnswer.happiness,
+        difficulty,
+      },
+    };
+  }
+
+  private generateLandlockedFactsQuestion(
+    countries: readonly CountryDataRecord[],
+    difficulty: Difficulty,
+    questionNumber: number,
+  ): Question {
+    // Famous landlocked countries (no coastline at all)
+    const landlockedCountries = [
+      'Afghanistan',
+      'Andorra',
+      'Armenia',
+      'Austria',
+      'Azerbaijan',
+      'Belarus',
+      'Bhutan',
+      'Bolivia',
+      'Botswana',
+      'Burkina Faso',
+      'Burundi',
+      'Central African Republic',
+      'Chad',
+      'Czech Republic',
+      'Ethiopia',
+      'Hungary',
+      'Kazakhstan',
+      'Kyrgyzstan',
+      'Laos',
+      'Lesotho',
+      'Liechtenstein',
+      'Luxembourg',
+      'Malawi',
+      'Mali',
+      'Moldova',
+      'Mongolia',
+      'Nepal',
+      'Niger',
+      'North Macedonia',
+      'Paraguay',
+      'Rwanda',
+      'San Marino',
+      'Serbia',
+      'Slovakia',
+      'South Sudan',
+      'Eswatini',
+      'Switzerland',
+      'Tajikistan',
+      'Turkmenistan',
+      'Uganda',
+      'Uzbekistan',
+      'Vatican City',
+      'Zambia',
+      'Zimbabwe',
+    ];
+
+    const choiceCount = this.CHOICE_COUNTS[difficulty];
+
+    // Mix landlocked and coastal countries
+    const landlockedChoices = countries.filter((c) =>
+      landlockedCountries.includes(c.name),
+    );
+    const coastalChoices = countries.filter(
+      (c) => !landlockedCountries.includes(c.name) && c.population > 1_000_000,
+    );
+
+    // Select one landlocked (correct answer)
+    const correctCountries = this.selectRandomCountries(landlockedChoices, 1);
+    if (correctCountries.length === 0) {
+      // Fallback to population question if no landlocked countries
+      return this.generatePopulationFactsQuestion(
+        countries,
+        difficulty,
+        questionNumber,
+      );
+    }
+
+    const correctAnswer = correctCountries[0];
+
+    // Select coastal distractors
+    const distractors = this.selectRandomCountries(
+      coastalChoices,
+      choiceCount - 1,
+    );
+    const allChoices = this.shuffleArray([
+      correctAnswer.name,
+      ...distractors.map((c) => c.name),
+    ]);
+
+    return {
+      id: `facts_landlocked_${questionNumber}`,
+      type: 'facts-guess' as GameMode,
+      prompt: `Which country is landlocked (has no coastline)?`,
+      correctAnswer: correctAnswer.name,
+      choices: allChoices,
+      metadata: {
+        factType: 'landlocked',
+        isLandlocked: true,
+        difficulty,
+      },
+    };
+  }
+
+  private generateIslandsFactsQuestion(
+    countries: readonly CountryDataRecord[],
+    difficulty: Difficulty,
+    questionNumber: number,
+  ): Question {
+    // Island nations and countries with many islands (publicly available data)
+    const islandData: { [key: string]: number } = {
+      Sweden: 267570,
+      Norway: 239057,
+      Finland: 188000,
+      Canada: 36563,
+      Indonesia: 17508,
+      Australia: 8222,
+      Philippines: 7641,
+      Japan: 6852,
+      'United Kingdom': 6289,
+      Greece: 6000,
+      'United States': 18617,
+      Chile: 5000,
+      Croatia: 1244,
+      Estonia: 2355,
+      Maldives: 1190,
+      Denmark: 443,
+      'New Zealand': 600,
+      Malaysia: 878,
+      Thailand: 1430,
+      Italy: 450,
+    };
+
+    const eligibleCountries = countries.filter(
+      (country) => islandData[country.name] !== undefined,
+    );
+
+    const countriesWithIslands = eligibleCountries.map((country) => ({
+      ...country,
+      islands: islandData[country.name],
+    }));
+
+    const sortedByIslands = countriesWithIslands.sort(
+      (a, b) => b.islands - a.islands,
+    );
+
+    const choiceCount = this.CHOICE_COUNTS[difficulty];
+    const selectedCountries = sortedByIslands.slice(0, choiceCount);
+    const correctAnswer = selectedCountries[0];
+    const shuffledChoices = this.shuffleArray(
+      selectedCountries.map((c) => c.name),
+    );
+
+    return {
+      id: `facts_islands_${questionNumber}`,
+      type: 'facts-guess' as GameMode,
+      prompt: `Which country has the most islands?`,
+      correctAnswer: correctAnswer.name,
+      choices: shuffledChoices,
+      metadata: {
+        factType: 'islands',
+        factValue: correctAnswer.islands,
         difficulty,
       },
     };

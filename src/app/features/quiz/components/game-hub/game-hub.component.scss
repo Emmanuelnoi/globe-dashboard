@@ -10,6 +10,9 @@
   pointer-events: auto;
   box-sizing: border-box;
   overflow-y: auto;
+  transition:
+    width 0.3s ease,
+    padding 0.3s ease;
 
   /* Unified glass morphism styling */
   border-radius: var(--glass-radius-medium);
@@ -21,13 +24,31 @@
   box-shadow: var(--glass-shadow-strong);
 }
 
+/* Collapsed state */
+.quiz-view.collapsed {
+  width: 60px;
+  padding: 16px 8px;
+  overflow: visible;
+}
+
 .quiz-content {
   color: rgba(255, 255, 255, 0.9);
 }
 
 .quiz-header {
-  text-align: center;
   margin-bottom: 20px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.header-text {
+  flex: 1;
+  text-align: center;
 }
 
 .quiz-header h2 {
@@ -42,6 +63,41 @@
   font-size: 14px;
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.3;
+}
+
+/* Collapse button */
+.collapse-btn {
+  padding: 4px 10px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.collapse-btn:active {
+  transform: scale(0.98);
+}
+
+/* Collapsed state - center the toggle button vertically */
+.quiz-view.collapsed .quiz-header {
+  margin-bottom: 0;
+}
+
+.quiz-view.collapsed .header-content {
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 20px;
 }
 
 /* Form Styles */

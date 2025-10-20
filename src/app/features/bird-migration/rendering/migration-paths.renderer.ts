@@ -51,14 +51,38 @@ export class MigrationPathsRenderer {
    * @param activePaths Array of active paths
    */
   updatePaths(activePaths: readonly ActivePath[]): void {
+    migrationLogger.debug(
+      `📥 updatePaths called with ${activePaths.length} active paths`,
+      'MigrationPathsRenderer',
+    );
+    migrationLogger.debug(
+      `📊 Current pathMeshes.size: ${this.pathMeshes.size}`,
+      'MigrationPathsRenderer',
+    );
+    migrationLogger.debug(
+      `📊 pathGroup.children.length: ${this.pathGroup.children.length}`,
+      'MigrationPathsRenderer',
+    );
+
     const activeIds = new Set(activePaths.map((p) => p.migrationId));
 
     // Remove paths that are no longer active
+    const pathsToRemove: string[] = [];
     this.pathMeshes.forEach((mesh, id) => {
       if (!activeIds.has(id)) {
-        this.removePath(id);
+        pathsToRemove.push(id);
       }
     });
+
+    if (pathsToRemove.length > 0) {
+      migrationLogger.debug(
+        `🗑️ Removing ${pathsToRemove.length} paths: ${pathsToRemove.join(', ')}`,
+        'MigrationPathsRenderer',
+      );
+      pathsToRemove.forEach((id) => {
+        this.removePath(id);
+      });
+    }
 
     // Add or update active paths
     activePaths.forEach((activePath) => {
@@ -74,7 +98,10 @@ export class MigrationPathsRenderer {
       }
     });
 
-    migrationLogger.debug(`Updated ${activePaths.length} active paths`);
+    migrationLogger.debug(
+      `✅ Updated to ${activePaths.length} active paths (meshes: ${this.pathMeshes.size}, group children: ${this.pathGroup.children.length})`,
+      'MigrationPathsRenderer',
+    );
   }
 
   /**

@@ -120,7 +120,7 @@ export interface MigrationInfoCardHandlers {
 
       <!-- Clear All Button -->
       @if (migrationData().length > 0) {
-        <button class="clear-all-btn" (click)="onClearAll()">
+        <button class="clear-all-btn" (click)="onClearAll()()">
           Clear All Paths
         </button>
       }

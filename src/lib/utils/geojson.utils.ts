@@ -306,6 +306,23 @@ export const COUNTRY_MATERIALS = {
       fog: true,
     }),
   },
+  quiz: {
+    fill: new MeshBasicMaterial({
+      color: 0x10b981, // Emerald green for quiz candidate selection (same as comparison mode)
+      transparent: true,
+      opacity: 0.8,
+      side: DoubleSide,
+      fog: true,
+      depthTest: false,
+      depthWrite: false,
+    }),
+    border: new LineBasicMaterial({
+      color: 0x34d399, // Lighter emerald for quiz border (same as comparison mode)
+      transparent: true,
+      opacity: 1.0,
+      fog: true,
+    }),
+  },
 } as const;
 
 /**

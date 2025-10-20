@@ -1,499 +1,532 @@
-<div class="quiz-view" role="region" aria-label="Game Quiz Hub">
-  <div class="quiz-content">
-    <header class="quiz-header">
-      <h2>🎮 Game Quiz</h2>
-      <p>Test your geography knowledge with interactive quiz games</p>
-    </header>
-
-    <!-- Game Configuration Form -->
-    @if (gameState() === "idle") {
-      <form class="game-config-form" (ngSubmit)="startGame()">
-        <!-- Game Mode Selector -->
-        <div class="form-group">
-          <label class="form-label">Game Mode</label>
-          <div class="mode-selector">
-            @for (mode of availableModes; track mode.value) {
-              <div
-                class="mode-option"
-                [class.selected]="selectedMode() === mode.value"
-                [class.disabled]="!mode.enabled"
-                (click)="mode.enabled && onModeChange(mode.value)"
-                [attr.aria-disabled]="!mode.enabled"
-                role="radio"
-                [attr.aria-checked]="selectedMode() === mode.value"
-              >
-                <div class="mode-icon">
-                  @switch (mode.value) {
-                    @case ("find-country") {
-                      🌍
-                    }
-                    @case ("capital-match") {
-                      🏛️
-                    }
-                    @case ("flag-id") {
-                      🏳️
-                    }
-                    @case ("facts-guess") {
-                      📊
-                    }
-                  }
-                </div>
-                <div class="mode-info">
-                  <h3>{{ mode.label }}</h3>
-                  @if (!mode.enabled) {
-                    <span class="coming-soon">Sprint 2</span>
-                  }
-                </div>
-              </div>
-            }
-          </div>
+<div
+  class="quiz-view"
+  [class.collapsed]="isCollapsed()"
+  role="region"
+  aria-label="Game Quiz Hub"
+>
+  <header class="quiz-header">
+    <div class="header-content">
+      @if (!isCollapsed()) {
+        <div class="header-text">
+          <h2>🎮 Game Quiz</h2>
+          <p>Test your geography knowledge with interactive quiz games</p>
         </div>
-
-        <!-- Difficulty Selector -->
-        <div class="form-group">
-          <label class="form-label">Difficulty</label>
-          <div class="difficulty-selector">
-            @for (difficulty of difficulties; track difficulty.value) {
-              <label class="difficulty-option">
-                <input
-                  type="radio"
-                  name="difficulty"
-                  [value]="difficulty.value"
-                  [checked]="selectedDifficulty() === difficulty.value"
-                  (change)="onDifficultyChange(difficulty.value)"
-                />
-                <span class="radio-custom"></span>
-                <div class="difficulty-info">
-                  <span class="difficulty-name">{{ difficulty.label }}</span>
-                  <span class="difficulty-desc">{{
-                    difficulty.description
-                  }}</span>
-                </div>
-              </label>
-            }
-          </div>
-        </div>
-
-        <!-- Question Count Selector -->
-        <div class="form-group">
-          <label class="form-label" for="question-count">
-            Questions: {{ questionCount() }}
-          </label>
-          <div class="question-count-selector">
-            <input
-              type="range"
-              id="question-count"
-              class="count-slider"
-              [min]="questionCountOptions[0]"
-              [max]="questionCountOptions[questionCountOptions.length - 1]"
-              [step]="5"
-              [value]="questionCount()"
-              (input)="onQuestionCountChange(+$any($event.target).value)"
-            />
-            <div class="count-marks">
-              @for (count of questionCountOptions; track count) {
-                <span
-                  class="count-mark"
-                  [class.active]="questionCount() === count"
-                  >{{ count }}</span
-                >
-              }
-            </div>
-          </div>
-        </div>
-
-        <!-- Start Game Button -->
-        <div class="form-actions">
-          <button
-            type="submit"
-            class="start-game-btn"
-            [disabled]="!isFormValid || isStarting()"
-            [attr.aria-busy]="isStarting()"
-          >
-            @if (isStarting()) {
-              <span class="btn-spinner">🔄</span>
-              Starting...
-            } @else {
-              <span class="btn-icon">🎮</span>
-              Start Game
-            }
-          </button>
-        </div>
-      </form>
-    }
-
-    <!-- Quiz Gameplay HUD (shows during active quiz) -->
-    @if (
-      gameState() === "question" ||
-      gameState() === "evaluating" ||
-      gameState() === "playing"
-    ) {
-      <div
-        class="quiz-gameplay"
-        role="complementary"
-        aria-label="Quiz game controls"
+      }
+      <button
+        type="button"
+        class="collapse-btn"
+        (click)="toggleCollapse()"
+        [attr.aria-expanded]="!isCollapsed()"
+        aria-label="{{ isCollapsed() ? 'Expand panel' : 'Collapse panel' }}"
       >
-        <!-- ARIA Live Regions for Screen Readers -->
-        <div
-          class="sr-only"
-          aria-live="polite"
-          aria-atomic="true"
-          [attr.aria-label]="screenReaderStatus()"
-        ></div>
+        {{ isCollapsed() ? "◀" : "▶" }}
+      </button>
+    </div>
+  </header>
 
-        <!-- Header with Progress and Timer -->
-        <header class="hud-header">
-          <!-- Progress Indicator -->
-          <div class="progress-section">
-            <div class="progress-text">
-              Question {{ currentQuestionNumber() }} of
-              {{ totalQuestions() }}
-            </div>
-            <div class="progress-bar">
-              <div
-                class="progress-fill"
-                [style.width.%]="progressPercentage()"
-                role="progressbar"
-                [attr.aria-valuenow]="currentQuestionNumber()"
-                [attr.aria-valuemax]="totalQuestions()"
-                [attr.aria-label]="
-                  'Question progress: ' +
-                  currentQuestionNumber() +
-                  ' of ' +
-                  totalQuestions()
-                "
-              ></div>
-            </div>
-          </div>
-
-          <!-- Timer Display -->
-          <div class="timer-section">
-            <div class="timer-display">
-              <svg
-                class="timer-circle"
-                width="60"
-                height="60"
-                viewBox="0 0 60 60"
-              >
-                <!-- Background circle -->
-                <circle
-                  cx="30"
-                  cy="30"
-                  r="26"
-                  fill="none"
-                  stroke="rgba(255,255,255,0.1)"
-                  stroke-width="3"
-                />
-                <!-- Progress circle -->
-                <circle
-                  cx="30"
-                  cy="30"
-                  r="26"
-                  fill="none"
-                  stroke="rgba(100,200,255,0.8)"
-                  stroke-width="3"
-                  stroke-linecap="round"
-                  [style.stroke-dasharray]="163"
-                  [style.stroke-dashoffset]="timerDashOffset()"
-                  [class.timer-warning]="timeLeftSeconds() <= 10"
-                  [class.timer-critical]="timeLeftSeconds() <= 5"
-                  transform="rotate(-90 30 30)"
-                />
-              </svg>
-              <div class="timer-text">
-                <span class="timer-seconds">{{ timeLeftSeconds() }}</span>
-                <span class="timer-label">sec</span>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <!-- Question Prompt -->
-        <div class="question-section">
-          <div
-            class="question-prompt"
-            [attr.aria-live]="gameState() === 'question' ? 'polite' : 'off'"
-          >
-            @if (currentQuestion()) {
-              {{ currentQuestion()!.prompt }}
-            }
-          </div>
-
-          <!-- Flag Display for Flag ID Mode -->
-          @if (
-            currentQuestion()?.type === "flag-id" &&
-            currentQuestion()?.metadata?.flagUrl
-          ) {
-            <div class="flag-display">
-              <img
-                [src]="currentQuestion()?.metadata?.flagUrl"
-                [alt]="'Flag to identify'"
-                class="question-flag"
-                loading="eager"
-                (error)="onFlagError($event)"
-              />
-            </div>
-          }
-        </div>
-
-        <!-- Selection Interface -->
-        <div class="selection-section">
-          <!-- Multiple Choice Grid (for capital-match, flag-id, facts-guess) -->
-          @if (isMultipleChoiceMode()) {
-            <div
-              class="multiple-choice-grid"
-              role="radiogroup"
-              [attr.aria-label]="
-                'Answer choices for: ' + currentQuestion()?.prompt
-              "
-            >
-              @if (currentQuestion()?.choices; as choices) {
-                @for (choice of choices; track choice) {
-                  <button
-                    type="button"
-                    class="choice-button"
-                    [class.selected]="selectedCandidate() === choice"
-                    [disabled]="isConfirmLocked()"
-                    (click)="selectChoice(choice)"
-                    role="radio"
-                    [attr.aria-checked]="selectedCandidate() === choice"
-                    [attr.aria-label]="'Select ' + choice"
-                  >
-                    <div class="choice-content">
-                      <span class="choice-text">{{ choice }}</span>
-                    </div>
-                    @if (selectedCandidate() === choice) {
-                      <div class="choice-indicator">✓</div>
-                    }
-                  </button>
-                }
-              }
-            </div>
-          } @else {
-            <!-- Globe Selection Display (for find-country) -->
-            @if (selectedCandidate()) {
-              <div class="selected-candidate" role="status" aria-live="polite">
-                <span class="selection-label">Selected </span>
-              </div>
-            } @else {
-              <div class="no-selection" role="status" aria-live="polite">
-                <span class="selection-hint"
-                  >Click a country on the globe to select it</span
+  @if (!isCollapsed()) {
+    <div class="quiz-content">
+      <!-- Game Configuration Form -->
+      @if (gameState() === "idle") {
+        <form class="game-config-form" (ngSubmit)="startGame()">
+          <!-- Game Mode Selector -->
+          <div class="form-group">
+            <label class="form-label">Game Mode</label>
+            <div class="mode-selector">
+              @for (mode of availableModes; track mode.value) {
+                <div
+                  class="mode-option"
+                  [class.selected]="selectedMode() === mode.value"
+                  [class.disabled]="!mode.enabled"
+                  (click)="mode.enabled && onModeChange(mode.value)"
+                  [attr.aria-disabled]="!mode.enabled"
+                  role="radio"
+                  [attr.aria-checked]="selectedMode() === mode.value"
                 >
-              </div>
-            }
-          }
-        </div>
+                  <div class="mode-icon">
+                    @switch (mode.value) {
+                      @case ("find-country") {
+                        🌍
+                      }
+                      @case ("capital-match") {
+                        🏛️
+                      }
+                      @case ("flag-id") {
+                        🏳️
+                      }
+                      @case ("facts-guess") {
+                        📊
+                      }
+                    }
+                  </div>
+                  <div class="mode-info">
+                    <h3>{{ mode.label }}</h3>
+                    @if (!mode.enabled) {
+                      <span class="coming-soon">Sprint 2</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
 
-        <!-- Action Buttons -->
-        <div class="actions-section">
-          <div class="action-buttons" role="toolbar" aria-label="Quiz actions">
-            <!-- Confirm Button -->
+          <!-- Difficulty Selector -->
+          <div class="form-group">
+            <label class="form-label">Difficulty</label>
+            <div class="difficulty-selector">
+              @for (difficulty of difficulties; track difficulty.value) {
+                <label class="difficulty-option">
+                  <input
+                    type="radio"
+                    name="difficulty"
+                    [value]="difficulty.value"
+                    [checked]="selectedDifficulty() === difficulty.value"
+                    (change)="onDifficultyChange(difficulty.value)"
+                  />
+                  <span class="radio-custom"></span>
+                  <div class="difficulty-info">
+                    <span class="difficulty-name">{{ difficulty.label }}</span>
+                    <span class="difficulty-desc">{{
+                      difficulty.description
+                    }}</span>
+                  </div>
+                </label>
+              }
+            </div>
+          </div>
+
+          <!-- Question Count Selector -->
+          <div class="form-group">
+            <label class="form-label" for="question-count">
+              Questions: {{ questionCount() }}
+            </label>
+            <div class="question-count-selector">
+              <input
+                type="range"
+                id="question-count"
+                class="count-slider"
+                [min]="questionCountOptions[0]"
+                [max]="questionCountOptions[questionCountOptions.length - 1]"
+                [step]="5"
+                [value]="questionCount()"
+                (input)="onQuestionCountChange(+$any($event.target).value)"
+              />
+              <div class="count-marks">
+                @for (count of questionCountOptions; track count) {
+                  <span
+                    class="count-mark"
+                    [class.active]="questionCount() === count"
+                    >{{ count }}</span
+                  >
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Start Game Button -->
+          <div class="form-actions">
             <button
-              class="action-btn confirm-btn"
-              [disabled]="!canConfirm()"
-              [class.locked]="isConfirmLocked()"
-              (click)="confirmAnswer()"
-              [attr.aria-busy]="isConfirmLocked()"
-              type="button"
+              type="submit"
+              class="start-game-btn"
+              [disabled]="!isFormValid || isStarting()"
+              [attr.aria-busy]="isStarting()"
             >
-              @if (isConfirmLocked()) {
+              @if (isStarting()) {
                 <span class="btn-spinner">🔄</span>
-                Processing...
+                Starting...
               } @else {
-                <span class="btn-icon">✓</span>
-                Confirm
+                <span class="btn-icon">🎮</span>
+                Start Game
               }
             </button>
+          </div>
+        </form>
+      }
 
-            <!-- Clear Button -->
-            <button
-              class="action-btn clear-btn"
-              [disabled]="!selectedCandidate() || isConfirmLocked()"
-              (click)="clearSelection()"
-              type="button"
+      <!-- Quiz Gameplay HUD (shows during active quiz) -->
+      @if (
+        gameState() === "question" ||
+        gameState() === "evaluating" ||
+        gameState() === "playing"
+      ) {
+        <div
+          class="quiz-gameplay"
+          role="complementary"
+          aria-label="Quiz game controls"
+        >
+          <!-- ARIA Live Regions for Screen Readers -->
+          <div
+            class="sr-only"
+            aria-live="polite"
+            aria-atomic="true"
+            [attr.aria-label]="screenReaderStatus()"
+          ></div>
+
+          <!-- Header with Progress and Timer -->
+          <header class="hud-header">
+            <!-- Progress Indicator -->
+            <div class="progress-section">
+              <div class="progress-text">
+                Question {{ currentQuestionNumber() }} of
+                {{ totalQuestions() }}
+              </div>
+              <div class="progress-bar">
+                <div
+                  class="progress-fill"
+                  [style.width.%]="progressPercentage()"
+                  role="progressbar"
+                  [attr.aria-valuenow]="currentQuestionNumber()"
+                  [attr.aria-valuemax]="totalQuestions()"
+                  [attr.aria-label]="
+                    'Question progress: ' +
+                    currentQuestionNumber() +
+                    ' of ' +
+                    totalQuestions()
+                  "
+                ></div>
+              </div>
+            </div>
+
+            <!-- Timer Display -->
+            <div class="timer-section">
+              <div class="timer-display">
+                <svg
+                  class="timer-circle"
+                  width="60"
+                  height="60"
+                  viewBox="0 0 60 60"
+                >
+                  <!-- Background circle -->
+                  <circle
+                    cx="30"
+                    cy="30"
+                    r="26"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.1)"
+                    stroke-width="3"
+                  />
+                  <!-- Progress circle -->
+                  <circle
+                    cx="30"
+                    cy="30"
+                    r="26"
+                    fill="none"
+                    stroke="rgba(100,200,255,0.8)"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    [style.stroke-dasharray]="163"
+                    [style.stroke-dashoffset]="timerDashOffset()"
+                    [class.timer-warning]="timeLeftSeconds() <= 10"
+                    [class.timer-critical]="timeLeftSeconds() <= 5"
+                    transform="rotate(-90 30 30)"
+                  />
+                </svg>
+                <div class="timer-text">
+                  <span class="timer-seconds">{{ timeLeftSeconds() }}</span>
+                  <span class="timer-label">sec</span>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <!-- Question Prompt -->
+          <div class="question-section">
+            <div
+              class="question-prompt"
+              [attr.aria-live]="gameState() === 'question' ? 'polite' : 'off'"
             >
-              <span class="btn-icon">✗</span>
-              Clear
-            </button>
+              @if (currentQuestion()) {
+                {{ currentQuestion()!.prompt }}
+              }
+            </div>
 
-            <!-- Skip Button -->
-            <button
-              class="action-btn skip-btn"
-              [disabled]="isConfirmLocked()"
-              (click)="skipQuestion()"
-              type="button"
-            >
-              <span class="btn-icon">⏭</span>
-              Skip
-            </button>
-          </div>
-        </div>
-
-        <!-- Score Display -->
-        <div class="score-section">
-          <div class="score-display">
-            <div class="score-item">
-              <span class="score-label">Score</span>
-              <span class="score-value">{{ score() }}</span>
-            </div>
-            <div class="score-item">
-              <span class="score-label">Streak</span>
-              <span class="score-value" [class.streak-active]="streak() > 0">
-                {{ streak() }}
-                @if (streak() > 2) {
-                  🔥
-                }
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Stop Game Button Section -->
-        <div class="stop-game-section">
-          <button
-            type="button"
-            class="stop-game-button"
-            (click)="stopGame()"
-            [attr.aria-label]="'Stop quiz and return to game setup'"
-            title="Stop Quiz"
-          >
-            <span class="button-icon">⏹️</span>
-            <span class="button-text">Stop Game</span>
-          </button>
-        </div>
-      </div>
-    }
-
-    <!-- Results Display (shows when quiz is complete) -->
-    @if (gameState() === "results" || gameState() === "ended") {
-      <div class="quiz-results" role="region" aria-label="Quiz Results">
-        <!-- Results Header -->
-        <header class="results-header">
-          <div class="results-icon">
-            @if (accuracyPercentage() >= 80) {
-              🏆
-            } @else if (accuracyPercentage() >= 60) {
-              🎉
-            } @else {
-              📊
-            }
-          </div>
-          <h2>Quiz Complete!</h2>
-          <div class="performance-badge" [class]="performanceLevel()">
-            {{ performanceText() }}
-          </div>
-        </header>
-
-        <!-- Score Summary -->
-        <div class="score-summary">
-          <div class="score-main">
-            <div class="final-score">
-              <span class="score-value">{{ finalScore() }}</span>
-              <span class="score-label">Points</span>
-            </div>
-            <div class="accuracy-display">
-              <span class="accuracy-value">{{ accuracyPercentage() }}%</span>
-              <span class="accuracy-label">Accuracy</span>
-            </div>
-          </div>
-
-          <div class="stats-grid">
-            <div class="stat-item">
-              <span class="stat-value">{{ correctAnswers() }}</span>
-              <span class="stat-label">Correct</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ incorrectAnswers() }}</span>
-              <span class="stat-label">Incorrect</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ bestStreak() }}</span>
-              <span class="stat-label">Best Streak</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ totalTimeFormatted() }}</span>
-              <span class="stat-label">Total Time</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Question Results -->
-        <div class="question-results">
-          <h3>Question Results</h3>
-          <div class="results-list">
-            @for (result of results(); track result.questionId) {
-              <div
-                class="result-item"
-                [class.correct]="result.isCorrect"
-                [class.incorrect]="!result.isCorrect"
-              >
-                <div class="result-icon">
-                  @if (result.isCorrect) {
-                    ✅
-                  } @else if (result.selectedAnswer === "SKIPPED") {
-                    ⏭️
-                  } @else {
-                    ❌
-                  }
-                </div>
-                <div class="result-content">
-                  <div class="result-question">
-                    {{ getQuestionPrompt(result.questionId) }}
-                  </div>
-                  <div class="result-details">
-                    @if (result.selectedAnswer === "SKIPPED") {
-                      <span class="result-answer skipped">Skipped</span>
-                    } @else {
-                      <span
-                        class="result-answer"
-                        [class.correct]="result.isCorrect"
-                        [class.incorrect]="!result.isCorrect"
-                      >
-                        {{ getCountryName(result.selectedAnswer) }}
-                      </span>
-                    }
-                    @if (
-                      !result.isCorrect && result.selectedAnswer !== "SKIPPED"
-                    ) {
-                      <span class="correct-answer">
-                        Correct: {{ getCountryName(result.correctAnswer) }}
-                      </span>
-                    }
-                  </div>
-                </div>
-                <div class="result-stats">
-                  <div class="result-points">+{{ result.pointsEarned }}</div>
-                  <div class="result-time">
-                    {{ formatTime(result.timeSpent) }}
-                  </div>
-                </div>
+            <!-- Flag Display for Flag ID Mode -->
+            @if (
+              currentQuestion()?.type === "flag-id" &&
+              currentQuestion()?.metadata?.flagUrl
+            ) {
+              <div class="flag-display">
+                <img
+                  [src]="currentQuestion()?.metadata?.flagUrl"
+                  [alt]="'Flag to identify'"
+                  class="question-flag"
+                  loading="eager"
+                  (error)="onFlagError($event)"
+                />
               </div>
             }
           </div>
-        </div>
 
-        <!-- Action Buttons -->
-        <div class="results-actions">
-          <button class="action-btn primary-btn" (click)="startNewGame()">
-            <span class="btn-icon">🎮</span>
-            Play Again
-          </button>
-          <button class="action-btn secondary-btn" (click)="toggleStats()">
-            <span class="btn-icon">📊</span>
-            {{ showStats() ? "Hide Stats" : "View Stats" }}
-          </button>
-          <button class="action-btn secondary-btn" (click)="returnToExplore()">
-            <span class="btn-icon">🌍</span>
-            Explore Globe
-          </button>
-        </div>
-      </div>
-    }
+          <!-- Selection Interface -->
+          <div class="selection-section">
+            <!-- Multiple Choice Grid (for capital-match, flag-id, facts-guess) -->
+            @if (isMultipleChoiceMode()) {
+              <div
+                class="multiple-choice-grid"
+                role="radiogroup"
+                [attr.aria-label]="
+                  'Answer choices for: ' + currentQuestion()?.prompt
+                "
+              >
+                @if (currentQuestion()?.choices; as choices) {
+                  @for (choice of choices; track choice) {
+                    <button
+                      type="button"
+                      class="choice-button"
+                      [class.selected]="selectedCandidate() === choice"
+                      [disabled]="isConfirmLocked()"
+                      (click)="selectChoice(choice)"
+                      role="radio"
+                      [attr.aria-checked]="selectedCandidate() === choice"
+                      [attr.aria-label]="'Select ' + choice"
+                    >
+                      <div class="choice-content">
+                        <span class="choice-text">{{ choice }}</span>
+                      </div>
+                      @if (selectedCandidate() === choice) {
+                        <div class="choice-indicator">✓</div>
+                      }
+                    </button>
+                  }
+                }
+              </div>
+            } @else {
+              <!-- Globe Selection Display (for find-country) -->
+              @if (selectedCandidate()) {
+                <div
+                  class="selected-candidate"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span class="selection-label">Selected </span>
+                </div>
+              } @else {
+                <div class="no-selection" role="status" aria-live="polite">
+                  <span class="selection-hint"
+                    >Click a country on the globe to select it</span
+                  >
+                </div>
+              }
+            }
+          </div>
 
-    <!-- Stats Panel Modal -->
-    @if (showStats()) {
-      <app-stats-panel (closeStats)="hideStats()" />
-    }
-  </div>
+          <!-- Action Buttons -->
+          <div class="actions-section">
+            <div
+              class="action-buttons"
+              role="toolbar"
+              aria-label="Quiz actions"
+            >
+              <!-- Confirm Button -->
+              <button
+                class="action-btn confirm-btn"
+                [disabled]="!canConfirm()"
+                [class.locked]="isConfirmLocked()"
+                (click)="confirmAnswer()"
+                [attr.aria-busy]="isConfirmLocked()"
+                type="button"
+              >
+                @if (isConfirmLocked()) {
+                  <span class="btn-spinner">🔄</span>
+                  Processing...
+                } @else {
+                  <span class="btn-icon">✓</span>
+                  Confirm
+                }
+              </button>
+
+              <!-- Clear Button -->
+              <button
+                class="action-btn clear-btn"
+                [disabled]="!selectedCandidate() || isConfirmLocked()"
+                (click)="clearSelection()"
+                type="button"
+              >
+                <span class="btn-icon">✗</span>
+                Clear
+              </button>
+
+              <!-- Skip Button -->
+              <button
+                class="action-btn skip-btn"
+                [disabled]="isConfirmLocked()"
+                (click)="skipQuestion()"
+                type="button"
+              >
+                <span class="btn-icon">⏭</span>
+                Skip
+              </button>
+            </div>
+          </div>
+
+          <!-- Score Display -->
+          <div class="score-section">
+            <div class="score-display">
+              <div class="score-item">
+                <span class="score-label">Score</span>
+                <span class="score-value">{{ score() }}</span>
+              </div>
+              <div class="score-item">
+                <span class="score-label">Streak</span>
+                <span class="score-value" [class.streak-active]="streak() > 0">
+                  {{ streak() }}
+                  @if (streak() > 2) {
+                    🔥
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stop Game Button Section -->
+          <div class="stop-game-section">
+            <button
+              type="button"
+              class="stop-game-button"
+              (click)="stopGame()"
+              [attr.aria-label]="'Stop quiz and return to game setup'"
+              title="Stop Quiz"
+            >
+              <span class="button-icon">⏹️</span>
+              <span class="button-text">Stop Game</span>
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Results Display (shows when quiz is complete) -->
+      @if (gameState() === "results" || gameState() === "ended") {
+        <div class="quiz-results" role="region" aria-label="Quiz Results">
+          <!-- Results Header -->
+          <header class="results-header">
+            <div class="results-icon">
+              @if (accuracyPercentage() >= 80) {
+                🏆
+              } @else if (accuracyPercentage() >= 60) {
+                🎉
+              } @else {
+                📊
+              }
+            </div>
+            <h2>Quiz Complete!</h2>
+            <div class="performance-badge" [class]="performanceLevel()">
+              {{ performanceText() }}
+            </div>
+          </header>
+
+          <!-- Score Summary -->
+          <div class="score-summary">
+            <div class="score-main">
+              <div class="final-score">
+                <span class="score-value">{{ finalScore() }}</span>
+                <span class="score-label">Points</span>
+              </div>
+              <div class="accuracy-display">
+                <span class="accuracy-value">{{ accuracyPercentage() }}%</span>
+                <span class="accuracy-label">Accuracy</span>
+              </div>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-value">{{ correctAnswers() }}</span>
+                <span class="stat-label">Correct</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ incorrectAnswers() }}</span>
+                <span class="stat-label">Incorrect</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ bestStreak() }}</span>
+                <span class="stat-label">Best Streak</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ totalTimeFormatted() }}</span>
+                <span class="stat-label">Total Time</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Question Results -->
+          <div class="question-results">
+            <h3>Question Results</h3>
+            <div class="results-list">
+              @for (result of results(); track result.questionId) {
+                <div
+                  class="result-item"
+                  [class.correct]="result.isCorrect"
+                  [class.incorrect]="!result.isCorrect"
+                >
+                  <div class="result-icon">
+                    @if (result.isCorrect) {
+                      ✅
+                    } @else if (result.selectedAnswer === "SKIPPED") {
+                      ⏭️
+                    } @else {
+                      ❌
+                    }
+                  </div>
+                  <div class="result-content">
+                    <div class="result-question">
+                      {{ getQuestionPrompt(result.questionId) }}
+                    </div>
+                    <div class="result-details">
+                      @if (result.selectedAnswer === "SKIPPED") {
+                        <span class="result-answer skipped">Skipped</span>
+                      } @else {
+                        <span
+                          class="result-answer"
+                          [class.correct]="result.isCorrect"
+                          [class.incorrect]="!result.isCorrect"
+                        >
+                          {{ getCountryName(result.selectedAnswer) }}
+                        </span>
+                      }
+                      @if (
+                        !result.isCorrect && result.selectedAnswer !== "SKIPPED"
+                      ) {
+                        <span class="correct-answer">
+                          Correct: {{ getCountryName(result.correctAnswer) }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+                  <div class="result-stats">
+                    <div class="result-points">+{{ result.pointsEarned }}</div>
+                    <div class="result-time">
+                      {{ formatTime(result.timeSpent) }}
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="results-actions">
+            <button class="action-btn primary-btn" (click)="startNewGame()">
+              <span class="btn-icon">🎮</span>
+              Play Again
+            </button>
+            <button class="action-btn secondary-btn" (click)="toggleStats()">
+              <span class="btn-icon">📊</span>
+              {{ showStats() ? "Hide Stats" : "View Stats" }}
+            </button>
+            <button
+              class="action-btn secondary-btn"
+              (click)="returnToExplore()"
+            >
+              <span class="btn-icon">🌍</span>
+              Explore Globe
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Stats Panel Modal -->
+      @if (showStats()) {
+        <app-stats-panel (closeStats)="hideStats()" />
+      }
+    </div>
+  }
 </div>

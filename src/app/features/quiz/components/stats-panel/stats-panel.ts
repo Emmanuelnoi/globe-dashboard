@@ -6,6 +6,7 @@ import {
   ViewChild,
   Output,
   EventEmitter,
+  signal,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { UserStatsService } from '../../../../core/services/user-stats.service';
@@ -46,14 +47,25 @@ interface ExportedStatsData {
           <span class="stats-icon" aria-hidden="true">📊</span>
           Quiz Statistics
         </h2>
-        <button
-          type="button"
-          class="close-button"
-          (click)="closeStats.emit()"
-          aria-label="Close statistics"
-        >
-          ✕
-        </button>
+        <div class="header-actions">
+          <button
+            type="button"
+            class="collapse-btn"
+            (click)="toggleCollapse()"
+            [attr.aria-expanded]="!isCollapsed()"
+            aria-label="{{ isCollapsed() ? 'Expand panel' : 'Collapse panel' }}"
+          >
+            {{ isCollapsed() ? '▲' : '▼' }}
+          </button>
+          <button
+            type="button"
+            class="close-button"
+            (click)="closeStats.emit()"
+            aria-label="Close statistics"
+          >
+            ✕
+          </button>
+        </div>
 
         @if (isLoading()) {
           <div class="loading-spinner" aria-label="Loading statistics">
@@ -61,43 +73,10 @@ interface ExportedStatsData {
             Loading...
           </div>
         }
-
-        @if (!isLoading() && hasPlayedAnyGames()) {
-          <div class="stats-actions">
-            <button
-              type="button"
-              class="action-button export-button"
-              (click)="exportStats()"
-              title="Export your quiz statistics to a JSON file"
-              aria-label="Export statistics"
-            >
-              <span class="button-icon" aria-hidden="true">📥</span>
-              Export
-            </button>
-            <button
-              type="button"
-              class="action-button import-button"
-              (click)="importStats()"
-              title="Import quiz statistics from a JSON file"
-              aria-label="Import statistics"
-            >
-              <span class="button-icon" aria-hidden="true">📤</span>
-              Import
-            </button>
-            <input
-              #fileInput
-              type="file"
-              accept=".json"
-              (change)="onFileSelected($event)"
-              style="display: none;"
-              aria-label="Select statistics file to import"
-            />
-          </div>
-        }
       </header>
 
       <!-- Main Stats Section -->
-      @if (!isLoading()) {
+      @if (!isLoading() && !isCollapsed()) {
         <div class="stats-content">
           <!-- Overall Performance -->
           <section class="stats-section" aria-labelledby="overall-stats-title">
@@ -297,6 +276,40 @@ interface ExportedStatsData {
         font-size: 28px;
       }
 
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .collapse-btn {
+        padding: 4px 10px;
+        border-radius: 5px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+      }
+
+      .collapse-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: scale(1.05);
+      }
+
+      .collapse-btn:active {
+        transform: scale(0.98);
+      }
+
+      .collapse-btn:focus {
+        outline: 2px solid rgba(255, 255, 255, 0.5);
+        outline-offset: 2px;
+      }
+
       .close-button {
         background: rgba(255, 255, 255, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.2);
@@ -344,57 +357,6 @@ interface ExportedStatsData {
         to {
           transform: rotate(360deg);
         }
-      }
-
-      .stats-actions {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-      }
-
-      .action-button {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 14px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 6px;
-        color: rgba(225, 225, 225, 0.9);
-        font-size: 13px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-family: inherit;
-      }
-
-      .action-button:hover {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.3);
-        transform: translateY(-1px);
-      }
-
-      .action-button:active {
-        transform: translateY(0);
-      }
-
-      .action-button:focus {
-        outline: 2px solid rgba(255, 255, 255, 0.5);
-        outline-offset: 2px;
-      }
-
-      .button-icon {
-        font-size: 14px;
-      }
-
-      .export-button:hover {
-        background: rgba(40, 167, 69, 0.15);
-        border-color: rgba(40, 167, 69, 0.3);
-      }
-
-      .import-button:hover {
-        background: rgba(0, 123, 255, 0.15);
-        border-color: rgba(0, 123, 255, 0.3);
       }
 
       .stats-content {
@@ -686,17 +648,6 @@ interface ExportedStatsData {
         .session-stats {
           align-self: flex-end;
         }
-
-        .stats-actions {
-          flex-direction: column;
-          width: 100%;
-          gap: 6px;
-        }
-
-        .action-button {
-          width: 100%;
-          justify-content: center;
-        }
       }
 
       @media (max-width: 480px) {
@@ -732,6 +683,10 @@ export class StatsPanelComponent {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @Output() closeStats = new EventEmitter<void>();
 
+  // Component state
+  private readonly _isCollapsed = signal<boolean>(false);
+  readonly isCollapsed = this._isCollapsed.asReadonly();
+
   // Signal subscriptions
   readonly stats = this.userStatsService.stats;
   readonly recentSessions = this.userStatsService.recentSessions;
@@ -752,6 +707,13 @@ export class StatsPanelComponent {
     { key: 'flag-id', name: 'Flag ID', icon: '🏴' },
     { key: 'facts-guess', name: 'Facts Guess', icon: '📊' },
   ] as const;
+
+  /**
+   * Toggle collapse state
+   */
+  toggleCollapse(): void {
+    this._isCollapsed.update((collapsed) => !collapsed);
+  }
 
   /**
    * Get statistics for a specific game mode
