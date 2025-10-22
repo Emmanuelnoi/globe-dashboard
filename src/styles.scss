@@ -67,3 +67,60 @@ textarea:focus-visible {
 .error-boundary-container {
   z-index: 9999;
 }
+
+/* ========================================
+   ACCESSIBILITY: Reduced Motion Support
+   ======================================== */
+
+/*
+ * Respect user's preference for reduced motion
+ * Disables animations for users with vestibular disorders
+ * or motion sensitivity
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable transform animations that might cause discomfort */
+  * {
+    transform: none !important;
+  }
+
+  /* Keep essential animations but make them instant */
+  .globe-rotation,
+  .country-highlight,
+  .migration-path {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --text-color: #ffffff;
+    --bg-color: #000000;
+    --border-color: #ffffff;
+  }
+
+  button,
+  input,
+  select {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Forced colors mode (Windows High Contrast) */
+@media (forced-colors: active) {
+  button,
+  input,
+  select {
+    border: 1px solid;
+  }
+}

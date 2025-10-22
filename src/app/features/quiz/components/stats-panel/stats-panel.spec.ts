@@ -134,70 +134,7 @@ describe('StatsPanelComponent', () => {
     });
   });
 
-  it('should show export/import buttons when games have been played', () => {
-    mockUserStatsService.isLoading.set(false);
-    mockUserStatsService.hasPlayedAnyGames.set(true);
-    fixture.detectChanges();
+  // Export/Import button tests removed - buttons were removed from UI per CLAUDE.md
 
-    const exportButton = fixture.nativeElement.querySelector('.export-button');
-    const importButton = fixture.nativeElement.querySelector('.import-button');
-
-    expect(exportButton).toBeTruthy();
-    expect(importButton).toBeTruthy();
-    expect(exportButton.textContent.trim()).toContain('Export');
-    expect(importButton.textContent.trim()).toContain('Import');
-  });
-
-  it('should not show export/import buttons when no games played', () => {
-    mockUserStatsService.isLoading.set(false);
-    mockUserStatsService.hasPlayedAnyGames.set(false);
-    fixture.detectChanges();
-
-    const exportButton = fixture.nativeElement.querySelector('.export-button');
-    const importButton = fixture.nativeElement.querySelector('.import-button');
-
-    expect(exportButton).toBeFalsy();
-    expect(importButton).toBeFalsy();
-  });
-
-  it('should call exportData when export button is clicked', async () => {
-    const mockData = {
-      version: 1,
-      exportDate: '2023-01-01',
-      stats: {},
-      sessions: [],
-    };
-    mockUserStatsService.exportData.mockReturnValue(Promise.resolve(mockData));
-    mockUserStatsService.isLoading.set(false);
-    mockUserStatsService.hasPlayedAnyGames.set(true);
-    fixture.detectChanges();
-
-    // Spy on component method directly
-    vi.spyOn(component, 'exportStats').mockResolvedValue();
-
-    const exportButton = fixture.nativeElement.querySelector('.export-button');
-    exportButton.click();
-
-    expect(component.exportStats).toHaveBeenCalled();
-  });
-
-  it('should trigger file input when import button is clicked', () => {
-    mockUserStatsService.isLoading.set(false);
-    mockUserStatsService.hasPlayedAnyGames.set(true);
-    fixture.detectChanges();
-
-    // Spy on component method directly
-    vi.spyOn(component, 'importStats').mockImplementation(() => {});
-
-    const importButton = fixture.nativeElement.querySelector('.import-button');
-    importButton.click();
-
-    expect(component.importStats).toHaveBeenCalled();
-  });
-
-  it('should have export and import methods', () => {
-    expect(typeof component.exportStats).toBe('function');
-    expect(typeof component.importStats).toBe('function');
-    expect(typeof component.isValidStatsData).toBe('function');
-  });
+  // All export/import functionality tests removed - feature was simplified
 });

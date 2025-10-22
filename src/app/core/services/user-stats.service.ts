@@ -460,4 +460,8 @@ export class UserStatsService {
       this.logger.debug('🔌 IndexedDB connection closed');
     }
   }
+
+  // ========== CLOUD SYNC METHODS (To be implemented) ==========
+  // NOTE: Cloud sync methods will be added in a separate service to keep this service focused on local storage
+  // See: CloudSyncService for cloud synchronization logic
 }

@@ -1,0 +1,101 @@
+{
+  "name": "3D Global Dashboard",
+  "short_name": "3D Globe",
+  "description": "Interactive 3D globe visualization featuring country data, bird migration patterns, and geography quizzes",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#1b2735",
+  "background_color": "#090a0f",
+  "orientation": "any",
+  "categories": ["education", "entertainment", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/globe-view.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Interactive 3D Globe View"
+    },
+    {
+      "src": "/screenshots/mobile-view.jpg",
+      "sizes": "640x1136",
+      "type": "image/jpeg",
+      "label": "Mobile Globe Experience"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Country Search",
+      "short_name": "Search",
+      "description": "Search for countries on the globe",
+      "url": "/?action=search",
+      "icons": [
+        {
+          "src": "/icons/search-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Bird Migration",
+      "short_name": "Migration",
+      "description": "Explore bird migration patterns",
+      "url": "/?action=migration",
+      "icons": [
+        {
+          "src": "/icons/bird-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Geography Quiz",
+      "short_name": "Quiz",
+      "description": "Test your geography knowledge",
+      "url": "/?action=quiz",
+      "icons": [
+        {
+          "src": "/icons/quiz-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

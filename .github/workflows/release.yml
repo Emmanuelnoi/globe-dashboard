@@ -1,0 +1,228 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g., 1.1.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # Job 1: Create GitHub Release
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION=${GITHUB_REF#refs/tags/v}
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📌 Version: $VERSION"
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Extract changelog section for this version
+          sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' > release-notes.md
+
+          # If release notes are empty, use a default message
+          if [ ! -s release-notes.md ]; then
+            echo "Release $VERSION" > release-notes.md
+            echo "" >> release-notes.md
+            echo "See [CHANGELOG.md](./CHANGELOG.md) for details." >> release-notes.md
+          fi
+
+          cat release-notes.md
+
+      - name: Build production artifacts
+        run: pnpm run build
+        env:
+          NODE_ENV: production
+
+      - name: Create distribution archive
+        run: |
+          cd dist/global-dashboard/browser
+          zip -r ../../../3d-global-dashboard-${{ steps.version.outputs.version }}.zip .
+          cd ../../..
+          tar -czf 3d-global-dashboard-${{ steps.version.outputs.version }}.tar.gz -C dist/global-dashboard/browser .
+
+      - name: Generate build metadata
+        run: |
+          echo "📦 Build Metadata" > build-info.txt
+          echo "" >> build-info.txt
+          echo "Version: ${{ steps.version.outputs.version }}" >> build-info.txt
+          echo "Build Date: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> build-info.txt
+          echo "Commit: ${{ github.sha }}" >> build-info.txt
+          echo "Node: $(node --version)" >> build-info.txt
+          echo "pnpm: $(pnpm --version)" >> build-info.txt
+          echo "" >> build-info.txt
+          echo "Bundle Size:" >> build-info.txt
+          du -sh dist/global-dashboard/browser >> build-info.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, 'beta') || contains(steps.version.outputs.version, 'alpha') }}
+          files: |
+            3d-global-dashboard-${{ steps.version.outputs.version }}.zip
+            3d-global-dashboard-${{ steps.version.outputs.version }}.tar.gz
+            build-info.txt
+            CHANGELOG.md
+            LICENSE
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Job 2: Deploy to Production
+  deploy-production:
+    name: Deploy to Production
+    needs: create-release
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://3d-global-dashboard.netlify.app
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build for production
+        run: pnpm run build
+        env:
+          NODE_ENV: production
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          GA_TRACKING_ID: ${{ secrets.GA_TRACKING_ID }}
+
+      - name: Deploy to Netlify Production
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          publish-dir: "./dist/global-dashboard/browser"
+          production-branch: main
+          production-deploy: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: |
+            🚀 Production Release ${{ needs.create-release.outputs.version }}
+            Commit: ${{ github.sha }}
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 10
+
+      - name: Verify production deployment
+        run: |
+          echo "⏳ Waiting for deployment to propagate..."
+          sleep 30
+
+          echo "🔍 Verifying production deployment..."
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://3d-global-dashboard.netlify.app)
+
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "✅ Production deployment verified!"
+          else
+            echo "❌ Production site returned HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+  # Job 3: Post-Release Tasks
+  post-release:
+    name: Post-Release Tasks
+    needs: [create-release, deploy-production]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create announcement
+        run: |
+          cat << EOF > announcement.md
+          # 🎉 Release v${{ needs.create-release.outputs.version }}
+
+          We're excited to announce the release of 3D Global Dashboard v${{ needs.create-release.outputs.version }}!
+
+          ## 🔗 Links
+          - 🌍 [Live Site](https://3d-global-dashboard.netlify.app)
+          - 📋 [Release Notes](https://github.com/${{ github.repository }}/releases/tag/v${{ needs.create-release.outputs.version }})
+          - 📦 [Download Assets](https://github.com/${{ github.repository }}/releases/tag/v${{ needs.create-release.outputs.version }})
+
+          ## 🚀 What's New
+          See the [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for full details.
+
+          ---
+          Released on $(date -u +'%Y-%m-%d') via GitHub Actions
+          EOF
+
+          cat announcement.md
+
+      - name: Create notification issue (optional)
+        uses: actions/github-script@v7
+        continue-on-error: true
+        with:
+          script: |
+            const fs = require('fs');
+            const announcement = fs.readFileSync('announcement.md', 'utf8');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `📢 Release v${{ needs.create-release.outputs.version }} Announcement`,
+              body: announcement,
+              labels: ['release', 'announcement']
+            });

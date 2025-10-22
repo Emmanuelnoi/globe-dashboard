@@ -36,7 +36,20 @@ yarn-error.log
 /libpeerconnection.log
 testem.log
 /typings
-md files
+
+
+# Environment variables
+.env
+.env.*
+.env.local
+.env.*.local
+!.env.example
+mfiles
+
+# Logs
+*.log
+.pnpm-debug.log
+pnpm-debug.log*
 
 # System files
 .DS_Store

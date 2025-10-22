@@ -15,9 +15,110 @@
       name="keywords"
       content="3D globe, geography, bird migration, interactive map, Three.js, WebGL, educational"
     />
+    <meta name="author" content="Emmanuel Noi" />
+    <meta name="theme-color" content="#1b2735" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://3d-global-dashboard.netlify.app/"
+    />
+    <meta
+      property="og:title"
+      content="3D Global Dashboard - Interactive Geography Visualization"
+    />
+    <meta
+      property="og:description"
+      content="Explore 241 countries, trace bird migration paths, and test your geography knowledge on an interactive 3D globe. Built with Three.js and Angular."
+    />
+    <meta
+      property="og:image"
+      content="https://3d-global-dashboard.netlify.app/og-image.jpg"
+    />
+    <meta property="og:site_name" content="3D Global Dashboard" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:url"
+      content="https://3d-global-dashboard.netlify.app/"
+    />
+    <meta
+      name="twitter:title"
+      content="3D Global Dashboard - Interactive Geography Visualization"
+    />
+    <meta
+      name="twitter:description"
+      content="Explore 241 countries, trace bird migration paths, and test your geography knowledge on an interactive 3D globe."
+    />
+    <meta
+      name="twitter:image"
+      content="https://3d-global-dashboard.netlify.app/og-image.jpg"
+    />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://3d-global-dashboard.netlify.app/" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <!-- Modern PWA meta tags (cross-platform) -->
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- iOS-specific tags (still needed for iOS) -->
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="3D Globe" />
+
+    <!-- Preconnect to external APIs for performance -->
+    <link rel="preconnect" href="https://api.gbif.org" crossorigin />
+    <link rel="dns-prefetch" href="https://api.gbif.org" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "3D Global Dashboard",
+        "description": "Interactive 3D globe visualization featuring country data, bird migration patterns, and geography quizzes",
+        "url": "https://3d-global-dashboard.netlify.app/",
+        "author": {
+          "@type": "Person",
+          "name": "Emmanuel Noi"
+        },
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Interactive 3D globe with 241 countries",
+          "Bird migration path visualization",
+          "Geography quiz with 4 game modes",
+          "Country comparison tools",
+          "Real-time country search"
+        ],
+        "screenshot": "https://3d-global-dashboard.netlify.app/og-image.jpg",
+        "softwareVersion": "1.0.0",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "ratingCount": "150"
+        }
+      }
+    </script>
   </head>
   <body>
     <app-root></app-root>

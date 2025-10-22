@@ -36,15 +36,25 @@ export const environment = {
   dataLoadingBatchSize: 1000,
   dataLoadingProgressiveStages: 5,
 
-  // Error Tracking (Sentry) - Configure before production deployment
-  sentryDsn: '', // TODO: Add your Sentry DSN here
+  // Error Tracking (Sentry)
+  // Get your DSN from: https://sentry.io/settings/projects/
+  // Set via Netlify environment variable: SENTRY_DSN
+  sentryDsn: process.env['SENTRY_DSN'] || '',
   sentryEnvironment: 'production',
   sentryTracesSampleRate: 0.1, // Sample 10% of transactions in production
-  sentryEnabled: false, // TODO: Set to true after configuring Sentry DSN
+  sentryEnabled: !!process.env['SENTRY_DSN'], // Auto-enable if DSN is set
 
-  // Analytics - Configure before production deployment
-  googleAnalyticsId: '', // TODO: Add your Google Analytics ID here
-  analyticsEnabled: false, // TODO: Set to true after configuring GA ID
+  // Analytics (Google Analytics 4)
+  // Get your ID from: https://analytics.google.com/
+  // Set via Netlify environment variable: GA_TRACKING_ID
+  googleAnalyticsId: process.env['GA_TRACKING_ID'] || '',
+  analyticsEnabled: !!process.env['GA_TRACKING_ID'], // Auto-enable if ID is set
+
+  // Supabase Configuration (Production)
+  // Get your credentials from: https://supabase.com/dashboard
+  // Set via Netlify environment variables: SUPABASE_URL and SUPABASE_ANON_KEY
+  supabaseUrl: process.env['SUPABASE_URL'] || '',
+  supabaseAnonKey: process.env['SUPABASE_ANON_KEY'] || '',
 
   // Build Information
   version: '1.0.0',

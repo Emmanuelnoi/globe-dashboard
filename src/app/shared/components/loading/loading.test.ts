@@ -218,10 +218,17 @@ describe('LoadingComponent', () => {
     ];
 
     variants.forEach((variant) => {
-      component.variant = variant;
-      fixture.detectChanges();
+      // Create a fresh fixture for each variant to avoid state pollution
+      const newFixture = TestBed.createComponent(LoadingComponent);
+      const newComponent = newFixture.componentInstance;
 
-      const compiled = fixture.nativeElement;
+      // Set variant and required properties
+      newComponent.variant = variant;
+      newComponent.progress = 50;
+      newComponent.showProgress = true;
+      newFixture.detectChanges();
+
+      const compiled = newFixture.nativeElement;
       const container = compiled.querySelector('.loading-container');
 
       expect(container).toBeTruthy();
@@ -229,21 +236,29 @@ describe('LoadingComponent', () => {
       // Check for variant-specific elements
       switch (variant) {
         case 'spinner':
-          expect(compiled.querySelector('.spinner')).toBeTruthy();
+          const spinner = compiled.querySelector('.spinner');
+          expect(spinner).toBeTruthy();
           break;
         case 'globe':
-          expect(compiled.querySelector('.globe-spinner')).toBeTruthy();
+          const globeSpinner = compiled.querySelector('.globe-spinner');
+          expect(globeSpinner).toBeTruthy();
           break;
         case 'dots':
-          expect(compiled.querySelectorAll('.dot').length).toBe(3);
+          const dots = compiled.querySelectorAll('.dot');
+          expect(dots.length).toBe(3);
           break;
         case 'skeleton':
-          expect(compiled.querySelectorAll('.skeleton').length).toBe(3);
+          const skeletonElements = compiled.querySelectorAll('.skeleton');
+          expect(skeletonElements.length).toBe(3);
           break;
         case 'progress':
-          expect(compiled.querySelector('.progress-bar')).toBeTruthy();
+          const progressBar = compiled.querySelector('.progress-bar');
+          expect(progressBar).toBeTruthy();
           break;
       }
+
+      // Clean up
+      newFixture.destroy();
     });
   });
 

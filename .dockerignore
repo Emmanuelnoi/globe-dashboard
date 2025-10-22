@@ -1,0 +1,62 @@
+# Node modules
+node_modules
+npm-debug.log
+pnpm-debug.log
+
+# Build output
+dist
+.angular
+out-tsc
+bazel-out
+
+# Testing
+coverage
+*.spec.ts
+*.test.ts
+e2e
+test-results
+playwright-report
+
+# Development files
+.vscode
+.idea
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation
+*.md
+!README.md
+docs
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs
+
+# Temporary files
+tmp
+temp
+.cache
+.sass-cache
+
+# Other
+.editorconfig
+.prettierrc
+.eslintrc*
+tsconfig.spec.json
+karma.conf.js

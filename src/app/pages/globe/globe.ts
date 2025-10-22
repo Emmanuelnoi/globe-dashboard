@@ -413,6 +413,8 @@ export class Globe implements AfterViewInit, OnDestroy {
   }
 
   private async initializeScene(): Promise<void> {
+    // Show loading indicator
+    this.isLoading.set(true);
     this.loadingMessage.set('Initializing 3D scene...');
     this.loadingProgress.set(10);
 

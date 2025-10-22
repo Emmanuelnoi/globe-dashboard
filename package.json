@@ -1,7 +1,36 @@
 {
   "name": "3d-global-dashboard",
-  "version": "0.0.0",
+  "version": "1.1.0",
+  "description": "Interactive 3D globe for exploring geography, visualizing bird migration patterns, and testing your knowledge through engaging quizzes",
+  "author": "Emmanuel Noi",
+  "license": "MIT",
   "type": "module",
+  "keywords": [
+    "3d",
+    "globe",
+    "geography",
+    "bird-migration",
+    "quiz",
+    "threejs",
+    "angular",
+    "typescript",
+    "webgl",
+    "data-visualization",
+    "interactive",
+    "education"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/3d-global-dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/3d-global-dashboard/issues"
+  },
+  "homepage": "https://github.com/yourusername/3d-global-dashboard#readme",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -46,6 +75,8 @@
     "@angular/compiler": "^20.2.4",
     "@angular/forms": "^20.2.4",
     "@angular/router": "^20.2.4",
+    "@angular/service-worker": "^20.3.6",
+    "@supabase/supabase-js": "^2.76.1",
     "@tailwindcss/postcss": "^4.1.13",
     "earcut": "^3.0.0",
     "idb": "^8.0.3",
@@ -105,7 +136,15 @@
   },
   "pnpm": {
     "overrides": {
-      "vite": "^7.1.5"
+      "vite": "^7.1.5",
+      "tar@<3.2.2": ">=3.2.2",
+      "simple-get@<2.8.2": ">=2.8.2",
+      "tar@<4.4.18": ">=4.4.18",
+      "tar@<6.2.1": ">=6.2.1",
+      "tough-cookie@<4.1.3": ">=4.1.3",
+      "semver@<5.7.2": ">=5.7.2",
+      "form-data@<2.5.4": ">=2.5.4",
+      "tar-fs@>=2.0.0 <2.1.4": ">=2.1.4"
     }
   },
   "lint-staged": {
