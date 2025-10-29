@@ -44,6 +44,12 @@ export const environment = {
   googleAnalyticsId: '',
   analyticsEnabled: false,
 
+  // Supabase Configuration (Development)
+  // Loaded from .env.local file (create it if it doesn't exist)
+  // Get your credentials from: https://supabase.com/dashboard
+  supabaseUrl: import.meta.env['VITE_SUPABASE_URL'] || '',
+  supabaseAnonKey: import.meta.env['VITE_SUPABASE_ANON_KEY'] || '',
+
   // Build Information
   version: '1.0.0-dev',
   buildDate: new Date().toISOString(),
