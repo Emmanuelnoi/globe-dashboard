@@ -1,0 +1,254 @@
+<!-- Backdrop -->
+<div *ngIf="isOpen()" class="modal-backdrop" [@fadeIn]>
+  <!-- Modal Container -->
+  <div class="modal-container" [@slideIn]>
+    <!-- Prompt Step -->
+    <div *ngIf="currentStep() === 'prompt'" class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">🎉 {{ triggerReason() }}</h2>
+        <button
+          class="close-button"
+          (click)="onClose()"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-description">
+          Create a free account to sync your progress across devices and never
+          lose your data!
+        </p>
+
+        <!-- Stats Preview -->
+        <div class="stats-preview">
+          <div class="stat-item" *ngIf="statsToMigrate().gamesPlayed">
+            <span class="stat-icon">🎯</span>
+            <span class="stat-value">{{ statsToMigrate().gamesPlayed }}</span>
+            <span class="stat-label">Games Played</span>
+          </div>
+          <div class="stat-item" *ngIf="statsToMigrate().countriesDiscovered">
+            <span class="stat-icon">🌍</span>
+            <span class="stat-value">{{
+              statsToMigrate().countriesDiscovered
+            }}</span>
+            <span class="stat-label">Countries Discovered</span>
+          </div>
+          <div class="stat-item" *ngIf="statsToMigrate().achievementsUnlocked">
+            <span class="stat-icon">🏆</span>
+            <span class="stat-value">{{
+              statsToMigrate().achievementsUnlocked
+            }}</span>
+            <span class="stat-label">Achievements</span>
+          </div>
+        </div>
+
+        <!-- Benefits List -->
+        <ul class="benefits-list">
+          <li>☁️ Automatic cloud backup</li>
+          <li>📊 Compete on global leaderboards</li>
+          <li>🏆 Track achievements across devices</li>
+          <li>📱 Access from anywhere</li>
+        </ul>
+      </div>
+
+      <div class="modal-footer">
+        <button class="button button-primary" (click)="onSignUpClick()">
+          Create Free Account
+        </button>
+        <button class="button button-secondary" (click)="onMaybeLater()">
+          Maybe Later
+        </button>
+      </div>
+    </div>
+
+    <!-- Sign Up Form Step -->
+    <div *ngIf="currentStep() === 'signup'" class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Create Your Account</h2>
+        <button
+          class="close-button"
+          (click)="onClose()"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Error Message -->
+        <div *ngIf="error()" class="error-message">
+          {{ error() }}
+        </div>
+
+        <!-- Sign Up Form -->
+        <form (ngSubmit)="onSubmit()" class="signup-form">
+          <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input
+              id="email"
+              type="email"
+              class="form-input"
+              placeholder="your@email.com"
+              [(ngModel)]="email"
+              [ngModelOptions]="{ standalone: true }"
+              required
+              autocomplete="email"
+              [disabled]="isLoading()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <div class="password-input-wrapper">
+              <input
+                id="password"
+                [type]="showPassword() ? 'text' : 'password'"
+                class="form-input"
+                placeholder="At least 6 characters"
+                [(ngModel)]="password"
+                [ngModelOptions]="{ standalone: true }"
+                required
+                autocomplete="new-password"
+                [disabled]="isLoading()"
+                minlength="6"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="
+                  showPassword() ? 'Hide password' : 'Show password'
+                "
+              >
+                {{ showPassword() ? "👁️" : "👁️‍🗨️" }}
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirm-password" class="form-label"
+              >Confirm Password</label
+            >
+            <input
+              id="confirm-password"
+              [type]="showPassword() ? 'text' : 'password'"
+              class="form-input"
+              placeholder="Re-enter password"
+              [(ngModel)]="confirmPassword"
+              [ngModelOptions]="{ standalone: true }"
+              required
+              autocomplete="new-password"
+              [disabled]="isLoading()"
+              minlength="6"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="button button-primary button-full-width"
+            [disabled]="isLoading()"
+          >
+            <span *ngIf="!isLoading()">Create Account</span>
+            <span *ngIf="isLoading()" class="loading-spinner">Creating...</span>
+          </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+          <span>or</span>
+        </div>
+
+        <!-- Google Sign Up -->
+        <button
+          type="button"
+          class="button button-google button-full-width"
+          (click)="onGoogleSignUp()"
+          [disabled]="isLoading()"
+        >
+          <span class="google-icon">G</span>
+          Continue with Google
+        </button>
+
+        <p class="terms-text">
+          By signing up, you agree to our Terms of Service and Privacy Policy
+        </p>
+
+        <p class="switch-auth-text">
+          Already have an account?
+          <button
+            type="button"
+            class="link-button"
+            (click)="switchToSignIn.emit()"
+            [disabled]="isLoading()"
+          >
+            Sign in
+          </button>
+        </p>
+      </div>
+    </div>
+
+    <!-- Migrating Step -->
+    <div *ngIf="currentStep() === 'migrating'" class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">✨ Syncing Your Progress</h2>
+      </div>
+
+      <div class="modal-body">
+        <div class="migration-status">
+          <div class="loading-spinner-large">⏳</div>
+          <p class="migration-message">
+            We're securely transferring your local progress to the cloud...
+          </p>
+          <div class="migration-progress">
+            <div class="progress-bar">
+              <div class="progress-fill"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email Confirmation Step -->
+    <div *ngIf="currentStep() === 'email-confirmation'" class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">📧 Check Your Email</h2>
+        <button
+          class="close-button"
+          (click)="onClose()"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-description">
+          We've sent a confirmation email to <strong>{{ email() }}</strong
+          >.
+        </p>
+        <p class="modal-description">
+          Please check your inbox and click the confirmation link to activate
+          your account and sync your progress.
+        </p>
+
+        <div class="email-confirmation-notice">
+          <p>✅ Your account has been created</p>
+          <p>📧 Confirmation email sent</p>
+          <p>🔒 Your local data is safe and will sync after confirmation</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="button button-primary button-full-width"
+          (click)="onClose()"
+        >
+          Got it!
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

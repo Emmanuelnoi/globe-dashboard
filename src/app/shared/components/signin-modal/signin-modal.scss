@@ -1,0 +1,146 @@
+// Re-use all styles from signup modal - must be first!
+@use "../signup-prompt-modal/signup-prompt-modal.scss";
+
+// Additional styles specific to sign-in modal
+.forgot-password-link {
+  text-align: right;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover:not(:disabled) {
+    color: #1d4ed8;
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.back-link {
+  display: block;
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.signin-form,
+.reset-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.switch-auth-text {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #666;
+
+  .link-button {
+    margin-left: 0.25rem;
+    font-weight: 600;
+  }
+}
+
+// Password Strength Indicator Styles
+.new-password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.password-strength-container {
+  margin-top: -0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.password-strength-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.password-strength-fill {
+  height: 100%;
+  transition:
+    width 0.3s ease,
+    background-color 0.3s ease;
+  border-radius: 4px;
+}
+
+.password-strength-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+
+  span {
+    transition: color 0.3s ease;
+  }
+}
+
+.password-feedback {
+  margin-top: 0.5rem;
+}
+
+.feedback-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+
+  li {
+    padding: 0.25rem 0;
+    padding-left: 1rem;
+    position: relative;
+
+    &::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: rgba(255, 255, 255, 0.5);
+    }
+  }
+}
+
+.validation-message {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+
+  &.error {
+    color: #ef4444;
+  }
+
+  &.success {
+    color: #22c55e;
+  }
+}
+
+.input-error {
+  border-color: #ef4444 !important;
+}
+
+.input-success {
+  border-color: #22c55e !important;
+}

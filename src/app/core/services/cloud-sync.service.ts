@@ -1,6 +1,9 @@
 import { Injectable, inject, signal, effect } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { UserStatsService } from './user-stats.service';
+import { CountryDiscoveryService } from './country-discovery.service';
+import { AchievementsService } from './achievements.service';
+import { LeaderboardService } from './leaderboard.service';
 import { LoggerService } from './logger.service';
 
 /**
@@ -21,6 +24,9 @@ import { LoggerService } from './logger.service';
 export class CloudSyncService {
   private readonly supabase = inject(SupabaseService);
   private readonly userStatsService = inject(UserStatsService);
+  private readonly discoveryService = inject(CountryDiscoveryService);
+  private readonly achievementsService = inject(AchievementsService);
+  private readonly leaderboardService = inject(LeaderboardService);
   private readonly logger = inject(LoggerService);
 
   // Sync state signals
@@ -39,10 +45,10 @@ export class CloudSyncService {
       const isAuthenticated = this.supabase.isAuthenticated();
 
       if (isAuthenticated) {
-        this.logger.debug(
-          'User authenticated, syncing from cloud...',
-          'CloudSync',
-        );
+        // this.logger.debug(
+        //   'User authenticated, syncing from cloud...',
+        //   'CloudSync',
+        // );
         this.syncFromCloud();
       }
     });
@@ -57,10 +63,10 @@ export class CloudSyncService {
    */
   queueSync(): void {
     if (!this.supabase.isUserAuthenticated()) {
-      this.logger.debug(
-        'User not authenticated, skipping cloud sync',
-        'CloudSync',
-      );
+      // this.logger.debug(
+      //   'User not authenticated, skipping cloud sync',
+      //   'CloudSync',
+      // );
       return;
     }
 
@@ -88,7 +94,7 @@ export class CloudSyncService {
     }
 
     if (this.syncInProgress) {
-      this.logger.debug('Sync already in progress, skipping', 'CloudSync');
+      // this.logger.debug('Sync already in progress, skipping', 'CloudSync');
       return;
     }
 
@@ -123,11 +129,20 @@ export class CloudSyncService {
         }
       }
 
+      // Upload discoveries
+      await this.discoveryService.syncToCloud();
+
+      // Upload achievements
+      await this.achievementsService.syncToCloud();
+
+      // Update leaderboard entry
+      await this.leaderboardService.updateMyEntry();
+
       this.syncStatus.set('synced');
       this.lastSyncTime.set(new Date());
       this.pendingSyncCount.set(0);
       this.logger.success(
-        `Synced ${localSessions.length} sessions and stats to cloud`,
+        `Synced ${localSessions.length} sessions, stats, discoveries, and achievements to cloud`,
         'CloudSync',
       );
     } catch (error) {
@@ -178,9 +193,18 @@ export class CloudSyncService {
       // Merge cloud data with local
       await this.mergeCloudData(cloudSessions, cloudStats);
 
+      // Sync discoveries from cloud
+      await this.discoveryService.syncFromCloud();
+
+      // Sync achievements from cloud
+      await this.achievementsService.syncFromCloud();
+
+      // Load leaderboards
+      await this.leaderboardService.refreshAllLeaderboards();
+
       this.syncStatus.set('synced');
       this.lastSyncTime.set(new Date());
-      this.logger.success('Synced data from cloud', 'CloudSync');
+      // this.logger.success('Synced all data from cloud', 'CloudSync');
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown sync error';
@@ -199,20 +223,20 @@ export class CloudSyncService {
    */
   async migrateAnonymousDataToUser(newUserId: string): Promise<void> {
     try {
-      this.logger.debug(
-        'Starting migration of anonymous data to user account...',
-        'CloudSync',
-      );
+      // this.logger.debug(
+      //   'Starting migration of anonymous data to user account...',
+      //   'CloudSync',
+      // );
 
       // Get all local data
       const localSessions =
         await this.userStatsService.getRecentSessions(10000); // Get all sessions
       const localStats = await this.userStatsService.getStats();
 
-      this.logger.debug(
-        `Found ${localSessions.length} sessions to migrate`,
-        'CloudSync',
-      );
+      // this.logger.debug(
+      //   `Found ${localSessions.length} sessions to migrate`,
+      //   'CloudSync',
+      // );
 
       // Upload all data to cloud (will be associated with new user ID via Supabase)
       if (localSessions.length > 0) {
@@ -277,10 +301,10 @@ export class CloudSyncService {
         }
 
         if (newSessions.length > 0) {
-          this.logger.debug(
-            `Imported ${newSessions.length} new sessions from cloud`,
-            'CloudSync',
-          );
+          // this.logger.debug(
+          //   `Imported ${newSessions.length} new sessions from cloud`,
+          //   'CloudSync',
+          // );
         }
       }
 
@@ -295,24 +319,24 @@ export class CloudSyncService {
             sessions: cloudSessions || [],
             stats: cloudStats,
           });
-          this.logger.debug(
-            'Updated local stats from cloud (cloud was newer)',
-            'CloudSync',
-          );
+          // this.logger.debug(
+          //   'Updated local stats from cloud (cloud was newer)',
+          //   'CloudSync',
+          // );
         } else {
           // Local stats are newer - upload them
-          this.logger.debug(
-            'Local stats are newer, will sync to cloud',
-            'CloudSync',
-          );
+          // this.logger.debug(
+          //   'Local stats are newer, will sync to cloud',
+          //   'CloudSync',
+          // );
           await this.syncToCloud();
         }
       } else if (localStats) {
         // No cloud stats exist - upload local
-        this.logger.debug(
-          'No cloud stats found, uploading local stats',
-          'CloudSync',
-        );
+        // this.logger.debug(
+        //   'No cloud stats found, uploading local stats',
+        //   'CloudSync',
+        // );
         await this.syncToCloud();
       }
     } catch (error) {
@@ -326,7 +350,7 @@ export class CloudSyncService {
    */
   async retrySync(): Promise<void> {
     if (this.syncError()) {
-      this.logger.debug('Retrying failed sync...', 'CloudSync');
+      // this.logger.debug('Retrying failed sync...', 'CloudSync');
       await this.syncToCloud();
     }
   }

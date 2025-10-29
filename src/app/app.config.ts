@@ -8,6 +8,7 @@ import {
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideServiceWorker } from '@angular/service-worker';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 import { routes } from './app.routes';
 import { GlobalErrorHandlerService } from './core/services/global-error-handler.service';
@@ -21,6 +22,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideHttpClient(withInterceptors([httpErrorInterceptor])),
+    provideAnimationsAsync(),
     {
       provide: ErrorHandler,
       useClass: GlobalErrorHandlerService,

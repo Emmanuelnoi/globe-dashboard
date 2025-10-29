@@ -1,0 +1,359 @@
+<!-- Backdrop -->
+<div *ngIf="isOpen()" class="modal-backdrop" [@fadeIn]>
+  <!-- Modal Container -->
+  <div class="modal-container" [@slideIn]>
+    <!-- Sign In Step -->
+    <div *ngIf="currentStep() === 'signin'" class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Welcome Back!</h2>
+        <button
+          class="close-button"
+          (click)="onClose()"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Error Message -->
+        <div *ngIf="error()" class="error-message">
+          {{ error() }}
+        </div>
+
+        <!-- Sign In Form -->
+        <form (ngSubmit)="onSubmit()" class="signin-form">
+          <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input
+              id="email"
+              type="email"
+              class="form-input"
+              placeholder="your@email.com"
+              [(ngModel)]="email"
+              [ngModelOptions]="{ standalone: true }"
+              required
+              autocomplete="email"
+              [disabled]="isLoading()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <div class="password-input-wrapper">
+              <input
+                id="password"
+                [type]="showPassword() ? 'text' : 'password'"
+                class="form-input"
+                placeholder="Enter your password"
+                [(ngModel)]="password"
+                [ngModelOptions]="{ standalone: true }"
+                required
+                autocomplete="current-password"
+                [disabled]="isLoading()"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="
+                  showPassword() ? 'Hide password' : 'Show password'
+                "
+              >
+                {{ showPassword() ? "👁️" : "👁️‍🗨️" }}
+              </button>
+            </div>
+          </div>
+
+          <div class="forgot-password-link">
+            <button
+              type="button"
+              class="link-button"
+              (click)="onForgotPassword()"
+              [disabled]="isLoading()"
+            >
+              Forgot password?
+            </button>
+          </div>
+
+          <button
+            type="submit"
+            class="button button-primary button-full-width"
+            [disabled]="isLoading()"
+          >
+            <span *ngIf="!isLoading()">Sign In</span>
+            <span *ngIf="isLoading()" class="loading-spinner"
+              >Signing in...</span
+            >
+          </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+          <span>or</span>
+        </div>
+
+        <!-- Google Sign In -->
+        <button
+          type="button"
+          class="button button-google button-full-width"
+          (click)="onGoogleSignIn()"
+          [disabled]="isLoading()"
+        >
+          <span class="google-icon">G</span>
+          Continue with Google
+        </button>
+
+        <p class="switch-auth-text">
+          Don't have an account?
+          <button
+            type="button"
+            class="link-button"
+            (click)="switchToSignUp.emit()"
+            [disabled]="isLoading()"
+          >
+            Sign up
+          </button>
+        </p>
+      </div>
+    </div>
+
+    <!-- Password Reset Step -->
+    <div *ngIf="currentStep() === 'reset-password'" class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Reset Password</h2>
+        <button
+          class="close-button"
+          (click)="onClose()"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Error Message -->
+        <div *ngIf="error()" class="error-message">
+          {{ error() }}
+        </div>
+
+        <p class="modal-description">
+          Enter your email address and we'll send you a link to reset your
+          password.
+        </p>
+
+        <form (ngSubmit)="onResetPassword()" class="reset-form">
+          <div class="form-group">
+            <label for="reset-email" class="form-label">Email</label>
+            <input
+              id="reset-email"
+              type="email"
+              class="form-input"
+              placeholder="your@email.com"
+              [(ngModel)]="email"
+              [ngModelOptions]="{ standalone: true }"
+              required
+              autocomplete="email"
+              [disabled]="isLoading()"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="button button-primary button-full-width"
+            [disabled]="isLoading()"
+          >
+            <span *ngIf="!isLoading()">Send Reset Link</span>
+            <span *ngIf="isLoading()" class="loading-spinner">Sending...</span>
+          </button>
+        </form>
+
+        <button
+          type="button"
+          class="link-button back-link"
+          (click)="backToSignIn()"
+          [disabled]="isLoading()"
+        >
+          ← Back to Sign In
+        </button>
+      </div>
+    </div>
+
+    <!-- Reset Email Sent Step -->
+    <div *ngIf="currentStep() === 'reset-sent'" class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">📧 Check Your Email</h2>
+        <button
+          class="close-button"
+          (click)="onClose()"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-description">
+          We've sent a password reset link to <strong>{{ email() }}</strong
+          >.
+        </p>
+        <p class="modal-description">
+          Please check your inbox and follow the instructions to reset your
+          password.
+        </p>
+
+        <div class="email-confirmation-notice">
+          <p>✅ Reset link sent successfully</p>
+          <p>📧 Check your email inbox</p>
+          <p>🔒 Link expires in 1 hour</p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="button button-primary button-full-width"
+          (click)="onClose()"
+        >
+          Got it!
+        </button>
+      </div>
+    </div>
+
+    <!-- Set New Password Step (After clicking email link) -->
+    <div *ngIf="currentStep() === 'set-new-password'" class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">🔒 Set New Password</h2>
+        <button
+          class="close-button"
+          (click)="onClose()"
+          aria-label="Close modal"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Error Message -->
+        <div *ngIf="error()" class="error-message">
+          {{ error() }}
+        </div>
+
+        <p class="modal-description">
+          Enter your new password below. Make sure it's strong and secure!
+        </p>
+
+        <form (ngSubmit)="onSubmitNewPassword()" class="new-password-form">
+          <!-- New Password -->
+          <div class="form-group">
+            <label for="new-password" class="form-label">New Password</label>
+            <div class="password-input-wrapper">
+              <input
+                id="new-password"
+                [type]="showNewPassword() ? 'text' : 'password'"
+                class="form-input"
+                placeholder="Enter new password"
+                [(ngModel)]="newPassword"
+                [ngModelOptions]="{ standalone: true }"
+                required
+                autocomplete="new-password"
+                [disabled]="isLoading()"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="toggleNewPasswordVisibility()"
+                [attr.aria-label]="
+                  showNewPassword() ? 'Hide password' : 'Show password'
+                "
+              >
+                {{ showNewPassword() ? "👁️" : "👁️‍🗨️" }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Password Strength Meter -->
+          <div *ngIf="newPassword()" class="password-strength-container">
+            <div class="password-strength-bar">
+              <div
+                class="password-strength-fill"
+                [style.width.%]="getPasswordStrengthWidth()"
+                [style.background-color]="getPasswordStrengthColor()"
+              ></div>
+            </div>
+            <div class="password-strength-label">
+              <span [style.color]="getPasswordStrengthColor()">
+                {{ passwordStrength().label }}
+              </span>
+            </div>
+            <div
+              *ngIf="passwordStrength().feedback.length > 0"
+              class="password-feedback"
+            >
+              <ul class="feedback-list">
+                <li *ngFor="let tip of passwordStrength().feedback">
+                  {{ tip }}
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="form-group">
+            <label for="confirm-password" class="form-label"
+              >Confirm Password</label
+            >
+            <div class="password-input-wrapper">
+              <input
+                id="confirm-password"
+                [type]="showConfirmPassword() ? 'text' : 'password'"
+                class="form-input"
+                [class.input-error]="confirmPassword() && !passwordsMatch()"
+                [class.input-success]="confirmPassword() && passwordsMatch()"
+                placeholder="Confirm new password"
+                [(ngModel)]="confirmPassword"
+                [ngModelOptions]="{ standalone: true }"
+                required
+                autocomplete="new-password"
+                [disabled]="isLoading()"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="toggleConfirmPasswordVisibility()"
+                [attr.aria-label]="
+                  showConfirmPassword() ? 'Hide password' : 'Show password'
+                "
+              >
+                {{ showConfirmPassword() ? "👁️" : "👁️‍🗨️" }}
+              </button>
+            </div>
+            <div
+              *ngIf="confirmPassword() && !passwordsMatch()"
+              class="validation-message error"
+            >
+              ❌ Passwords do not match
+            </div>
+            <div
+              *ngIf="confirmPassword() && passwordsMatch()"
+              class="validation-message success"
+            >
+              ✅ Passwords match
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            class="button button-primary button-full-width"
+            [disabled]="isLoading() || !canSubmitNewPassword()"
+          >
+            <span *ngIf="!isLoading()">Reset Password</span>
+            <span *ngIf="isLoading()" class="loading-spinner"
+              >Updating password...</span
+            >
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

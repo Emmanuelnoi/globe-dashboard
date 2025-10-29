@@ -32,6 +32,7 @@ declare global {
     testCloudSync: () => Promise<void>;
     checkAuthStatus: () => void;
     clearLocalData: () => Promise<void>;
+    runFullDiagnostics: () => Promise<void>;
   }
 }
 
@@ -53,15 +54,49 @@ export function getServices() {
     throw new Error('Angular devtools not available');
   }
 
-  const component = ng.getComponent(appRoot);
-  if (!component) {
-    console.error('❌ Could not get app component.');
-    throw new Error('Could not get app component');
+  // Try to get injector using Angular's debugging API
+  let injector;
+
+  try {
+    // Method 1: Try getInjector if available
+    if (ng.getInjector) {
+      injector = ng.getInjector(appRoot);
+    }
+  } catch (e) {
+    // Ignore and try next method
   }
 
-  const injector = component.injector;
   if (!injector) {
-    console.error('❌ Could not get injector.');
+    try {
+      // Method 2: Get from context
+      const context = ng.getContext(appRoot);
+      if (context && context.injector) {
+        injector = context.injector;
+      }
+    } catch (e) {
+      // Ignore and try next method
+    }
+  }
+
+  if (!injector) {
+    try {
+      // Method 3: Get from component
+      const component = ng.getComponent(appRoot);
+      if (component) {
+        // Try accessing injector through different paths
+        injector =
+          component.injector ||
+          (component as any).__ngContext__?.[0] ||
+          ng.getOwningComponent?.(appRoot)?.injector;
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }
+
+  if (!injector) {
+    console.error('❌ Could not get Angular injector.');
+    console.error('💡 Try: ng.probe(document.querySelector("app-root"))');
     throw new Error('Could not get injector');
   }
 
@@ -216,6 +251,165 @@ export async function clearLocalData() {
 }
 
 /**
+ * Run full diagnostic test suite
+ */
+export async function runFullDiagnostics() {
+  console.log('🔬 RUNNING FULL DIAGNOSTICS\n');
+  console.log('='.repeat(60));
+
+  try {
+    const { supabase, cloudSync, userStats } = getServices();
+
+    // Test 1: Authentication
+    console.log('\n📋 TEST 1: Authentication Status');
+    console.log('-'.repeat(60));
+    const isAuth = supabase.isAuthenticated();
+    const user = supabase.currentUser();
+    console.log(
+      `   Status: ${isAuth ? '✅ AUTHENTICATED' : '❌ NOT AUTHENTICATED'}`,
+    );
+    if (user) {
+      console.log(`   Email: ${user.email}`);
+      console.log(`   User ID: ${user.id}`);
+    } else {
+      console.error('   ❌ FAILED: No user session found');
+      console.log('\n💡 Action: Please sign in using the UI first');
+      return;
+    }
+
+    // Test 2: Local Data
+    console.log('\n📋 TEST 2: Local Data Check');
+    console.log('-'.repeat(60));
+    const stats = await userStats.getStats();
+    const sessions = await userStats.getRecentSessions(10);
+    console.log(`   Total Games: ${stats?.totalGames || 0}`);
+    console.log(`   Best Score: ${stats?.bestScore || 0}`);
+    console.log(`   Average Score: ${stats?.averageScore?.toFixed(2) || 0}`);
+    console.log(`   Recent Sessions: ${sessions.length}`);
+
+    if (sessions.length > 0) {
+      console.log('\n   📝 Session Details:');
+      sessions.slice(0, 3).forEach((session: any, i: number) => {
+        console.log(
+          `      ${i + 1}. Mode: ${session.configuration.mode}, Score: ${session.finalScore}, Questions: ${session.questions?.length || 0}`,
+        );
+      });
+    }
+
+    if (!stats || sessions.length === 0) {
+      console.warn('   ⚠️ No local data found. Play some quiz games first!');
+      return;
+    }
+
+    // Test 3: Cloud Sync Configuration
+    console.log('\n📋 TEST 3: Cloud Sync Configuration');
+    console.log('-'.repeat(60));
+    const syncStatus = cloudSync.getSyncStatus();
+    console.log(`   Sync Status: ${syncStatus.status}`);
+    console.log(`   Is Authenticated: ${syncStatus.isAuthenticated}`);
+    console.log(`   Pending Items: ${syncStatus.pendingCount}`);
+    console.log(`   Last Sync: ${syncStatus.lastSyncTime || 'Never'}`);
+    if (syncStatus.error) {
+      console.error(`   ❌ Last Error: ${syncStatus.error}`);
+    }
+
+    // Test 4: Upload to Cloud
+    console.log('\n📋 TEST 4: Uploading to Cloud');
+    console.log('-'.repeat(60));
+    console.log('   Starting upload...');
+
+    try {
+      await cloudSync.syncToCloud();
+      const newStatus = cloudSync.getSyncStatus();
+
+      if (newStatus.status === 'synced') {
+        console.log('   ✅ SUCCESS: Data uploaded to cloud');
+        console.log(`   Synced at: ${newStatus.lastSyncTime}`);
+      } else if (newStatus.status === 'error') {
+        console.error(`   ❌ FAILED: ${newStatus.error}`);
+        console.log('\n   📊 Error Details:');
+        console.log(`      Status: ${newStatus.status}`);
+        console.log(`      Error: ${newStatus.error}`);
+      } else {
+        console.warn(`   ⚠️ Unexpected status: ${newStatus.status}`);
+      }
+    } catch (error) {
+      console.error('   ❌ EXCEPTION during sync:', error);
+      if (error instanceof Error) {
+        console.error('      Message:', error.message);
+        console.error('      Stack:', error.stack);
+      }
+    }
+
+    // Test 5: Verify Upload Success
+    console.log('\n📋 TEST 5: Verifying Upload');
+    console.log('-'.repeat(60));
+    console.log('   Checking if data exists in cloud...');
+
+    try {
+      const { data: cloudSessions, error: sessionsError } =
+        await supabase.getQuizSessions(user.id, 5);
+
+      if (sessionsError) {
+        console.error(
+          `   ❌ Failed to retrieve sessions: ${sessionsError.message}`,
+        );
+      } else if (cloudSessions && cloudSessions.length > 0) {
+        console.log(`   ✅ Found ${cloudSessions.length} sessions in cloud`);
+        console.log('\n   📝 Cloud Session Details:');
+        cloudSessions.forEach((session: any, i: number) => {
+          console.log(
+            `      ${i + 1}. Mode: ${session.configuration.mode}, Score: ${session.finalScore}`,
+          );
+        });
+      } else {
+        console.warn(
+          '   ⚠️ No sessions found in cloud (upload may have failed)',
+        );
+      }
+
+      const { data: cloudStats, error: statsError } =
+        await supabase.getUserStats(user.id);
+
+      if (statsError) {
+        console.error(`   ❌ Failed to retrieve stats: ${statsError.message}`);
+      } else if (cloudStats) {
+        console.log(`   ✅ Found user stats in cloud`);
+        console.log(`      Total Games: ${cloudStats.totalGames}`);
+        console.log(`      Best Score: ${cloudStats.bestScore}`);
+      } else {
+        console.warn('   ⚠️ No stats found in cloud (upload may have failed)');
+      }
+    } catch (error) {
+      console.error('   ❌ EXCEPTION during verification:', error);
+    }
+
+    // Summary
+    console.log('\n' + '='.repeat(60));
+    console.log('📊 DIAGNOSTIC SUMMARY');
+    console.log('='.repeat(60));
+    console.log(`✅ Authentication: ${isAuth ? 'PASS' : 'FAIL'}`);
+    console.log(
+      `✅ Local Data: ${stats && sessions.length > 0 ? 'PASS' : 'FAIL'}`,
+    );
+    console.log(
+      `✅ Cloud Sync: ${cloudSync.getSyncStatus().status === 'synced' ? 'PASS' : 'FAIL'}`,
+    );
+
+    console.log('\n💡 Next Steps:');
+    console.log('   1. Check your Supabase Dashboard → Table Editor');
+    console.log('   2. Look for data in: quiz_sessions, user_stats');
+    console.log('   3. Verify user_id matches:', user.id);
+  } catch (error) {
+    console.error('\n❌ CRITICAL ERROR in diagnostics:', error);
+    if (error instanceof Error) {
+      console.error('   Message:', error.message);
+      console.error('   Stack:', error.stack);
+    }
+  }
+}
+
+/**
  * Initialize dev helpers in development mode
  */
 export function initDevHelpers() {
@@ -224,11 +418,13 @@ export function initDevHelpers() {
     window.testCloudSync = testCloudSync;
     window.checkAuthStatus = checkAuthStatus;
     window.clearLocalData = clearLocalData;
+    window.runFullDiagnostics = runFullDiagnostics;
 
     console.log('🛠️ Dev helpers loaded! Available commands:');
     console.log('   - getServices() - Access Angular services');
     console.log('   - testCloudSync() - Test cloud sync');
     console.log('   - checkAuthStatus() - Check auth status');
     console.log('   - clearLocalData() - Clear local data (for testing)');
+    console.log('   - runFullDiagnostics() - Run complete test suite ⭐ NEW');
   }
 }
