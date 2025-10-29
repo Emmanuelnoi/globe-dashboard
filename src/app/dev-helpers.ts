@@ -17,7 +17,6 @@
  * ```
  */
 
-import { ApplicationRef } from '@angular/core';
 import { SupabaseService } from './core/services/supabase.service';
 import { CloudSyncService } from './core/services/cloud-sync.service';
 import { UserStatsService } from './core/services/user-stats.service';
@@ -39,13 +38,18 @@ declare global {
 /**
  * Get Angular services from the browser console
  */
-export function getServices() {
+export function getServices(): {
+  supabase: SupabaseService;
+  cloudSync: CloudSyncService;
+  userStats: UserStatsService;
+} {
   const appRoot = document.querySelector('app-root');
   if (!appRoot) {
     console.error('❌ App root not found. Make sure the app is loaded.');
     throw new Error('App root not found');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ng = (window as any).ng;
   if (!ng) {
     console.error(
@@ -62,7 +66,7 @@ export function getServices() {
     if (ng.getInjector) {
       injector = ng.getInjector(appRoot);
     }
-  } catch (e) {
+  } catch {
     // Ignore and try next method
   }
 
@@ -73,7 +77,7 @@ export function getServices() {
       if (context && context.injector) {
         injector = context.injector;
       }
-    } catch (e) {
+    } catch {
       // Ignore and try next method
     }
   }
@@ -86,10 +90,11 @@ export function getServices() {
         // Try accessing injector through different paths
         injector =
           component.injector ||
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
           (component as any).__ngContext__?.[0] ||
           ng.getOwningComponent?.(appRoot)?.injector;
       }
-    } catch (e) {
+    } catch {
       // Ignore
     }
   }
@@ -110,7 +115,8 @@ export function getServices() {
 /**
  * Test cloud sync functionality
  */
-export async function testCloudSync() {
+export async function testCloudSync(): Promise<void> {
+  // eslint-disable-next-line no-console
   console.log('🧪 Testing Cloud Sync...\n');
 
   try {
@@ -171,7 +177,7 @@ export async function testCloudSync() {
 /**
  * Check authentication status
  */
-export function checkAuthStatus() {
+export function checkAuthStatus(): void {
   console.log('🔐 Authentication Status:\n');
 
   try {
@@ -209,7 +215,7 @@ export function checkAuthStatus() {
 /**
  * Clear local IndexedDB data (for testing sync from cloud)
  */
-export async function clearLocalData() {
+export async function clearLocalData(): Promise<void> {
   console.log('🗑️ Clearing local data...\n');
 
   try {
@@ -220,6 +226,7 @@ export async function clearLocalData() {
     const backup = await userStats.exportData();
     if (backup) {
       console.log(`   ✅ Backup created: ${backup.sessions.length} sessions`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).__backup = backup; // Store in window for recovery
       console.log('   💾 Backup stored in window.__backup');
     }
@@ -253,7 +260,7 @@ export async function clearLocalData() {
 /**
  * Run full diagnostic test suite
  */
-export async function runFullDiagnostics() {
+export async function runFullDiagnostics(): Promise<void> {
   console.log('🔬 RUNNING FULL DIAGNOSTICS\n');
   console.log('='.repeat(60));
 
@@ -289,6 +296,7 @@ export async function runFullDiagnostics() {
 
     if (sessions.length > 0) {
       console.log('\n   📝 Session Details:');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       sessions.slice(0, 3).forEach((session: any, i: number) => {
         console.log(
           `      ${i + 1}. Mode: ${session.configuration.mode}, Score: ${session.finalScore}, Questions: ${session.questions?.length || 0}`,
@@ -357,6 +365,7 @@ export async function runFullDiagnostics() {
       } else if (cloudSessions && cloudSessions.length > 0) {
         console.log(`   ✅ Found ${cloudSessions.length} sessions in cloud`);
         console.log('\n   📝 Cloud Session Details:');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         cloudSessions.forEach((session: any, i: number) => {
           console.log(
             `      ${i + 1}. Mode: ${session.configuration.mode}, Score: ${session.finalScore}`,
@@ -412,7 +421,7 @@ export async function runFullDiagnostics() {
 /**
  * Initialize dev helpers in development mode
  */
-export function initDevHelpers() {
+export function initDevHelpers(): void {
   if (typeof window !== 'undefined') {
     window.getServices = getServices;
     window.testCloudSync = testCloudSync;
@@ -420,11 +429,17 @@ export function initDevHelpers() {
     window.clearLocalData = clearLocalData;
     window.runFullDiagnostics = runFullDiagnostics;
 
+    // eslint-disable-next-line no-console
     console.log('🛠️ Dev helpers loaded! Available commands:');
+    // eslint-disable-next-line no-console
     console.log('   - getServices() - Access Angular services');
+    // eslint-disable-next-line no-console
     console.log('   - testCloudSync() - Test cloud sync');
+    // eslint-disable-next-line no-console
     console.log('   - checkAuthStatus() - Check auth status');
+    // eslint-disable-next-line no-console
     console.log('   - clearLocalData() - Clear local data (for testing)');
+    // eslint-disable-next-line no-console
     console.log('   - runFullDiagnostics() - Run complete test suite ⭐ NEW');
   }
 }
