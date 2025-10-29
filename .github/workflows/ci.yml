@@ -41,7 +41,9 @@ jobs:
           sudo apt-get install -y libxi-dev libxext-dev libglew-dev libglu1-mesa-dev mesa-common-dev xvfb
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts || pnpm install --frozen-lockfile
+        env:
+          SKIP_OPTIONAL_DEPS: true
 
       - name: Run ESLint
         run: pnpm run lint
@@ -88,7 +90,9 @@ jobs:
           sudo apt-get install -y libxi-dev libxext-dev libglew-dev libglu1-mesa-dev mesa-common-dev xvfb
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts || pnpm install --frozen-lockfile
+        env:
+          SKIP_OPTIONAL_DEPS: true
 
       - name: Run unit tests
         run: pnpm test -- --run --coverage
@@ -143,7 +147,9 @@ jobs:
           sudo apt-get install -y libxi-dev libxext-dev libglew-dev libglu1-mesa-dev mesa-common-dev xvfb
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts || pnpm install --frozen-lockfile
+        env:
+          SKIP_OPTIONAL_DEPS: true
 
       - name: Build application
         run: pnpm run build
@@ -195,7 +201,9 @@ jobs:
           sudo apt-get install -y libxi-dev libxext-dev libglew-dev libglu1-mesa-dev mesa-common-dev xvfb
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts || pnpm install --frozen-lockfile
+        env:
+          SKIP_OPTIONAL_DEPS: true
 
       - name: Run security audit
         run: pnpm audit --audit-level=moderate
@@ -238,7 +246,9 @@ jobs:
           sudo apt-get install -y libxi-dev libxext-dev libglew-dev libglu1-mesa-dev mesa-common-dev xvfb
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts || pnpm install --frozen-lockfile
+        env:
+          SKIP_OPTIONAL_DEPS: true
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
