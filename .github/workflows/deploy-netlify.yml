@@ -55,14 +55,16 @@ jobs:
         run: pnpm run build
         env:
           NODE_ENV: production
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          GA_TRACKING_ID: ${{ secrets.GA_TRACKING_ID }}
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+          VITE_GA_TRACKING_ID: ${{ secrets.VITE_GA_TRACKING_ID }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Deploy to Netlify
         id: deploy
         uses: nwtgck/actions-netlify@v3.0
         with:
-          publish-dir: "./dist/global-dashboard/browser"
+          publish-dir: "./dist/browser"
           production-branch: main
           production-deploy: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
