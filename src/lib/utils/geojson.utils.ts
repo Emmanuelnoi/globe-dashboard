@@ -739,9 +739,9 @@ function createPolygonSelectionMesh(
     );
 
     // Always log triangulation data for debugging (matches 275bcf7 behavior)
-    console.log(
-      `📊 [${name}] Triangulation data: ${vertices2D.length / 2} vertices, ${holeIndices.length} holes${holeIndices.length > 0 ? ` at indices [${holeIndices.join(', ')}]` : ''}`,
-    );
+    // console.log(
+    //   `📊 [${name}] Triangulation data: ${vertices2D.length / 2} vertices, ${holeIndices.length} holes${holeIndices.length > 0 ? ` at indices [${holeIndices.join(', ')}]` : ''}`,
+    // );
 
     // Triangulate with validation using extracted utility
     const triangles = triangulateWithValidation(

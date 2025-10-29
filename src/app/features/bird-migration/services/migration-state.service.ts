@@ -245,7 +245,7 @@ export class MigrationStateService {
     // Setup effects for automatic state management
     this.setupEffects();
 
-    migrationLogger.success('MigrationStateService initialized');
+    // migrationLogger.success('MigrationStateService initialized');
   }
 
   // ===== Public Methods: Data Loading =====
@@ -257,7 +257,7 @@ export class MigrationStateService {
   setMigrations(migrations: readonly MigrationRecord[]): void {
     this._migrations.set(migrations);
     this.regenerateMarkers();
-    migrationLogger.success(`Loaded ${migrations.length} migration records`);
+    // migrationLogger.success(`Loaded ${migrations.length} migration records`);
   }
 
   /**
@@ -266,7 +266,7 @@ export class MigrationStateService {
    */
   setSpecies(species: readonly Species[]): void {
     this._species.set(species);
-    migrationLogger.success(`Loaded ${species.length} species`);
+    // migrationLogger.success(`Loaded ${species.length} species`);
   }
 
   /**
@@ -694,7 +694,7 @@ export class MigrationStateService {
     });
 
     this._markers.set(markers);
-    migrationLogger.success(`Generated ${markers.length} markers`);
+    // migrationLogger.success(`Generated ${markers.length} markers`);
   }
 
   /**

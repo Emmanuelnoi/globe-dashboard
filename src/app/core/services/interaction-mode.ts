@@ -1,11 +1,11 @@
 import { Injectable, signal, computed } from '@angular/core';
 
-export type InteractionMode = 'explore' | 'quiz' | 'migration';
+export type InteractionMode = 'explore' | 'quiz' | 'migration' | 'leaderboard';
 
 /**
  * Interaction Mode Service using Angular 20 signals
  * Manages the current interaction mode to coordinate between
- * normal globe exploration, quiz mode, and bird migration visualization
+ * normal globe exploration, quiz mode, bird migration visualization, and leaderboard view
  */
 @Injectable({
   providedIn: 'root',
@@ -21,6 +21,7 @@ export class InteractionModeService {
   readonly isExploreMode = computed(() => this._mode() === 'explore');
   readonly isQuizMode = computed(() => this._mode() === 'quiz');
   readonly isMigrationMode = computed(() => this._mode() === 'migration');
+  readonly isLeaderboardMode = computed(() => this._mode() === 'leaderboard');
 
   /**
    * Switch to explore mode (normal globe interactions)
@@ -41,6 +42,13 @@ export class InteractionModeService {
    */
   enableMigrationMode(): void {
     this._mode.set('migration');
+  }
+
+  /**
+   * Switch to leaderboard mode (disable globe interactions)
+   */
+  enableLeaderboardMode(): void {
+    this._mode.set('leaderboard');
   }
 
   /**

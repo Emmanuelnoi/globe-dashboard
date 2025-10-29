@@ -1,7 +1,7 @@
 /**
  * Generated Country Data Types - Robust Edition
  *
- * Auto-generated on: 2025-10-20T21:10:47.888Z
+ * Auto-generated on: 2025-10-23T15:59:12.114Z
  * Data sources: REST Countries API, World Bank API, Manual curated data, Regional estimates
  * Coverage: 200+ countries with intelligent fallbacks
  *

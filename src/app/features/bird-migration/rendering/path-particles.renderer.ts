@@ -62,7 +62,7 @@ export class PathParticlesRenderer {
     // Create particle texture
     this.particleTexture = this.createParticleTexture();
 
-    migrationLogger.success('PathParticlesRenderer initialized');
+    // migrationLogger.success('PathParticlesRenderer initialized');
   }
 
   /**

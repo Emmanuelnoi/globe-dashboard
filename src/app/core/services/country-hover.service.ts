@@ -162,10 +162,10 @@ export class CountryHoverService {
       });
     }
 
-    this.logger.debug(
-      `Found ${selectionMeshes.length} selection meshes for raycasting`,
-      'CountryHoverService',
-    );
+    // this.logger.debug(
+    //   `Found ${selectionMeshes.length} selection meshes for raycasting`,
+    //   'CountryHoverService',
+    // );
     return selectionMeshes;
   }
 
@@ -200,10 +200,10 @@ export class CountryHoverService {
     // Convert camelCase or handle special cases
     const formattedName = this.formatCountryName(countryName);
 
-    this.logger.debug(
-      `Extracted country name: "${countryName}" -> "${formattedName}"`,
-      'CountryHoverService',
-    );
+    // this.logger.debug(
+    //   `Extracted country name: "${countryName}" -> "${formattedName}"`,
+    //   'CountryHoverService',
+    // );
     return formattedName;
   }
 

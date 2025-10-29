@@ -78,7 +78,7 @@ export class TourPlaybackService {
     this.cameraAnimator = new CameraAnimator();
     this.cameraAnimator.initialize(camera);
 
-    this.logger.debug('✅ TourPlaybackService initialized', 'TourPlayback');
+    // this.logger.debug('✅ TourPlaybackService initialized', 'TourPlayback');
   }
 
   /**

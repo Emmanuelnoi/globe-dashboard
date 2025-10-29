@@ -107,10 +107,10 @@ export class GlobeMigrationService {
     atmosphereMesh?: Mesh,
   ): Promise<void> {
     try {
-      this.logger.debug(
-        '🐦 Initializing migration system...',
-        'GlobeMigrationService',
-      );
+      // this.logger.debug(
+      //   '🐦 Initializing migration system...',
+      //   'GlobeMigrationService',
+      // );
 
       // Store references
       this.scene = scene;
@@ -129,10 +129,10 @@ export class GlobeMigrationService {
 
       // Load data into state service
       this.migrationState.loadMigrationData(data.migrations, data.species);
-      this.logger.debug(
-        `✅ Loaded ${data.migrations.length} migrations, ${data.species.length} species`,
-        'GlobeMigrationService',
-      );
+      // this.logger.debug(
+      //   `✅ Loaded ${data.migrations.length} migrations, ${data.species.length} species`,
+      //   'GlobeMigrationService',
+      // );
 
       // Initialize renderers
       this.markersRenderer = new MigrationMarkersRenderer(scene);
@@ -158,10 +158,10 @@ export class GlobeMigrationService {
       this.setupEffects();
 
       this.isInitialized.set(true);
-      this.logger.success(
-        '✅ Migration system initialized',
-        'GlobeMigrationService',
-      );
+      // this.logger.success(
+      //   '✅ Migration system initialized',
+      //   'GlobeMigrationService',
+      // );
     } catch (error) {
       this.logger.error(
         '❌ Failed to initialize migration system:',
@@ -262,10 +262,10 @@ export class GlobeMigrationService {
       // Effect to update markers when marker data changes
       effect(() => {
         const markers = this.migrationState.markers();
-        this.logger.debug(
-          `🎯 Markers changed (${markers.length}), updating renderer`,
-          'GlobeMigrationService',
-        );
+        // this.logger.debug(
+        //   `🎯 Markers changed (${markers.length}), updating renderer`,
+        //   'GlobeMigrationService',
+        // );
         if (this.markersRenderer) {
           this.markersRenderer.updateMarkers(markers);
         }
@@ -274,31 +274,31 @@ export class GlobeMigrationService {
       // Effect to update paths when active paths change
       effect(() => {
         const activePaths = this.migrationState.activePaths();
-        this.logger.debug(
-          `🎨 Active paths changed (${activePaths.length}), updating renderers`,
-          'GlobeMigrationService',
-        );
+        // this.logger.debug(
+        //   `🎨 Active paths changed (${activePaths.length}), updating renderers`,
+        //   'GlobeMigrationService',
+        // );
 
-        if (activePaths.length === 0) {
-          this.logger.debug(
-            '🧹 NO ACTIVE PATHS - All paths should be removed from scene',
-            'GlobeMigrationService',
-          );
-        }
+        // if (activePaths.length === 0) {
+        //   this.logger.debug(
+        //     '🧹 NO ACTIVE PATHS - All paths should be removed from scene',
+        //     'GlobeMigrationService',
+        //   );
+        // }
 
         if (this.pathsRenderer) {
           this.pathsRenderer.updatePaths(activePaths);
-          this.logger.debug(
-            `✅ Paths renderer updated`,
-            'GlobeMigrationService',
-          );
+          // this.logger.debug(
+          //   `✅ Paths renderer updated`,
+          //   'GlobeMigrationService',
+          // );
         }
         if (this.particlesRenderer) {
           this.particlesRenderer.updateParticleSystems(activePaths);
-          this.logger.debug(
-            `✅ Particles renderer updated`,
-            'GlobeMigrationService',
-          );
+          // this.logger.debug(
+          //   `✅ Particles renderer updated`,
+          //   'GlobeMigrationService',
+          // );
         }
       });
     });
@@ -339,10 +339,10 @@ export class GlobeMigrationService {
       this.atmosphereMesh.visible = true;
     }
 
-    this.logger.debug(
-      `🔄 Migration visibility toggled: ${visible} (markers, paths, particles)`,
-      'GlobeMigrationService',
-    );
+    // this.logger.debug(
+    //   `🔄 Migration visibility toggled: ${visible} (markers, paths, particles)`,
+    //   'GlobeMigrationService',
+    // );
   }
 
   /**

@@ -50,6 +50,7 @@ import { GlobeMigrationService } from './services/globe-migration.service';
 import { GlobeQuizIntegrationService } from './services/globe-quiz-integration.service';
 import { GlobeSceneService } from './services/globe-scene.service';
 import { GlobeTooltipService } from './services/globe-tooltip.service';
+import { CountryDiscoveryService } from '../../core/services/country-discovery.service';
 @Component({
   selector: 'app-globe',
   imports: [
@@ -88,6 +89,7 @@ export class Globe implements AfterViewInit, OnDestroy {
   private readonly dataLoading = inject(GlobeDataLoadingService);
   private readonly globeAccessibility = inject(GlobeAccessibilityService);
   private readonly comparisonSync = inject(GlobeComparisonSyncService);
+  private readonly discoveryService = inject(CountryDiscoveryService);
 
   @ViewChild('canvas') private canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('rendererContainer', { static: true })
@@ -214,6 +216,9 @@ export class Globe implements AfterViewInit, OnDestroy {
   // Track previous bird migration state to prevent infinite loops
   private previousWasInBirdMigrationView = false;
 
+  // Track previous leaderboard state to prevent infinite loops
+  private previousWasInLeaderboardView = false;
+
   // Event listeners for cleanup
   private eventListeners: Array<{
     element: HTMLElement;
@@ -309,6 +314,45 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       // Update previous state
       this.previousWasInBirdMigrationView = isBirdMigrationView;
+    });
+
+    // Setup effect to synchronize navigation state with interaction modes
+    effect(() => {
+      if (this.navigationStateService.isLeaderboardActive()) {
+        this.interactionModeService.enableLeaderboardMode();
+      } else if (this.navigationStateService.isGameQuizActive()) {
+        this.interactionModeService.enableQuizMode();
+      } else if (this.navigationStateService.isBirdMigrationActive()) {
+        this.interactionModeService.enableMigrationMode();
+      } else {
+        this.interactionModeService.enableExploreMode();
+      }
+    });
+
+    // Setup effect to clear all selections when entering leaderboard view
+    effect(() => {
+      const isLeaderboardView =
+        this.navigationStateService.isLeaderboardActive();
+
+      // Only trigger when ENTERING leaderboard view (not when already in it)
+      if (isLeaderboardView && !this.previousWasInLeaderboardView) {
+        // Clear selected country data tooltip and name tooltip
+        this.tooltipService.hideAllTooltips();
+        this.selectedCountry.set(null);
+
+        // Clear all visual selections on globe (only if countries are loaded)
+        if (this.countries) {
+          this.countrySelection.resetAllCountrySelections(this.countries);
+        }
+
+        this.logger.debug(
+          `Cleared all selections and tooltips (leaderboard view active)`,
+          'GlobeComponent',
+        );
+      }
+
+      // Update previous state
+      this.previousWasInLeaderboardView = isLeaderboardView;
     });
 
     // Setup bi-directional sync: comparison table → globe visual selections
@@ -486,10 +530,10 @@ export class Globe implements AfterViewInit, OnDestroy {
         undefined, // atmosphere mesh is optional
       );
 
-      this.logger.success(
-        'Migration system initialized successfully',
-        'GlobeComponent',
-      );
+      // this.logger.success(
+      //   'Migration system initialized successfully',
+      //   'GlobeComponent',
+      // );
     } catch (error) {
       this.logger.error(
         'Failed to initialize migration system:',
@@ -926,8 +970,11 @@ export class Globe implements AfterViewInit, OnDestroy {
   private async handleCountryInfoDisplay(event: MouseEvent): Promise<void> {
     event.preventDefault();
 
-    // Early exit if in bird migration view - no selection allowed
-    if (this.navigationStateService.isBirdMigrationActive()) {
+    // Early exit if in bird migration view or leaderboard view - no selection allowed
+    if (
+      this.navigationStateService.isBirdMigrationActive() ||
+      this.navigationStateService.isLeaderboardActive()
+    ) {
       return;
     }
 
@@ -950,20 +997,27 @@ export class Globe implements AfterViewInit, OnDestroy {
         const normalizedCountryName =
           this.countrySelection.normalizeCountryNameForDataService(countryName);
 
-        console.log(
-          `🔍 [Globe] Detected country: "${countryName}" -> normalized: "${normalizedCountryName}"`,
-        );
+        // console.log(
+        //   `🔍 [Globe] Detected country: "${countryName}" -> normalized: "${normalizedCountryName}"`,
+        // );
 
         const countryData = this.countryDataService.getCountryByName(
           normalizedCountryName,
         );
 
-        console.log(
-          `📊 [Globe] Country data lookup result:`,
-          countryData ? 'FOUND' : 'NOT FOUND',
-        );
+        // console.log(
+        //   `📊 [Globe] Country data lookup result:`,
+        //   countryData ? 'FOUND' : 'NOT FOUND',
+        // );
 
         if (countryData) {
+          // Track discovery (works for both quiz and explore modes)
+          await this.discoveryService.trackDiscovery(
+            countryData.id,
+            countryData.name,
+            'click',
+          );
+
           // Check if we're in quiz mode - if so, forward to quiz service instead of explore mode logic
           if (this.interactionModeService.isQuizMode()) {
             // For quiz mode, we use the country ID (code) as the candidate
@@ -994,7 +1048,7 @@ export class Globe implements AfterViewInit, OnDestroy {
                 countryName,
                 this.countries,
               );
-              console.log(`🔄 [Globe] Toggled OFF: "${countryName}"`);
+              // console.log(`🔄 [Globe] Toggled OFF: "${countryName}"`);
             } else {
               // Add to selection (don't reset others)
               this.countrySelection.applyPersistentCountrySelection(
@@ -1002,7 +1056,7 @@ export class Globe implements AfterViewInit, OnDestroy {
                 this.countries,
                 false, // Don't reset - additive
               );
-              console.log(`🔄 [Globe] Toggled ON: "${countryName}"`);
+              // console.log(`🔄 [Globe] Toggled ON: "${countryName}"`);
             }
 
             // For toggle, we don't change selectedCountry signal
@@ -1021,7 +1075,7 @@ export class Globe implements AfterViewInit, OnDestroy {
               false, // Don't reset - additive
             );
 
-            console.log(`➕ [Globe] Added to selection: "${countryName}"`);
+            // console.log(`➕ [Globe] Added to selection: "${countryName}"`);
 
             // For Shift+click, we don't change selectedCountry signal
             // Just apply visual highlighting - the info card stays on the first selected country
@@ -1037,9 +1091,9 @@ export class Globe implements AfterViewInit, OnDestroy {
               true, // Reset others first
             );
 
-            console.log(
-              `🎯 [Globe] Selected (cleared others): "${countryName}"`,
-            );
+            // console.log(
+            //   `🎯 [Globe] Selected (cleared others): "${countryName}"`,
+            // );
           }
 
           // Show immediate feedback tooltip for all cases
@@ -1109,11 +1163,12 @@ export class Globe implements AfterViewInit, OnDestroy {
   private async handleCountryAddToComparison(event: MouseEvent): Promise<void> {
     event.preventDefault();
 
-    // Early exit if in quiz mode, game quiz view, or bird migration view - double-click is disabled
+    // Early exit if in quiz mode, game quiz view, bird migration view, or leaderboard view - double-click is disabled
     if (
       this.interactionModeService.isQuizMode() ||
       this.navigationStateService.isGameQuizActive() ||
-      this.navigationStateService.isBirdMigrationActive()
+      this.navigationStateService.isBirdMigrationActive() ||
+      this.navigationStateService.isLeaderboardActive()
     ) {
       return;
     }
@@ -1143,12 +1198,19 @@ export class Globe implements AfterViewInit, OnDestroy {
         );
 
         if (added) {
-          // Get the country code to update previousSelectedCodes
+          // Get the country code to update previousSelectedCodes and track discovery
           const country = this.countryDataService.getCountryByName(
             normalizedCountryName,
           );
           if (country) {
             this.previousSelectedCodes.add(country.code);
+
+            // Track discovery for comparison
+            await this.discoveryService.trackDiscovery(
+              country.id,
+              country.name,
+              'comparison',
+            );
           }
 
           // Apply visual selection to the country on globe (additive - don't reset others)
@@ -1232,7 +1294,8 @@ export class Globe implements AfterViewInit, OnDestroy {
         !this.countries ||
         this.countries.children.length === 0 ||
         this.interactionModeService.isQuizMode() ||
-        this.navigationStateService.isGameQuizActive()
+        this.navigationStateService.isGameQuizActive() ||
+        this.navigationStateService.isLeaderboardActive()
       ) {
         this.tooltipService.hideAllTooltips();
         return;
@@ -1256,6 +1319,22 @@ export class Globe implements AfterViewInit, OnDestroy {
       );
 
       if (hoverResult) {
+        // Track discovery on hover (throttled by service)
+        const normalizedCountryName =
+          this.countrySelection.normalizeCountryNameForDataService(
+            hoverResult.countryName,
+          );
+        const countryData = this.countryDataService.getCountryByName(
+          normalizedCountryName,
+        );
+        if (countryData) {
+          await this.discoveryService.trackDiscovery(
+            countryData.id,
+            countryData.name,
+            'hover',
+          );
+        }
+
         // Show only country name tooltip on hover
         this.hoveredCountryName.set(hoverResult.countryName);
         this.countryNameTooltipPosition.set({

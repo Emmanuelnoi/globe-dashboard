@@ -43,7 +43,7 @@ export class MigrationPathsRenderer {
     this.pathGroup.name = 'migration-paths';
     this.scene.add(this.pathGroup);
 
-    migrationLogger.success('MigrationPathsRenderer initialized');
+    // migrationLogger.success('MigrationPathsRenderer initialized');
   }
 
   /**

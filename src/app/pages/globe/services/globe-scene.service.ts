@@ -104,7 +104,7 @@ export class GlobeSceneService {
    * @returns Promise that resolves when scene is fully initialized
    */
   async initialize(container: ElementRef<HTMLDivElement>): Promise<void> {
-    this.logger.debug('🌍 Initializing GlobeSceneService', 'GlobeSceneService');
+    // this.logger.debug('🌍 Initializing GlobeSceneService', 'GlobeSceneService');
 
     // Check WebGL support first
     if (!this.checkWebGLSupport()) {
@@ -129,17 +129,17 @@ export class GlobeSceneService {
     this.setupControls();
 
     this.isInitialized.set(true);
-    this.logger.success(
-      '✅ GlobeSceneService initialized',
-      'GlobeSceneService',
-    );
+    // this.logger.success(
+    //   '✅ GlobeSceneService initialized',
+    //   'GlobeSceneService',
+    // );
   }
 
   /**
    * Setup the basic Three.js scene with fog and starfield
    */
   private async setupScene(): Promise<void> {
-    this.logger.debug('🔧 Setting up scene...', 'GlobeSceneService');
+    // this.logger.debug('🔧 Setting up scene...', 'GlobeSceneService');
 
     // Create scene with atmospheric fog
     this.scene = new Scene();
@@ -159,14 +159,14 @@ export class GlobeSceneService {
     this.starfield = getStarfield({ numStars: 2500 });
     this.scene.add(this.starfield);
 
-    this.logger.debug('✅ Scene setup complete', 'GlobeSceneService');
+    // this.logger.debug('✅ Scene setup complete', 'GlobeSceneService');
   }
 
   /**
    * Setup Earth mesh with textures and GPU-optimized materials
    */
   private async setupEarthMesh(): Promise<void> {
-    this.logger.debug('🌎 Setting up Earth mesh...', 'GlobeSceneService');
+    // this.logger.debug('🌎 Setting up Earth mesh...', 'GlobeSceneService');
 
     const geometry = new SphereGeometry(1.98, 128, 128);
 
@@ -188,14 +188,14 @@ export class GlobeSceneService {
 
     this.scene.add(this.earthMesh);
 
-    this.logger.debug('✅ Earth mesh created', 'GlobeSceneService');
+    // this.logger.debug('✅ Earth mesh created', 'GlobeSceneService');
   }
 
   /**
    * Setup lighting with ambient and directional lights
    */
   private setupLighting(): void {
-    this.logger.debug('💡 Setting up lighting...', 'GlobeSceneService');
+    // this.logger.debug('💡 Setting up lighting...', 'GlobeSceneService');
 
     // Ambient light - balanced intensity for texture visibility
     const ambientLight = new AmbientLight(0xc2c2c2, 0.6); // Brighter gray for better texture visibility
@@ -212,14 +212,14 @@ export class GlobeSceneService {
     rimLight.position.set(-5, -2, -3);
     this.scene.add(rimLight);
 
-    this.logger.debug('✅ Lighting setup complete', 'GlobeSceneService');
+    // this.logger.debug('✅ Lighting setup complete', 'GlobeSceneService');
   }
 
   /**
    * Setup atmospheric glow effect using Fresnel shader
    */
   private setupAtmosphere(): void {
-    this.logger.debug('🌫️ Setting up atmosphere...', 'GlobeSceneService');
+    // this.logger.debug('🌫️ Setting up atmosphere...', 'GlobeSceneService');
 
     const atmosphereGeometry = new SphereGeometry(1.88, 64, 64);
     // const atmosphereGeometry = new SphereGeometry(1.98, 64, 64);
@@ -228,7 +228,7 @@ export class GlobeSceneService {
     this.atmosphereMesh.scale.set(1.06, 1.06, 1.06); // Subtle atmospheric glow
     this.scene.add(this.atmosphereMesh);
 
-    this.logger.debug('✅ Atmosphere setup complete', 'GlobeSceneService');
+    // this.logger.debug('✅ Atmosphere setup complete', 'GlobeSceneService');
   }
 
   /**
@@ -237,19 +237,19 @@ export class GlobeSceneService {
    * @param container - HTML container for the canvas
    */
   private setupRenderer(container: ElementRef<HTMLDivElement>): void {
-    this.logger.debug('🎨 Setting up renderer...', 'GlobeSceneService');
+    // this.logger.debug('🎨 Setting up renderer...', 'GlobeSceneService');
 
     const nativeElement = container.nativeElement;
-    this.logger.debug(
-      '📦 Renderer container dimensions:',
-      {
-        width: nativeElement.clientWidth,
-        height: nativeElement.clientHeight,
-        offsetWidth: nativeElement.offsetWidth,
-        offsetHeight: nativeElement.offsetHeight,
-      },
-      'GlobeSceneService',
-    );
+    // this.logger.debug(
+    //   '📦 Renderer container dimensions:',
+    //   {
+    //     width: nativeElement.clientWidth,
+    //     height: nativeElement.clientHeight,
+    //     offsetWidth: nativeElement.offsetWidth,
+    //     offsetHeight: nativeElement.offsetHeight,
+    //   },
+    //   'GlobeSceneService',
+    // );
 
     // Create renderer with optimal settings
     this.renderer = new WebGLRenderer({
@@ -272,21 +272,21 @@ export class GlobeSceneService {
     // Clear existing canvas if any
     const existingCanvas = nativeElement.querySelector('canvas');
     if (existingCanvas) {
-      this.logger.debug('🧹 Removing existing canvas', 'GlobeSceneService');
+      // this.logger.debug('🧹 Removing existing canvas', 'GlobeSceneService');
       existingCanvas.remove();
     }
 
     // Append canvas to container
     nativeElement.appendChild(this.renderer.domElement);
 
-    this.logger.debug('✅ Renderer setup complete', 'GlobeSceneService');
+    // this.logger.debug('✅ Renderer setup complete', 'GlobeSceneService');
   }
 
   /**
    * Setup OrbitControls for camera interaction
    */
   private setupControls(): void {
-    this.logger.debug('🎮 Setting up controls...', 'GlobeSceneService');
+    // this.logger.debug('🎮 Setting up controls...', 'GlobeSceneService');
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
@@ -317,7 +317,7 @@ export class GlobeSceneService {
       this.needsRender = true;
     });
 
-    this.logger.debug('✅ Controls setup complete', 'GlobeSceneService');
+    // this.logger.debug('✅ Controls setup complete', 'GlobeSceneService');
   }
 
   /**
@@ -327,7 +327,7 @@ export class GlobeSceneService {
     if (this.isAnimating) return;
 
     this.isAnimating = true;
-    this.logger.debug('▶️ Starting animation loop', 'GlobeSceneService');
+    // this.logger.debug('▶️ Starting animation loop', 'GlobeSceneService');
     this.animate();
   }
 

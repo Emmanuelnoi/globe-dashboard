@@ -46,6 +46,7 @@ export class IconComponent {
       plane: '🐦',
       map: '🗺️',
       menu: '☰',
+      trophy: '🏆',
     };
     return iconMap[this.name] || '■';
   }

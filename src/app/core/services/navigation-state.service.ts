@@ -27,7 +27,7 @@ export class NavigationStateService {
     { id: 'country-comparison', label: 'Country Comparison', icon: 'globe' },
     { id: 'game-quiz', label: 'Game Quiz', icon: 'gamepad' },
     { id: 'bird-migration', label: 'Bird Migration', icon: 'plane' },
-    { id: 'crop-cuisine-mapper', label: 'Crop & Cuisine Mapper', icon: 'map' },
+    { id: 'leaderboard', label: 'Leaderboard', icon: 'trophy' },
   ];
 
   // Computed values for derived state
@@ -47,8 +47,8 @@ export class NavigationStateService {
     () => this.currentView() === 'bird-migration',
   );
 
-  readonly isCropCuisineMapperActive = computed(
-    () => this.currentView() === 'crop-cuisine-mapper',
+  readonly isLeaderboardActive = computed(
+    () => this.currentView() === 'leaderboard',
   );
 
   /**

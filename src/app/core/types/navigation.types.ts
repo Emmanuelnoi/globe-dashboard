@@ -10,7 +10,7 @@ export type ViewMode =
   | 'country-comparison'
   | 'game-quiz'
   | 'bird-migration'
-  | 'crop-cuisine-mapper';
+  | 'leaderboard';
 
 /**
  * Navigation item interface for sidebar menu
@@ -76,7 +76,7 @@ export function isValidViewMode(value: string): value is ViewMode {
     'country-comparison',
     'game-quiz',
     'bird-migration',
-    'crop-cuisine-mapper',
+    'leaderboard',
   ].includes(value as ViewMode);
 }
 
@@ -107,12 +107,13 @@ export const VIEW_CONFIGS: Record<ViewMode, ViewConfig> = {
     id: 'bird-migration',
     title: 'Bird Migration',
     description: 'Animated bird migration patterns visualization',
-    isImplemented: false,
+    isImplemented: true,
   },
-  'crop-cuisine-mapper': {
-    id: 'crop-cuisine-mapper',
-    title: 'Crop & Cuisine Mapper',
-    description: 'Agricultural and culinary data visualization',
-    isImplemented: false,
+  leaderboard: {
+    id: 'leaderboard',
+    title: 'Leaderboard',
+    description: 'View rankings, achievements, and compete globally',
+    component: 'LeaderboardView',
+    isImplemented: true,
   },
 } as const;

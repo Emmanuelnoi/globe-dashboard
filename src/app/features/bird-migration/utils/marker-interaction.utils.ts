@@ -38,7 +38,7 @@ export class MarkerInteractionHandler {
     };
     this.mouse = new THREE.Vector2();
 
-    migrationLogger.success('MarkerInteractionHandler initialized');
+    // migrationLogger.success('MarkerInteractionHandler initialized');
   }
 
   /**

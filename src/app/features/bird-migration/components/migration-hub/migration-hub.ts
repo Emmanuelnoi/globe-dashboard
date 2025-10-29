@@ -74,10 +74,10 @@ export class MigrationHubComponent implements OnInit {
       this.migrationState.loadMigrationData(data.migrations, data.species);
       this._dataLoaded.set(true);
 
-      this.logger.success(
-        `✅ Loaded ${data.migrations.length} migrations, ${data.species.length} species`,
-        'MigrationHub',
-      );
+      // this.logger.success(
+      //   `✅ Loaded ${data.migrations.length} migrations, ${data.species.length} species`,
+      //   'MigrationHub',
+      // );
     } catch (error) {
       this.logger.error(
         '❌ Failed to load migration data:',

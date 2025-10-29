@@ -71,7 +71,7 @@ export class MigrationMarkersRenderer {
     // Pre-generate textures for all marker types
     this.generateMarkerTextures();
 
-    migrationLogger.success('MigrationMarkersRenderer initialized');
+    // migrationLogger.success('MigrationMarkersRenderer initialized');
   }
 
   /**

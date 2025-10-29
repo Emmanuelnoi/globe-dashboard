@@ -107,10 +107,10 @@ export class CountryIdTextureService {
       // Create selection mask canvas
       this.createSelectionMask(idMapImage.width, idMapImage.height);
 
-      this.logger.success(
-        `Country ID textures loaded: ${Object.keys(lookupData.countries).length} countries`,
-        'CountryIdTextureService',
-      );
+      // this.logger.success(
+      //   `Country ID textures loaded: ${Object.keys(lookupData.countries).length} countries`,
+      //   'CountryIdTextureService',
+      // );
       this.isLoaded.set(true);
     } catch (error) {
       const errorMessage =

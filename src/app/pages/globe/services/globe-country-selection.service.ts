@@ -262,30 +262,27 @@ export class GlobeCountrySelectionService {
     });
 
     if (foundMatch) {
-      console.log(
-        `✅ [CountrySelection] Successfully applied selection to: "${countryName}" (${meshCount} meshes)`,
-      );
-
-      // Sort by vertex count to find the largest meshes (likely mainland)
-      const sortedBySize = [...matchedMeshes].sort(
-        (a, b) => b.vertices - a.vertices,
-      );
-      const totalVertices = matchedMeshes.reduce(
-        (sum, m) => sum + m.vertices,
-        0,
-      );
-
-      console.log(
-        `📊 Total vertices: ${totalVertices.toLocaleString()}, Largest 3 meshes:`,
-        sortedBySize.slice(0, 3),
-      );
-
-      if (meshCount <= 10) {
-        console.log(`📋 All matched meshes:`, matchedMeshes);
-      } else {
-        console.log(`📋 First 5 meshes:`, matchedMeshes.slice(0, 5));
-        console.log(`📋 Last 5 meshes:`, matchedMeshes.slice(-5));
-      }
+      // console.log(
+      //   `✅ [CountrySelection] Successfully applied selection to: "${countryName}" (${meshCount} meshes)`,
+      // );
+      // // Sort by vertex count to find the largest meshes (likely mainland)
+      // const sortedBySize = [...matchedMeshes].sort(
+      //   (a, b) => b.vertices - a.vertices,
+      // );
+      // const totalVertices = matchedMeshes.reduce(
+      //   (sum, m) => sum + m.vertices,
+      //   0,
+      // );
+      // console.log(
+      //   `📊 Total vertices: ${totalVertices.toLocaleString()}, Largest 3 meshes:`,
+      //   sortedBySize.slice(0, 3),
+      // );
+      // if (meshCount <= 10) {
+      //   console.log(`📋 All matched meshes:`, matchedMeshes);
+      // } else {
+      //   console.log(`📋 First 5 meshes:`, matchedMeshes.slice(0, 5));
+      //   console.log(`📋 Last 5 meshes:`, matchedMeshes.slice(-5));
+      // }
     } else {
       this.logger.warn(
         `No mesh found for country: ${countryName}`,
@@ -293,22 +290,22 @@ export class GlobeCountrySelectionService {
       );
 
       // Debug: Show possible matches
-      const possibleMatches: string[] = [];
-      countriesGroup.traverse((object: Object3D) => {
-        if (object instanceof Mesh && object.name) {
-          const meshName = object.name.toLowerCase();
-          const targetName = countryName.toLowerCase();
-          if (meshName.includes(targetName) || targetName.includes(meshName)) {
-            possibleMatches.push(object.name);
-          }
-        }
-      });
-      if (possibleMatches.length > 0) {
-        console.log(
-          `🔍 Possible "${countryName}" matches:`,
-          possibleMatches.slice(0, 10),
-        );
-      }
+      // const possibleMatches: string[] = [];
+      // countriesGroup.traverse((object: Object3D) => {
+      //   if (object instanceof Mesh && object.name) {
+      //     const meshName = object.name.toLowerCase();
+      //     const targetName = countryName.toLowerCase();
+      //     if (meshName.includes(targetName) || targetName.includes(meshName)) {
+      //       possibleMatches.push(object.name);
+      //     }
+      //   }
+      // });
+      // if (possibleMatches.length > 0) {
+      //   console.log(
+      //     `🔍 Possible "${countryName}" matches:`,
+      //     possibleMatches.slice(0, 10),
+      //   );
+      // }
     }
   }
 
