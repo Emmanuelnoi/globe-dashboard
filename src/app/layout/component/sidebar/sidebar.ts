@@ -20,6 +20,7 @@ import { CommonModule } from '@angular/common';
 import { IconComponent } from '@lib/index';
 import { TableKeyboardDirective } from '@lib/directives/table-keyboard.directive';
 import { NavigationStateService } from '../../../core/services/navigation-state.service';
+import { SidebarStateService } from '../../../core/services/sidebar-state.service';
 import { type ViewMode } from '../../../core/types/navigation.types';
 
 interface Item {
@@ -170,6 +171,7 @@ interface Item {
       .brand {
         font-weight: 600;
         color: rgba(255, 255, 255, 0.95);
+        flex: 1;
       }
 
       /* ---------------- glass card ---------------- */
@@ -553,6 +555,7 @@ export class Sidebar implements AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
   private hostRef = inject(ElementRef<HTMLElement>);
   private navigationService = inject(NavigationStateService);
+  private sidebarStateService = inject(SidebarStateService);
 
   /** navigation items from service */
   items: Item[] = this.navigationService.navigationItems;
@@ -595,6 +598,9 @@ export class Sidebar implements AfterViewInit {
   // --- actions: update signals ---
   toggle(): void {
     this.collapsed.update((v) => !v);
+
+    // Sync with sidebar state service for other components
+    this.sidebarStateService.setCollapsed(this.collapsed());
 
     // when expanding, restore focus after DOM updates:
     if (!this.collapsed()) {

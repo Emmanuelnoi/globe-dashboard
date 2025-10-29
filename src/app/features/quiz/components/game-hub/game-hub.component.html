@@ -269,7 +269,7 @@
                 "
               >
                 @if (currentQuestion()?.choices; as choices) {
-                  @for (choice of choices; track choice) {
+                  @for (choice of choices; track $index) {
                     <button
                       type="button"
                       class="choice-button"

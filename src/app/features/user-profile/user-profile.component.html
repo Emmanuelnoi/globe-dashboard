@@ -1,0 +1,233 @@
+<div class="user-profile-container">
+  <!-- Header with sign out and close buttons -->
+  <div class="profile-header">
+    <div class="header-content">
+      <h2>👤 Profile</h2>
+    </div>
+    <div class="header-actions">
+      <button
+        class="sign-out-button"
+        (click)="signOut()"
+        [attr.aria-label]="'Sign out'"
+        type="button"
+      >
+        <span class="button-icon">🚪</span>
+        <span class="button-label">Sign Out</span>
+      </button>
+      <button
+        class="close-button"
+        (click)="closeProfile()"
+        [attr.aria-label]="'Close profile'"
+        type="button"
+      >
+        <span class="close-icon">✕</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main content (always visible) -->
+  <div class="profile-content">
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <div class="avatar-section">
+        <img
+          [src]="avatarUrl()"
+          [alt]="displayName() + ' avatar'"
+          class="avatar"
+        />
+        <button
+          class="edit-button"
+          (click)="startEdit()"
+          *ngIf="!isEditing()"
+          aria-label="Edit profile"
+          type="button"
+        >
+          ✏️
+        </button>
+      </div>
+
+      <div class="profile-info">
+        <h3 class="display-name">{{ displayName() }}</h3>
+        <p class="email">{{ currentUser()?.email }}</p>
+
+        <!-- Edit Form -->
+        <div class="edit-form" *ngIf="isEditing()">
+          <div class="form-group">
+            <label for="displayName">Display Name</label>
+            <input
+              id="displayName"
+              type="text"
+              [(ngModel)]="editDisplayName"
+              placeholder="Enter your display name"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="avatarUrl">Avatar URL</label>
+            <input
+              id="avatarUrl"
+              type="url"
+              [(ngModel)]="editAvatarUrl"
+              placeholder="https://example.com/avatar.jpg"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-actions">
+            <button
+              class="save-button"
+              (click)="saveProfile()"
+              [disabled]="isSaving()"
+              type="button"
+            >
+              {{ isSaving() ? "Saving..." : "Save" }}
+            </button>
+            <button
+              class="cancel-button"
+              (click)="cancelEdit()"
+              [disabled]="isSaving()"
+              type="button"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <!-- Total Score -->
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value">{{ totalScore() | number }}</div>
+        <div class="stat-label">Total Score</div>
+      </div>
+
+      <!-- Total Games -->
+      <div class="stat-card">
+        <div class="stat-icon">🎮</div>
+        <div class="stat-value">{{ totalGames() }}</div>
+        <div class="stat-label">Games Played</div>
+      </div>
+
+      <!-- Average Score -->
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-value">{{ averageScore() | number: "1.0-1" }}</div>
+        <div class="stat-label">Average Score</div>
+      </div>
+
+      <!-- Best Score -->
+      <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-value">{{ bestScore() }}</div>
+        <div class="stat-label">Best Score</div>
+      </div>
+
+      <!-- Best Streak -->
+      <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-value">{{ bestStreak() }}</div>
+        <div class="stat-label">Best Streak</div>
+      </div>
+
+      <!-- Countries Discovered -->
+      <div class="stat-card">
+        <div class="stat-icon">🗺️</div>
+        <div class="stat-value">{{ totalDiscovered() }}/241</div>
+        <div class="stat-label">Countries</div>
+        <div class="stat-progress">
+          <div
+            class="progress-bar"
+            [style.width.%]="percentageExplored()"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rank Section -->
+    <div class="rank-section" *ngIf="myRank()">
+      <div class="section-header">
+        <h3>🏆 Global Ranking</h3>
+      </div>
+      <div class="rank-card">
+        <div class="rank-number">{{ myRank()!.rank }}</div>
+        <div class="rank-details">
+          <div class="rank-percentile">
+            Top {{ myRank()!.percentile?.toFixed(1) }}%
+          </div>
+          <div class="rank-stats">
+            <span>{{ myRank()!.totalGames }} games</span>
+            <span>•</span>
+            <span>{{ myRank()!.totalScore | number }} points</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievements Summary -->
+    <div class="achievements-section">
+      <div class="section-header">
+        <h3>🏅 Achievements</h3>
+        <span class="achievement-count">
+          {{ unlockedAchievements().length }}/{{ achievements.length }}
+        </span>
+      </div>
+      <div class="achievement-progress-bar">
+        <div
+          class="achievement-progress-fill"
+          [style.width.%]="achievementProgress()"
+        ></div>
+      </div>
+      <div class="achievement-preview">
+        <div
+          class="achievement-badge"
+          *ngFor="let achievement of unlockedAchievements().slice(0, 5)"
+          [title]="achievement.name"
+        >
+          <div
+            class="badge-icon"
+            [style.background]="getTierColor(achievement.tier)"
+          >
+            {{
+              achievement.category === "quiz"
+                ? "🎯"
+                : achievement.category === "discovery"
+                  ? "🗺️"
+                  : "🔍"
+            }}
+          </div>
+        </div>
+        <div class="more-badge" *ngIf="unlockedAchievements().length > 5">
+          +{{ unlockedAchievements().length - 5 }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Sessions -->
+    <div class="recent-sessions-section" *ngIf="recentSessions().length > 0">
+      <div class="section-header">
+        <h3>📝 Recent Games</h3>
+      </div>
+      <div class="sessions-list">
+        <div class="session-item" *ngFor="let session of recentSessions()">
+          <div class="session-mode">
+            {{ getModeDisplayName(session.configuration.mode) }}
+          </div>
+          <div class="session-score">{{ session.finalScore }} pts</div>
+          <div class="session-date">
+            {{ formatDate(session.startTime) }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="totalGames() === 0">
+      <div class="empty-icon">🎮</div>
+      <p class="empty-text">Play your first quiz game to see your stats!</p>
+    </div>
+  </div>
+</div>

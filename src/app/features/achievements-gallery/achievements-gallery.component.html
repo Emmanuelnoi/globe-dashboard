@@ -1,0 +1,125 @@
+<div
+  class="achievements-gallery-container"
+  [class.sidebar-collapsed]="sidebarCollapsed()"
+>
+  <!-- Header -->
+  <div class="gallery-header">
+    <div class="header-content">
+      <h2>🏅 Achievements</h2>
+      <p class="completion-text">
+        {{ unlockedCount() }}/{{ totalCount() }} Unlocked ({{
+          completionPercentage()
+        }}%)
+      </p>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="gallery-content">
+    <!-- Overall Progress Bar -->
+    <div class="overall-progress">
+      <div class="progress-fill" [style.width.%]="completionPercentage()"></div>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="category-filter">
+      <button
+        *ngFor="let category of categories"
+        class="category-button"
+        [class.active]="selectedCategory() === category.id"
+        (click)="selectCategory(category.id)"
+        [attr.aria-label]="'Filter by ' + category.name"
+        type="button"
+      >
+        <span class="category-icon">{{ category.icon }}</span>
+        <span class="category-name">{{ category.name }}</span>
+      </button>
+    </div>
+
+    <!-- Sign-in Prompt for Unauthenticated Users -->
+    <div class="auth-prompt" *ngIf="!isAuthenticated">
+      <p class="prompt-icon">🔒</p>
+      <p class="prompt-text">Sign in to track your achievements!</p>
+    </div>
+
+    <!-- Achievements Grid -->
+    <div class="achievements-grid" *ngIf="isAuthenticated">
+      <div
+        *ngFor="let achievement of filteredAchievements()"
+        class="achievement-card"
+        [class.unlocked]="achievement.isUnlocked"
+        [class.locked]="!achievement.isUnlocked"
+      >
+        <!-- Achievement Icon -->
+        <div
+          class="achievement-icon"
+          [style.background]="
+            achievement.isUnlocked
+              ? getTierColor(achievement.tier)
+              : 'rgba(255, 255, 255, 0.1)'
+          "
+        >
+          <span class="icon-emoji">{{
+            getCategoryIcon(achievement.category)
+          }}</span>
+          @if (achievement.isUnlocked) {
+            <div class="unlock-glow"></div>
+          }
+        </div>
+
+        <!-- Achievement Info -->
+        <div class="achievement-info">
+          <div class="achievement-header">
+            <h3 class="achievement-name">{{ achievement.name }}</h3>
+            <span
+              class="tier-badge"
+              [style.background]="getTierColor(achievement.tier)"
+            >
+              {{ achievement.tier }}
+            </span>
+          </div>
+
+          <p class="achievement-description">{{ achievement.description }}</p>
+
+          <!-- Progress Bar (for locked achievements) -->
+          @if (!achievement.isUnlocked) {
+            <div class="progress-section">
+              <div class="progress-bar-container">
+                <div
+                  class="progress-bar-fill"
+                  [style.width.%]="getProgressPercentage(achievement)"
+                ></div>
+              </div>
+              <div class="progress-text">
+                {{ achievement.progress }} / {{ achievement.progressMax }}
+              </div>
+            </div>
+          }
+
+          <!-- Unlock Date (for unlocked achievements) -->
+          @if (achievement.isUnlocked && achievement.unlockedAt) {
+            <div class="unlock-date">
+              ✓ Unlocked on {{ formatDate(achievement.unlockedAt) }}
+            </div>
+          }
+        </div>
+
+        <!-- Lock Overlay (for locked achievements) -->
+        @if (!achievement.isUnlocked) {
+          <div class="lock-overlay">
+            <span class="lock-icon">🔒</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Empty State (when filtering shows no results) -->
+    <div
+      class="empty-state"
+      *ngIf="isAuthenticated && filteredAchievements().length === 0"
+    >
+      <p class="empty-icon">🏆</p>
+      <p class="empty-text">No achievements in this category yet.</p>
+    </div>
+  </div>
+</div>

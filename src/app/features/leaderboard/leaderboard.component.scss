@@ -1,0 +1,523 @@
+// Leaderboard Component - Glass Morphism Design
+// Matches application-wide glass design system
+
+.leaderboard-container {
+  position: fixed;
+  top: 76px; // Align with nav.glass-card (16px sidebar top + 16px sidebar padding + ~44px header)
+  left: calc(300px + 30px); // Sidebar width (300px) + spacing (30px)
+  width: 750px;
+  height: calc(
+    100vh - 76px - 50px
+  ); // Full height minus top position and bottom margin
+  max-height: calc(100vh - 76px - 50px);
+  z-index: 500;
+  transition: all 0.3s ease;
+
+  // Glass morphism styling
+  background: var(--glass-bg-primary);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  border: var(--glass-border-primary);
+  border-radius: var(--glass-radius-medium);
+  box-shadow: var(--glass-shadow-strong);
+  color: var(--glass-text-primary);
+
+  // Adjust position when sidebar is collapsed
+  &.sidebar-collapsed {
+    left: calc(60px + 30px); // Collapsed sidebar width (60px) + spacing (30px)
+    width: 850px; // Wider when more space available
+  }
+
+  // Scrollable content
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  }
+}
+
+// Header Section
+.leaderboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  .header-content {
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--glass-text-primary);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    p {
+      margin: 4px 0 0 0;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
+}
+
+// Tab Navigation
+.tab-navigation {
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  .tab-button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: rgba(255, 255, 255, 0.7);
+
+    .tab-icon {
+      font-size: 18px;
+    }
+
+    .tab-label {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: var(--glass-text-primary);
+    }
+
+    &.active {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: rgb(16, 185, 129);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    }
+  }
+}
+
+// My Rank Card
+.my-rank-card {
+  margin: 16px 20px;
+  padding: 16px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+
+  .my-rank-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+
+    .my-rank-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: rgb(16, 185, 129);
+    }
+
+    .refresh-button {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  .my-rank-details {
+    .rank-position {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 12px;
+
+      .rank-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--glass-text-primary);
+      }
+
+      .rank-percentile {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+
+    .rank-stats {
+      display: flex;
+      gap: 16px;
+
+      .stat-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+
+        .stat-value {
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--glass-text-primary);
+        }
+
+        .stat-label {
+          font-size: 11px;
+          color: rgba(255, 255, 255, 0.6);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+    }
+  }
+}
+
+// Auth Prompt
+.auth-prompt {
+  text-align: center;
+  padding: 32px 20px;
+  color: rgba(255, 255, 255, 0.6);
+
+  .prompt-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  .prompt-text {
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+// Loading State
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  gap: 16px;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: rgb(16, 185, 129);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Error State
+.error-state {
+  text-align: center;
+  padding: 32px 20px;
+
+  .error-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+
+  .error-text {
+    font-size: 14px;
+    color: rgba(239, 68, 68, 0.9);
+    margin: 0 0 16px 0;
+  }
+
+  .retry-button {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: 8px;
+    padding: 10px 20px;
+    color: rgb(239, 68, 68);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.25);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+// Leaderboard Table
+.leaderboard-table-wrapper {
+  padding: 0 20px 16px;
+}
+
+.leaderboard-table {
+  .table-header {
+    display: grid;
+    grid-template-columns: 60px 1fr 80px 60px 60px;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .table-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 80px 60px 60px;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
+      transform: translateX(4px);
+    }
+
+    &.current-user {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.3);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+    }
+  }
+
+  .cell-rank {
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--glass-text-primary);
+
+      &.rank-badge-gold {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 215, 0, 0.3),
+          rgba(218, 165, 32, 0.3)
+        );
+        color: rgb(255, 215, 0);
+        box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+      }
+
+      &.rank-badge-silver {
+        background: linear-gradient(
+          135deg,
+          rgba(192, 192, 192, 0.3),
+          rgba(169, 169, 169, 0.3)
+        );
+        color: rgb(192, 192, 192);
+        box-shadow: 0 0 12px rgba(192, 192, 192, 0.3);
+      }
+
+      &.rank-badge-bronze {
+        background: linear-gradient(
+          135deg,
+          rgba(205, 127, 50, 0.3),
+          rgba(184, 115, 51, 0.3)
+        );
+        color: rgb(205, 127, 50);
+        box-shadow: 0 0 12px rgba(205, 127, 50, 0.3);
+      }
+    }
+  }
+
+  .cell-player {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .player-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--glass-text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .player-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      color: rgb(16, 185, 129);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      width: fit-content;
+    }
+  }
+
+  .cell-score {
+    .score-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--glass-text-primary);
+    }
+  }
+
+  .cell-games,
+  .cell-avg {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+
+  .empty-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .empty-text {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+  }
+}
+
+// Footer
+.leaderboard-footer {
+  padding: 12px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+
+  .footer-text {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0;
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .leaderboard-container {
+    right: 10px;
+    top: 10px;
+    width: calc(100vw - 20px);
+    max-width: 420px;
+    max-height: calc(100vh - 100px);
+  }
+}
+
+@media (max-width: 480px) {
+  .leaderboard-table {
+    .table-header,
+    .table-row {
+      grid-template-columns: 50px 1fr 70px 50px;
+      gap: 8px;
+      padding: 10px 12px;
+      font-size: 10px;
+    }
+
+    // Hide average column on small screens
+    .header-avg,
+    .cell-avg {
+      display: none;
+    }
+  }
+
+  .my-rank-card {
+    .rank-stats {
+      gap: 8px;
+
+      .stat-item {
+        .stat-value {
+          font-size: 16px;
+        }
+
+        .stat-label {
+          font-size: 10px;
+        }
+      }
+    }
+  }
+}
+
+// Animation for fadeIn
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.leaderboard-container {
+  animation: fadeIn 0.3s ease-out;
+}

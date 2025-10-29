@@ -1,0 +1,166 @@
+<div
+  class="leaderboard-container"
+  [class.sidebar-collapsed]="sidebarCollapsed()"
+>
+  <!-- Header -->
+  <div class="leaderboard-header">
+    <div class="header-content">
+      <h2>🏆 Leaderboard</h2>
+      <p>Compete with players worldwide</p>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="leaderboard-content">
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <button
+        class="tab-button"
+        [class.active]="selectedTab() === 'global'"
+        (click)="selectTab('global')"
+        aria-label="View global leaderboard"
+      >
+        <span class="tab-icon">🌍</span>
+        <span class="tab-label">Global</span>
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="selectedTab() === 'weekly'"
+        (click)="selectTab('weekly')"
+        aria-label="View weekly leaderboard"
+      >
+        <span class="tab-icon">📅</span>
+        <span class="tab-label">Weekly</span>
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="selectedTab() === 'monthly'"
+        (click)="selectTab('monthly')"
+        aria-label="View monthly leaderboard"
+      >
+        <span class="tab-icon">📊</span>
+        <span class="tab-label">Monthly</span>
+      </button>
+    </div>
+
+    <!-- My Rank Card (if authenticated and ranked) -->
+    <div class="my-rank-card" *ngIf="isAuthenticated() && myRankInCurrent()">
+      <div class="my-rank-header">
+        <span class="my-rank-label">Your Rank</span>
+        <button
+          class="refresh-button"
+          (click)="refresh()"
+          aria-label="Refresh leaderboard"
+        >
+          🔄
+        </button>
+      </div>
+      <div class="my-rank-details">
+        <div class="rank-position">
+          <span class="rank-number">{{ myRankInCurrent()!.rank }}</span>
+          <span class="rank-percentile" *ngIf="myRankInCurrent()!.percentile">
+            {{ getPercentileText(myRankInCurrent()!.percentile) }}
+          </span>
+        </div>
+        <div class="rank-stats">
+          <div class="stat-item">
+            <span class="stat-value">{{
+              formatNumber(myRankInCurrent()!.totalScore)
+            }}</span>
+            <span class="stat-label">Score</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ myRankInCurrent()!.totalGames }}</span>
+            <span class="stat-label">Games</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value">{{ myRankInCurrent()!.bestStreak }}</span>
+            <span class="stat-label">Streak</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sign in prompt for unauthenticated users -->
+    <div class="auth-prompt" *ngIf="!isAuthenticated()">
+      <p class="prompt-icon">🔒</p>
+      <p class="prompt-text">Sign in to see your rank and compete!</p>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="isLoading()">
+      <div class="spinner"></div>
+      <p>Loading leaderboard...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" *ngIf="!isLoading() && lastError()">
+      <p class="error-icon">⚠️</p>
+      <p class="error-text">{{ lastError() }}</p>
+      <button class="retry-button" (click)="refresh()">Retry</button>
+    </div>
+
+    <!-- Leaderboard Table -->
+    <div class="leaderboard-table-wrapper" *ngIf="!isLoading() && !lastError()">
+      <div
+        class="leaderboard-table"
+        *ngIf="currentEntries().length > 0; else emptyState"
+      >
+        <!-- Table Header -->
+        <div class="table-header">
+          <div class="header-rank">Rank</div>
+          <div class="header-player">Player</div>
+          <div class="header-score">Score</div>
+          <div class="header-games">Games</div>
+          <div class="header-avg">Avg</div>
+        </div>
+
+        <!-- Table Rows -->
+        <div
+          class="table-row"
+          *ngFor="let entry of currentEntries(); trackBy: trackByUserId"
+          [class.current-user]="isCurrentUser(entry)"
+        >
+          <div class="cell-rank">
+            <span
+              class="rank-badge"
+              [ngClass]="getRankBadgeClass(entry.rank || 0)"
+            >
+              {{ entry.rank }}
+            </span>
+          </div>
+          <div class="cell-player">
+            <span class="player-name">{{ entry.username || "Anonymous" }}</span>
+            <span class="player-badge" *ngIf="isCurrentUser(entry)">You</span>
+          </div>
+          <div class="cell-score">
+            <span class="score-value">{{
+              formatNumber(entry.totalScore)
+            }}</span>
+          </div>
+          <div class="cell-games">
+            {{ entry.totalGames }}
+          </div>
+          <div class="cell-avg">
+            {{ entry.averageScore.toFixed(0) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <p class="empty-icon">📊</p>
+          <p class="empty-text">No entries yet. Be the first to play!</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="leaderboard-footer" *ngIf="currentEntries().length > 0">
+      <p class="footer-text">
+        Showing top {{ currentEntries().length }} players
+      </p>
+    </div>
+  </div>
+</div>

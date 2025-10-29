@@ -93,7 +93,7 @@ export class UserStatsService {
         },
       });
 
-      this.logger.debug('📊 IndexedDB initialized successfully');
+      // this.logger.debug('📊 IndexedDB initialized successfully');
 
       // Load initial data
       await this.loadStats();
@@ -144,7 +144,7 @@ export class UserStatsService {
       // Complete transaction
       await tx.done;
 
-      this.logger.debug('💾 Session saved successfully:', session.id);
+      // this.logger.debug('💾 Session saved successfully:', session.id);
 
       // Update reactive signals
       this._stats.set(updatedStats);
@@ -255,7 +255,7 @@ export class UserStatsService {
       await tx.objectStore('meta').clear();
       await tx.done;
 
-      this.logger.debug('🗑️ All data cleared successfully');
+      // this.logger.debug('🗑️ All data cleared successfully');
 
       // Reset signals
       this._stats.set(null);
@@ -326,7 +326,7 @@ export class UserStatsService {
 
       await tx.done;
 
-      this.logger.debug('📥 Data imported successfully');
+      // this.logger.debug('📥 Data imported successfully');
 
       // Refresh reactive signals
       await this.loadStats();
@@ -457,7 +457,7 @@ export class UserStatsService {
     if (this.db) {
       this.db.close();
       this.db = null;
-      this.logger.debug('🔌 IndexedDB connection closed');
+      // this.logger.debug('🔌 IndexedDB connection closed');
     }
   }
 

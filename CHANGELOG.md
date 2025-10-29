@@ -7,7 +7,251 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## 📑 Quick Links
+
+**Latest Releases:**
+
+- [🆕 Unreleased](#unreleased)
+- [v2.0.0 - Gamification & Cloud Authentication 🎮](#200-gamification-cloud-authentication-)
+- [v1.2.0 - Cloud Sync Infrastructure ☁️](#120-cloud-sync-infrastructure-️)
+- [v1.1.0 - Production Operations 🚀](#110-phase-5-production-operations-)
+- [v1.0.1 - Performance & Accessibility ⚡](#101-phase-4-performance--accessibility-)
+- [v1.0.0 - Production Release 🚀](#100-production-release-)
+
+**Previous Releases:**
+
+- [v0.10.0 - Bird Migration & Infrastructure](#0100-bird-migration--infrastructure)
+- [v0.9.0 - Quiz System Complete](#090-quiz-system-complete)
+- [v0.8.0 - Country Search & Tooltips](#080-country-search--tooltips)
+- [v0.7.0 - Notification System](#070-notification-system)
+- [v0.6.0 - TopoJSON Migration](#060-topojson-migration)
+- [v0.5.0 - Country Data System](#050-country-data-system)
+- [v0.4.0 - Country Comparison](#040-country-comparison)
+- [v0.3.0 - UI Polish](#030-ui-polish)
+- [v0.2.0 - 3D Globe Foundation](#020-globe-foundation)
+- [v0.1.0 - Initial Release](#010-initial-release)
+
+**Additional Sections:**
+
+- [📊 Project Statistics](#project-statistics)
+- [🚀 Upcoming Features](#upcoming-features)
+- [🔗 Links](#links)
+
+---
+
 ## [Unreleased]
+
+---
+
+## [2.0.0] - 2025-10-28 (Gamification & Cloud Authentication) 🎮
+
+### Added
+
+- 🎮 **Gamification System - Complete**
+  - **AchievementsService** (`src/app/core/services/achievements.service.ts`)
+    - 14 achievements across 5 categories (Quiz, Discovery, Exploration, Social, Milestone)
+    - Tier system: Bronze, Silver, Gold, Platinum, Diamond
+    - Real-time unlock detection with progress tracking
+    - Cloud sync integration for cross-device achievement persistence
+    - Comprehensive unit tests (achievements.service.spec.ts)
+  - **LeaderboardService** (`src/app/core/services/leaderboard.service.ts`)
+    - Global, weekly, and monthly leaderboard rankings
+    - Real-time rank calculation with percentiles
+    - Support for 4 game modes (flags, capitals, maps, facts)
+    - Top 100 player display with rank badges
+    - User rank highlighting and stats display
+    - Automatic leaderboard entry creation and updates
+  - **Achievement Notifications** (`src/app/shared/components/achievement-notification/`)
+    - Toast-style notifications with queue system
+    - Auto-dismiss after 4 seconds with manual override
+    - Optional Web Audio API sound effects (3-tone success chime)
+    - Pulse animations with glow effects
+    - Category-specific icons (🎯 Quiz, 🗺️ Discovery, etc.)
+    - Tier badges with color coding
+  - **Achievements Gallery** (`src/app/features/achievements-gallery/`)
+    - Grid layout showing all 14 achievements
+    - Locked/unlocked states with visual distinction
+    - Progress bars for in-progress achievements
+    - Category filtering (All, Quiz, Discovery, Exploration, Social, Milestone)
+    - Overall progress tracking (X/14 unlocked)
+    - Unlock date display
+    - Glow animations for unlocked achievements
+    - Glass morphism design with collapsible UI
+  - **Leaderboard UI** (`src/app/features/leaderboard/`)
+    - Tab navigation (Global/Weekly/Monthly)
+    - "My Rank" card showing user's position and stats
+    - Rank badges (🥇 gold, 🥈 silver, 🥉 bronze)
+    - Current user highlighting with emerald green
+    - Loading, error, and empty states
+    - Sign-in prompt for unauthenticated users
+    - Mobile responsive with optimized breakpoints
+  - **User Profile System** (`src/app/features/user-profile/`)
+    - Profile card with avatar and display name editing
+    - Stats grid (total score, games, average, best, streak, countries)
+    - Global rank card with percentile display
+    - Achievements summary with progress bar
+    - Recent quiz sessions history (last 5 games)
+    - Edit profile functionality (display name, avatar URL)
+    - Collapsible UI to save screen space
+  - **Database Schema** (`supabase-migration-gamification.sql`)
+    - user_achievements table with RLS policies
+    - leaderboard_entries table with compound indexes
+    - Automatic leaderboard update triggers
+    - Performance-optimized queries
+
+- 🔐 ** Password Reset System**
+  - **Password Recovery Flow** (`src/app/core/services/supabase.service.ts`)
+    - Email-based password reset with token verification
+    - Token expiration (1 hour, single-use)
+    - Automatic session establishment from recovery links
+    - Retry logic with exponential backoff (3 attempts: 1s, 2s, 4s)
+    - Enhanced error handling (expired tokens, invalid sessions, API errors)
+  - **Password Validation** (`signin-modal.ts`)
+    - 8+ characters with complexity requirements (uppercase, lowercase, numbers, special chars)
+    - Real-time password strength meter (Very Weak → Strong)
+    - Password confirmation matching with visual feedback
+    - Pattern detection (rejects common passwords like "password", "12345")
+    - Strength scoring on 0-4 scale with descriptive labels
+  - **Auto Sign-in**
+    - User automatically authenticated after successful password reset
+    - Cloud data sync triggered immediately
+    - Seamless transition to authenticated experience
+  - **URL Hash Detection** (`src/app/app.ts`)
+    - Auto-opens sign-in modal on recovery link click
+    - Handles expired token errors with helpful messages
+    - 406 API error handling for edge cases
+
+- 🔄 **Enhanced Authentication UI**
+  - **Sign-In → Sign-Up Modal Switching**
+    - Direct mode flag to bypass progress card
+    - Seamless transition between sign-in and sign-up forms
+    - Maintains context during modal switches
+  - **Profile UI Improvements**
+    - Top-right dropdown now shows display name instead of email
+    - Display name logic: `display_name || email.split('@')[0] || 'User'`
+    - Profile component embedded in dropdown menu
+    - Close button replaces collapse functionality
+    - Sign-out button in profile header
+
+- 🔧 **Environment Variable Migration**
+  - **Development Configuration** (`.env.local`)
+    - Supabase URL and Anon Key loaded from environment
+    - Template file (`.env.example`) for new developers
+    - Git-ignored for security (credentials never committed)
+  - **Production Configuration**
+    - Uses Netlify environment variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)
+    - Optional Sentry DSN and Google Analytics tracking
+    - Consistent pattern across dev/staging/prod
+  - **Build-Time Injection**
+    - All credentials injected during build via `import.meta.env`
+    - No hardcoded secrets in source code
+
+- 🚀 **GitHub Actions CI/CD Pipeline**
+  - **CI Workflow** (`.github/workflows/ci.yml`)
+    - Code quality checks (ESLint, TypeScript type checking)
+    - Unit tests with coverage reporting (Codecov integration)
+    - Production build verification
+    - Security audit with pnpm audit
+    - Bundle size analysis
+    - Runs on Node.js 22 with pnpm
+  - **Netlify Deployment** (`.github/workflows/deploy-netlify.yml`)
+    - Auto-deploy on push to main branch
+    - Preview deployments for pull requests
+    - Lighthouse CI performance audits (3 runs averaged)
+    - Post-deployment health checks
+    - Automatic PR comments with deployment URLs
+  - **Dependency Updates** (`.github/workflows/dependency-update.yml`)
+    - Weekly automated dependency updates (every Monday 9 AM UTC)
+    - Runs tests and build before creating PR
+    - Auto-generates PRs with update details
+  - **Workflow Features**
+    - Concurrency controls to prevent race conditions
+    - Timeouts for all jobs (10-20 minutes)
+    - Artifact uploads (test results, coverage, build)
+    - Status notifications
+
+- 🌐 **Country Discovery Tracking**
+  - **CountryDiscoveryService** (`src/app/core/services/country-discovery.service.ts`)
+    - Track which countries users have explored
+    - Timestamp recording for first visit
+    - Cloud sync integration
+    - Unit tests (country-discovery.service.spec.ts)
+
+- 📚 **Comprehensive Documentation**
+  - **Legal & Compliance**
+    - PRIVACY_POLICY.md - GDPR/CCPA compliant privacy policy
+    - TERMS_OF_SERVICE.md - Comprehensive terms of use
+    - ACCESSIBILITY_STATEMENT.md - WCAG 2.1 AA compliance
+  - **Project Documentation**
+    - SECURITY.md - Security policy and vulnerability reporting
+    - CONTRIBUTING.md - Contribution guidelines
+    - FEATURES_IMPLEMENTATION_SUMMARY.md - Feature documentation
+    - INTEGRATION_COMPLETE.md - Integration guide
+    - INCIDENT_RESPONSE_PLAN.md - Professional incident management
+  - **Development**
+    - CLAUDE.md - Session notes and implementation details
+    - Dockerfile - Container configuration for deployment
+    - test-cloud-sync.md - Cloud sync testing guide
+
+### Changed
+
+- 🔧 **UserStatsService Enhancement**
+  - Extended for comprehensive gamification tracking
+  - Added total games, scores, streaks, averages
+  - Real-time stats updates across all features
+  - Cloud sync integration
+
+- 🎨 **UI/UX Improvements**
+  - Profile button shows display name instead of email
+  - Profile UI moved to top-right dropdown
+  - Collapsible achievements gallery and leaderboard
+  - Mobile-optimized responsive layouts (768px, 480px breakpoints)
+  - Glass morphism design system consistency
+
+- 📦 **Dependencies**
+  - Supabase client: @supabase/supabase-js@^2.76.1
+  - All dependencies up to date
+
+### Fixed
+
+- 🐛 **Database Schema Issues**
+  - Fixed foreign key relationship between leaderboard_entries and profiles
+  - Resolved duplicate leaderboard entries (NULL vs epoch handling)
+  - Fixed RLS performance with optimized queries
+  - Fixed search_path security vulnerabilities
+
+- 🔐 **Authentication Fixes**
+  - Fixed sign-up modal switching (progress card bypass)
+  - Fixed password reset token verification
+  - Fixed 406 API errors for new users
+  - Enhanced session management
+
+### Security
+
+- ✅ **Credentials Management**
+  - All secrets moved to environment variables
+  - .env.local git-ignored (never committed)
+  - Supabase Anon Key safe for frontend (RLS enforced)
+  - Production secrets managed by Netlify
+  - GitHub Secrets for CI/CD workflows
+
+- 🔒 **Database Security**
+  - Row Level Security (RLS) policies on all tables
+  - Users can only access their own data
+  - Service role key never exposed to frontend
+  - Performance-optimized RLS queries
+
+### Documentation
+
+- ✅ ** Readiness**: 95% (maintained from v1.1.0)
+- ✅ **Gamification**: 100% complete
+- ✅ **Authentication**: 100% complete
+- ✅ **CI/CD**: 100% complete
+- ✅ **Documentation**: 100% complete
+
+---
+
+## [1.2.0] - 2025-10-23 (Cloud Sync Infrastructure) ☁️
 
 ### Added
 
@@ -139,7 +383,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- 📈 **Enterprise Readiness Metrics**
+- 📈 ** Readiness Metrics**
   - Overall score increased from 90% to 95% (+5% improvement)
   - Documentation score: 100% (up from 95%)
   - Legal/Compliance score: 100% (up from 95%)
@@ -149,7 +393,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
-- ✅ All 5 phases of Enterprise Production Checklist complete
+- ✅ All 5 phases of Production Checklist complete
 - ✅ 14 comprehensive documentation files created
 - ✅ Production-ready deployment instructions
 - ✅ Legal compliance for US, EU, and Canada
@@ -194,7 +438,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 📦 **Dependencies**
   - Added @angular/service-worker ^20.3.6
   - Updated angular.json for production service worker builds
-- 📊 **Enterprise Readiness**
+- 📊 ** Readiness**
   - Overall score increased from 78% to 90% (+12% improvement)
   - Performance score: 95% (up from 80%)
   - Accessibility score: 95% (up from 75%)
@@ -210,11 +454,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.0] - 2025-10-19 (Enterprise Production Release) 🚀
+## [1.0.0] - 2025-10-19 ( Production Release) 🚀
 
 ### Added
 
-- 🔒 **Enterprise Security**
+- 🔒 ** Security**
   - MIT License added
   - Security vulnerability audit and fixes (89% reduction: 9 → 1 vulnerability)
   - pnpm override strategy for transitive dependency security
@@ -223,7 +467,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 📚 **Professional Documentation**
   - CONTRIBUTING.md with development guidelines
   - SECURITY.md with security policies
-  - Enterprise Production Checklist (5-phase roadmap)
+  - Production Checklist (5-phase roadmap)
   - Phase 2 Security & Testing Report
 - 🚀 **Production Deployment**
   - Netlify deployment configuration (netlify.toml)
@@ -294,7 +538,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `LICENSE` - MIT License
   - `CONTRIBUTING.md` - Contribution guidelines
   - `SECURITY.md` - Security policy and reporting
-  - `ENTERPRISE_PRODUCTION_CHECKLIST.md` - 5-phase roadmap
+  - `_PRODUCTION_CHECKLIST.md` - 5-phase roadmap
   - `PHASE2_SECURITY_TESTING_REPORT.md` - Security audit report
 
 ### Deployment
@@ -311,7 +555,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [0.10.0] - 2025-01-20 (Bird Migration & Infrastructure)
 
 ### Added
 
@@ -442,7 +686,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- 🔔 **Enterprise Notification System**
+- 🔔 ** Notification System**
   - Toast notifications with multiple severity levels
   - Sort control for country comparison
   - Multi-selection support for countries
