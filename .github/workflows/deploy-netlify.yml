@@ -71,7 +71,7 @@ jobs:
         id: deploy
         uses: nwtgck/actions-netlify@v3.0
         with:
-          publish-dir: "./dist/browser"
+          publish-dir: "./dist/global-dashboard/browser"
           production-branch: main
           production-deploy: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
