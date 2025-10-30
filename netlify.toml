@@ -2,8 +2,8 @@
   # Build command (pnpm install handled by Netlify automatically)
   command = "pnpm run build"
 
-  # Publish directory (Angular 20 outputs to dist/browser)
-  publish = "dist/browser"
+  # Publish directory (Angular 20 outputs to dist/global-dashboard/browser)
+  publish = "dist/global-dashboard/browser"
 
 [build.environment]
   NODE_ENV = "production"

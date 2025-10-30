@@ -27,6 +27,8 @@ jobs:
     name: Deploy to Netlify
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      url: ${{ steps.deploy.outputs.deploy-url }}
     environment:
       name: ${{ github.event_name == 'pull_request' && 'preview' || (github.event.inputs.environment || 'production') }}
       url: ${{ steps.deploy.outputs.url }}
@@ -153,9 +155,10 @@ jobs:
       - name: Check site is accessible
         run: |
           echo "🏥 Running health checks..."
+          echo "Deployment URL: ${{ needs.deploy.outputs.url }}"
 
           # Check main page
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://3d-global-dashboard.netlify.app || echo "000")
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${{ needs.deploy.outputs.url }}" || echo "000")
           echo "Main page HTTP status: $HTTP_CODE"
 
           if [ "$HTTP_CODE" -eq 200 ]; then
@@ -168,17 +171,18 @@ jobs:
       - name: Check critical assets
         run: |
           echo "📦 Checking critical assets..."
+          DEPLOY_URL="${{ needs.deploy.outputs.url }}"
 
           # Check manifest.json
-          curl -f https://3d-global-dashboard.netlify.app/manifest.json > /dev/null 2>&1 && echo "✅ manifest.json" || echo "⚠️ manifest.json missing"
+          curl -f "${DEPLOY_URL}/manifest.json" > /dev/null 2>&1 && echo "✅ manifest.json" || echo "⚠️ manifest.json missing"
 
           # Check robots.txt
-          curl -f https://3d-global-dashboard.netlify.app/robots.txt > /dev/null 2>&1 && echo "✅ robots.txt" || echo "⚠️ robots.txt missing"
+          curl -f "${DEPLOY_URL}/robots.txt" > /dev/null 2>&1 && echo "✅ robots.txt" || echo "⚠️ robots.txt missing"
 
           # Check sitemap.xml
-          curl -f https://3d-global-dashboard.netlify.app/sitemap.xml > /dev/null 2>&1 && echo "✅ sitemap.xml" || echo "⚠️ sitemap.xml missing"
+          curl -f "${DEPLOY_URL}/sitemap.xml" > /dev/null 2>&1 && echo "✅ sitemap.xml" || echo "⚠️ sitemap.xml missing"
 
       - name: Notify deployment success
         run: |
           echo "🎉 Deployment successful and healthy!"
-          echo "URL: https://3d-global-dashboard.netlify.app"
+          echo "URL: ${{ needs.deploy.outputs.url }}"

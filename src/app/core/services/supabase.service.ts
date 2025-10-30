@@ -680,20 +680,16 @@ export class SupabaseService {
         .from('user_stats')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          // No stats found (404) - this is okay for new users
-          return { data: null, error: null };
-        }
-        if (error.code === 'PGRST301' || error.message?.includes('406')) {
-          // 406 Not Acceptable - API format issue, return null for new users
-          this.logger.warn('API format issue (406), treating as new user');
-          return { data: null, error: null };
-        }
         this.logger.error('Failed to get user stats:', error);
         return { data: null, error: new Error(error.message) };
+      }
+
+      // No stats found - this is okay for new users
+      if (!data) {
+        return { data: null, error: null };
       }
 
       const stats: UserStatsV1 = {
