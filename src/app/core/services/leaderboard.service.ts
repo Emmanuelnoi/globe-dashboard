@@ -279,6 +279,78 @@ export class LeaderboardService {
   }
 
   /**
+   * Calculate stats for a specific time period
+   */
+  private async calculatePeriodStats(
+    periodStart: Date,
+    periodEnd: Date,
+  ): Promise<{
+    totalScore: number;
+    totalGames: number;
+    averageScore: number;
+    bestScore: number;
+    bestStreak: number;
+  }> {
+    // Get all sessions (using large limit to get all sessions)
+    const allSessions = await this.userStatsService.getRecentSessions(10000);
+
+    // Filter sessions within the period
+    const periodSessions = allSessions.filter((session) => {
+      const sessionDate = new Date(session.endTime || session.startTime);
+      return sessionDate >= periodStart && sessionDate <= periodEnd;
+    });
+
+    if (periodSessions.length === 0) {
+      return {
+        totalScore: 0,
+        totalGames: 0,
+        averageScore: 0,
+        bestScore: 0,
+        bestStreak: 0,
+      };
+    }
+
+    // Calculate stats from filtered sessions
+    const totalScore = periodSessions.reduce(
+      (sum, s) => sum + (s.finalScore || 0),
+      0,
+    );
+    const totalGames = periodSessions.length;
+    const averageScore =
+      totalGames > 0 ? Math.round(totalScore / totalGames) : 0;
+    const bestScore = Math.max(
+      ...periodSessions.map((s) => s.finalScore || 0),
+      0,
+    );
+
+    // Calculate best streak within the period
+    let currentStreak = 0;
+    let bestStreak = 0;
+    const sortedSessions = [...periodSessions].sort(
+      (a, b) =>
+        new Date(a.endTime || a.startTime).getTime() -
+        new Date(b.endTime || b.startTime).getTime(),
+    );
+
+    for (const session of sortedSessions) {
+      if (session.finalScore && session.finalScore > 0) {
+        currentStreak++;
+        bestStreak = Math.max(bestStreak, currentStreak);
+      } else {
+        currentStreak = 0;
+      }
+    }
+
+    return {
+      totalScore,
+      totalGames,
+      averageScore,
+      bestScore,
+      bestStreak,
+    };
+  }
+
+  /**
    * Update my leaderboard entry (authenticated users only)
    */
   async updateMyEntry(): Promise<void> {
@@ -321,15 +393,16 @@ export class LeaderboardService {
       // Update weekly leaderboard
       const weekStart = this.getPeriodStart('weekly');
       const weekEnd = this.getPeriodEnd('weekly');
+      const weeklyStats = await this.calculatePeriodStats(weekStart, weekEnd);
       await this.upsertEntry({
         userId,
         leaderboardType: 'weekly',
         gameMode: 'all',
-        totalScore: stats.totalScore, // TODO: Filter by week
-        totalGames: stats.totalGames,
-        averageScore: stats.averageScore,
-        bestScore: stats.bestScore,
-        bestStreak: stats.bestStreak,
+        totalScore: weeklyStats.totalScore,
+        totalGames: weeklyStats.totalGames,
+        averageScore: weeklyStats.averageScore,
+        bestScore: weeklyStats.bestScore,
+        bestStreak: weeklyStats.bestStreak,
         countriesDiscovered: totalDiscovered,
         achievementsUnlocked: unlockedCount,
         lastUpdated: new Date(),
@@ -340,15 +413,19 @@ export class LeaderboardService {
       // Update monthly leaderboard
       const monthStart = this.getPeriodStart('monthly');
       const monthEnd = this.getPeriodEnd('monthly');
+      const monthlyStats = await this.calculatePeriodStats(
+        monthStart,
+        monthEnd,
+      );
       await this.upsertEntry({
         userId,
         leaderboardType: 'monthly',
         gameMode: 'all',
-        totalScore: stats.totalScore, // TODO: Filter by month
-        totalGames: stats.totalGames,
-        averageScore: stats.averageScore,
-        bestScore: stats.bestScore,
-        bestStreak: stats.bestStreak,
+        totalScore: monthlyStats.totalScore,
+        totalGames: monthlyStats.totalGames,
+        averageScore: monthlyStats.averageScore,
+        bestScore: monthlyStats.bestScore,
+        bestStreak: monthlyStats.bestStreak,
         countriesDiscovered: totalDiscovered,
         achievementsUnlocked: unlockedCount,
         lastUpdated: new Date(),

@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { LoggerService } from './logger.service';
 
 export interface ErrorNotification {
   id: string;
@@ -13,6 +14,7 @@ export interface ErrorNotification {
   providedIn: 'root',
 })
 export class ErrorNotificationService {
+  private readonly logger = inject(LoggerService);
   private notifications = signal<ErrorNotification[]>([]);
 
   readonly activeNotifications = this.notifications.asReadonly();
@@ -57,7 +59,7 @@ export class ErrorNotificationService {
    * Handle common quiz-related errors with user-friendly messages
    */
   handleQuizError(error: unknown, context: string): void {
-    console.error(`Quiz error in ${context}:`, error);
+    this.logger.error(`Quiz error in ${context}:`, error, 'ErrorNotification');
 
     if (error instanceof Error) {
       switch (context) {
