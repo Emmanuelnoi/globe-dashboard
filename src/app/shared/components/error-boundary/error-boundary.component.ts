@@ -318,7 +318,7 @@ export class ErrorBoundaryComponent {
    * Handle an error and display the error boundary
    */
   handleError(error: Error | ErrorInfo): void {
-    console.error('Error caught by boundary:', error);
+    // console.error('Error caught by boundary:', error);
 
     const errorInfo: ErrorInfo =
       error instanceof Error

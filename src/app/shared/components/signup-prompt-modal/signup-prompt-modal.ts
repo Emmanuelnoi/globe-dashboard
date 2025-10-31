@@ -6,6 +6,7 @@ import {
   inject,
   ChangeDetectionStrategy,
   effect,
+  DestroyRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -59,6 +60,10 @@ export class SignupPromptModalComponent {
   private readonly supabase = inject(SupabaseService);
   private readonly cloudSync = inject(CloudSyncService);
   private readonly logger = inject(LoggerService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  // Timer reference for cleanup
+  private closeTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Inputs
   readonly isOpen = input<boolean>(false);
@@ -101,6 +106,11 @@ export class SignupPromptModalComponent {
         // Reset to prompt when opening normally
         this.currentStep.set('prompt');
       }
+    });
+
+    // Register cleanup for timer on component destroy
+    this.destroyRef.onDestroy(() => {
+      if (this.closeTimer) clearTimeout(this.closeTimer);
     });
   }
 
@@ -168,7 +178,8 @@ export class SignupPromptModalComponent {
       this.signupSuccess.emit();
 
       // Close modal after brief delay
-      setTimeout(() => {
+      if (this.closeTimer) clearTimeout(this.closeTimer);
+      this.closeTimer = setTimeout(() => {
         this.onClose();
       }, 2000);
     } catch (error) {

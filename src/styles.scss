@@ -2,7 +2,7 @@
 @use "tailwindcss";
 
 /* Import unified glass morphism design system */
-@import "styles/glass-morphism.scss";
+@use "styles/glass-morphism.scss" as *;
 
 /* Global CSS Reset and Dark Theme */
 * {

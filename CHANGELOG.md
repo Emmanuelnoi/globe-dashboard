@@ -41,6 +41,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- 🚀 **Vercel Deployment Support** (2025-10-30)
+  - `vercel.json` - Complete Vercel configuration with build settings
+  - `.vercelignore` - Optimized deployment exclusions
+  - `.github/workflows/deploy-vercel.yml` - CI/CD workflow for automated deployments
+  - `VERCEL_SETUP.md` - Comprehensive deployment guide
+  - Support for production and preview deployments
+  - Health checks for deployed applications
+  - Security headers matching Netlify configuration
+
+### Fixed
+
+- 🔧 **Netlify Deployment Fixes** (2025-10-30)
+  - Fixed `husky: not found` build error by making prepare script fail silently
+  - Fixed `pnpm-lock.yaml` sync issues by regenerating lockfile
+  - Fixed blank page deployment by adding Supabase to Content-Security-Policy
+  - Fixed `import.meta.env` undefined errors with safe type checks in `environment.prod.ts`
+  - Fixed frozen-lockfile installation errors in CI/CD
+  - Updated security headers to allow Supabase API connections
+
+### Changed
+
+- 📦 **Build Configuration** (2025-10-30)
+  - Updated `package.json` prepare script to handle production environments
+  - Regenerated `pnpm-lock.yaml` with optimized dependency tree
+  - Improved CSP configuration in `netlify.toml` for better API support
+
 ---
 
 ## [2.0.0] - 2025-10-28 (Gamification & Cloud Authentication) 🎮
@@ -815,12 +843,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [ ] Historical migration data comparison
 - [ ] Climate data integration
 - [ ] Custom tour creation tools
-
----
-
-## Links
-
-- **Docs**: [migration-hub.md](migration-hub.md)
-- **Contributing**: [CONTRIBUTING.md](CONTRIBUTING.md)
-- **License**: [MIT License](LICENSE)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/3d-global-dashboard/issues)

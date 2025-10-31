@@ -7,6 +7,7 @@ import {
   ChangeDetectionStrategy,
   computed,
   effect,
+  DestroyRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -61,6 +62,11 @@ import { LoggerService } from '../../../core/services/logger.service';
 export class SigninModalComponent {
   private readonly supabase = inject(SupabaseService);
   private readonly logger = inject(LoggerService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  // Timer references for cleanup
+  private resetSentTimer: ReturnType<typeof setTimeout> | null = null;
+  private successTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Inputs
   readonly isOpen = input<boolean>(false);
@@ -118,6 +124,12 @@ export class SigninModalComponent {
         // Try to establish session from URL token
         this.verifyRecoveryToken();
       }
+    });
+
+    // Register cleanup for timers on component destroy
+    this.destroyRef.onDestroy(() => {
+      if (this.resetSentTimer) clearTimeout(this.resetSentTimer);
+      if (this.successTimer) clearTimeout(this.successTimer);
     });
   }
 
@@ -222,7 +234,8 @@ export class SigninModalComponent {
       this.signinSuccess.emit();
 
       // Close modal after brief delay
-      setTimeout(() => {
+      if (this.successTimer) clearTimeout(this.successTimer);
+      this.successTimer = setTimeout(() => {
         this.onClose();
       }, 1000);
     } catch (error) {
@@ -353,7 +366,8 @@ export class SigninModalComponent {
       this.signinSuccess.emit();
 
       // Close modal after brief delay
-      setTimeout(() => {
+      if (this.resetSentTimer) clearTimeout(this.resetSentTimer);
+      this.resetSentTimer = setTimeout(() => {
         this.onClose();
       }, 2000);
     } catch (error) {
