@@ -14,12 +14,6 @@
       "NODE_VERSION": "20"
     }
   },
-  "env": {
-    "VITE_SUPABASE_URL": "@supabase-url",
-    "VITE_SUPABASE_ANON_KEY": "@supabase-anon-key",
-    "VITE_SENTRY_DSN": "@sentry-dsn",
-    "VITE_GA_TRACKING_ID": "@ga-tracking-id"
-  },
   "rewrites": [
     {
       "source": "/(.*)",
