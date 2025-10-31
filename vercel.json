@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "name": "3d-global-dashboard",
-  "buildCommand": "NODE_ENV=production pnpm run build",
+  "buildCommand": "pnpm run build",
   "outputDirectory": "dist/global-dashboard/browser",
   "framework": "angular",
   "installCommand": "pnpm install --frozen-lockfile",
@@ -14,6 +14,7 @@
       "NODE_VERSION": "20"
     }
   },
+  "_comment": "Environment variables are injected via scripts/inject-env.mjs. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Vercel dashboard: Project Settings → Environment Variables",
   "rewrites": [
     {
       "source": "/(.*)",

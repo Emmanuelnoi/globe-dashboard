@@ -1,5 +1,8 @@
 [build]
   # Build command (pnpm install handled by Netlify automatically)
+  # Environment variables are injected via scripts/inject-env.mjs
+  # Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Netlify dashboard:
+  # Site settings → Environment variables → Add variable
   command = "pnpm run build"
 
   # Publish directory (Angular 20 outputs to dist/global-dashboard/browser)
