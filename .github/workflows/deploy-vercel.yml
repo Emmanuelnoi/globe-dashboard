@@ -104,7 +104,8 @@ jobs:
 
       - name: Check main page
         run: |
-          URL="${{ needs.deploy.outputs.url }}"
+          # Use production domain for main branch (no authentication required)
+          URL="https://globe-dashboard-zeta.vercel.app"
           echo "Checking URL: $URL"
 
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
@@ -119,7 +120,7 @@ jobs:
 
       - name: Check manifest.json
         run: |
-          URL="${{ needs.deploy.outputs.url }}/manifest.json"
+          URL="https://globe-dashboard-zeta.vercel.app/manifest.json"
           echo "Checking manifest: $URL"
 
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
@@ -133,7 +134,7 @@ jobs:
 
       - name: Check robots.txt
         run: |
-          URL="${{ needs.deploy.outputs.url }}/robots.txt"
+          URL="https://globe-dashboard-zeta.vercel.app/robots.txt"
           echo "Checking robots.txt: $URL"
 
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
@@ -148,4 +149,4 @@ jobs:
       - name: Summary
         run: |
           echo "🎉 Deployment successful and health checks passed!"
-          echo "🌐 Production URL: ${{ needs.deploy.outputs.url }}"
+          echo "🌐 Production URL: https://globe-dashboard-zeta.vercel.app"
