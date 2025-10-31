@@ -69,6 +69,20 @@ textarea:focus-visible {
 }
 
 /* ========================================
+   GLOBAL ANIMATIONS
+   ======================================== */
+
+/* Spin animation - used by multiple components */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================================
    ACCESSIBILITY: Reduced Motion Support
    ======================================== */
 

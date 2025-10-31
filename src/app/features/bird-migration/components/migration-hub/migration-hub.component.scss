@@ -63,22 +63,22 @@
   align-items: center;
   justify-content: space-between;
   padding-bottom: 8px; /* Reduced from 12px */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: var(--glass-border-secondary);
 }
 
 .migration-header h2 {
   margin: 0;
   font-size: 16px; /* Reduced from 20px */
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--glass-text-primary);
 }
 
 .collapse-btn {
   padding: 4px 10px; /* Reduced from 6px 12px */
   border-radius: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: var(--glass-border-primary);
   background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--glass-text-secondary);
   font-size: 12px; /* Reduced from 14px */
   font-weight: 600;
   cursor: pointer;
@@ -106,7 +106,7 @@
   padding: 8px 16px;
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--glass-text-muted);
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 14px;
@@ -119,7 +119,7 @@
 
 .hemisphere-btn.active {
   background: rgba(59, 130, 246, 0.3);
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--glass-text-primary);
 }
 
 /* Hemisphere detection styles */
@@ -172,7 +172,7 @@
   font-size: 12px;
   cursor: pointer;
   padding: 2px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--glass-text-subtle);
   transition: color 0.2s ease;
 }
 
@@ -181,7 +181,7 @@
 }
 
 .detection-method {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--glass-text-subtle);
   font-weight: 500;
 }
 
@@ -199,7 +199,7 @@
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 8px;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--glass-text-secondary);
 }
 
 /* Preview Controls */
@@ -225,7 +225,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.25s ease;
-  backdrop-filter: blur(8px);
+  backdrop-filter: var(--glass-blur-minimal);
 }
 
 .preview-btn:hover:not(:disabled) {
@@ -257,7 +257,7 @@
 
 .help-text {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--glass-text-subtle);
   font-style: italic;
 }
 
@@ -271,7 +271,7 @@
   width: 100%;
   padding: 12px 16px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: var(--glass-border-primary);
   background: rgba(255, 255, 255, 0.05);
   color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
@@ -286,7 +286,7 @@
 
 .help-text {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--glass-text-subtle);
 }
 
 .preview-card {
@@ -310,7 +310,7 @@
 
 .stat-label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--glass-text-subtle);
 }
 
 .stat-value {
@@ -364,7 +364,7 @@
   justify-content: space-between;
   margin-top: 8px;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--glass-text-subtle);
 }
 
 .loading-card,
@@ -386,15 +386,6 @@
   margin: 0 auto 16px;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 .progress-bar {
   width: 100%;
   height: 6px;
@@ -413,7 +404,7 @@
 
 .progress-text {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--glass-text-muted);
 }
 
 .action-buttons {
@@ -448,7 +439,7 @@
 .btn-secondary {
   background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: var(--glass-border-primary);
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -473,12 +464,12 @@ button:disabled {
 }
 
 .error-content h3 {
-  margin: 0 0 12px 0;
+  margin-bottom: 12px;
   color: #ef4444;
 }
 
 .error-content p {
-  margin: 0 0 16px 0;
+  margin-bottom: 16px;
   color: rgba(255, 255, 255, 0.8);
 }
 
@@ -500,16 +491,16 @@ button:disabled {
 }
 
 .empty-state-content h3 {
-  margin: 0 0 8px 0;
+  margin-bottom: 8px;
   font-size: 16px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--glass-text-primary);
 }
 
 .empty-state-content p {
-  margin: 0 0 12px 0;
+  margin-bottom: 12px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--glass-text-muted);
 }
 
 .empty-state-steps {
@@ -564,14 +555,14 @@ button:disabled {
 }
 
 .success-state-content h3 {
-  margin: 0 0 6px 0;
+  margin-bottom: 6px;
   font-size: 15px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--glass-text-primary);
 }
 
 .success-state-content p {
-  margin: 0 0 10px 0;
+  margin-bottom: 10px;
   font-size: 12px;
   color: rgba(255, 255, 255, 0.8);
 }
@@ -592,7 +583,7 @@ button:disabled {
 
 .success-stats .stat-label {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--glass-text-subtle);
 }
 
 .success-stats .stat-value {
@@ -611,9 +602,9 @@ button:disabled {
 .btn-outline {
   padding: 6px 12px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: var(--glass-border-primary);
   background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--glass-text-secondary);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -888,7 +879,7 @@ button:disabled {
   gap: 12px;
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: var(--glass-border-secondary);
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.05),
@@ -919,14 +910,14 @@ button:disabled {
   display: block;
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--glass-text-primary);
   margin-bottom: 4px;
 }
 
 .instruction-text p {
   margin: 0;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--glass-text-muted);
   line-height: 1.4;
 }
 
@@ -955,7 +946,7 @@ button:disabled {
 
 .instruction-item {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--glass-text-muted);
   white-space: nowrap;
 }
 

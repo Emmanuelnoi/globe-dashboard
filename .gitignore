@@ -44,6 +44,7 @@ testem.log
 .env.local
 .env.*.local
 !.env.example
+environments
 mfiles
 
 # Logs
