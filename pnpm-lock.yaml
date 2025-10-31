@@ -139,6 +139,9 @@ importers:
       d3-geo:
         specifier: ^3.1.1
         version: 3.1.1
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       eslint:
         specifier: ^9.35.0
         version: 9.35.0(jiti@2.5.1)
@@ -3687,6 +3690,13 @@ packages:
       {
         integrity: sha512-6kZKyUajlDuqlHKVX1w7gyslj9MPIXzIFiz/rGu35uC1wMi+kMhQwGhl4lt9unC9Vb9INnY9Z3/ZA3+FhASLaw==,
       }
+
+  dotenv@17.2.3:
+    resolution:
+      {
+        integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==,
+      }
+    engines: { node: ">=12" }
 
   dunder-proto@1.0.1:
     resolution:
@@ -9487,6 +9497,8 @@ snapshots:
       dom-serializer: 2.0.0
       domelementtype: 2.3.0
       domhandler: 5.0.3
+
+  dotenv@17.2.3: {}
 
   dunder-proto@1.0.1:
     dependencies:

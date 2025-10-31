@@ -14,7 +14,6 @@
       "NODE_VERSION": "20"
     }
   },
-  "_comment": "Environment variables are injected via scripts/inject-env.mjs. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Vercel dashboard: Project Settings → Environment Variables",
   "rewrites": [
     {
       "source": "/(.*)",
