@@ -57,8 +57,7 @@
     "data:fetch": "npx tsx scripts/fetch-country-data-robust.ts",
     "data:update": "pnpm run data:fetch && pnpm run format",
     "geo:convert": "node scripts/geo/convert-geojson-to-topo.mjs",
-    "geo:convert:verbose": "node scripts/geo/convert-geojson-to-topo.mjs --verbose",
-    "prebuild": "pnpm run data:fetch && pnpm run geo:convert"
+    "geo:convert:verbose": "node scripts/geo/convert-geojson-to-topo.mjs --verbose"
   },
   "prettier": {
     "overrides": [
