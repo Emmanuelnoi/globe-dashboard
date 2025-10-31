@@ -20,7 +20,6 @@
   background: var(--glass-bg-primary);
   border: var(--glass-border-primary);
   backdrop-filter: var(--glass-blur-strong);
-  -webkit-backdrop-filter: var(--glass-blur-strong);
   box-shadow: var(--glass-shadow-strong);
 }
 
@@ -1096,6 +1095,30 @@
     width: 100%;
     min-width: unset;
   }
+
+  /* Flag Display Mobile Styles */
+  .flag-display {
+    margin: 12px 0;
+    padding: 12px;
+  }
+
+  .question-flag {
+    width: 100px;
+    height: 66px;
+  }
+
+  /* Multiple Choice Grid Mobile Styles */
+  .multiple-choice-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .choice-button {
+    padding: 10px 12px;
+    min-height: 44px;
+    font-size: 13px;
+  }
 }
 
 /* Flag Display Styles for Flag ID Mode */
@@ -1108,7 +1131,6 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--glass-radius-small);
   backdrop-filter: var(--glass-blur-light);
-  -webkit-backdrop-filter: var(--glass-blur-light);
 }
 
 .question-flag {
@@ -1120,18 +1142,6 @@
   box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-@media (max-width: 768px) {
-  .flag-display {
-    margin: 12px 0;
-    padding: 12px;
-  }
-
-  .question-flag {
-    width: 100px;
-    height: 66px;
-  }
 }
 
 /* Multiple Choice Grid Styles */
@@ -1161,7 +1171,6 @@
   text-align: left;
   outline: none;
   backdrop-filter: var(--glass-blur-light);
-  -webkit-backdrop-filter: var(--glass-blur-light);
 }
 
 .choice-button:hover {
@@ -1211,24 +1220,6 @@
 @media (min-width: 400px) {
   .multiple-choice-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .multiple-choice-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    margin: 12px 0;
-  }
-
-  .choice-button {
-    padding: 10px 12px;
-    min-height: 44px;
-    font-size: 13px;
-  }
-
-  .mode-selector {
-    grid-template-columns: 1fr;
   }
 }
 

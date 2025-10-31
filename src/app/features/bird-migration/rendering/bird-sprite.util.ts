@@ -98,10 +98,11 @@ export class BirdSprite {
       this.material.map = this.texture;
       this.material.needsUpdate = true;
     } catch (error) {
-      console.warn(
-        `Failed to load bird sprite texture: ${this.config.texturePath}`,
-        error,
-      );
+      // Failed to load bird sprite texture - using fallback
+      // console.warn(
+      //   `Failed to load bird sprite texture: ${this.config.texturePath}`,
+      //   error,
+      // );
       // Fallback: Create simple colored sprite
       this.material.color.setHex(0xffffff);
     }

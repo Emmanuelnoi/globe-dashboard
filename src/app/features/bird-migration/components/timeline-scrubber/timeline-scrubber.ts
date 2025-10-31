@@ -727,7 +727,7 @@ export interface TimelineMarker {
           /* Enhanced mobile shadows */
           box-shadow:
             0 3px 12px rgba(0, 255, 255, 0.5),
-            \n01px4px rgba(0, 0, 0, 0.3);
+            \n01px4pxrgba(0, 0, 0, 0.3);
         }
 
         .scrubber-handle:hover,
@@ -735,14 +735,14 @@ export interface TimelineMarker {
           transform: translate(-50%, -50%) scale(1.15);
           box-shadow:
             0 4px 20px rgba(0, 255, 255, 0.7),
-            \n02px8px rgba(0, 0, 0, 0.4);
+            \n02px8pxrgba(0, 0, 0, 0.4);
         }
 
         .scrubber-handle.dragging {
           transform: translate(-50%, -50%) scale(1.25);
           box-shadow:
             0 6px 24px rgba(0, 255, 255, 0.8),
-            \n03px12px rgba(0, 0, 0, 0.5);
+            \n03px12pxrgba(0, 0, 0, 0.5);
         }
 
         .handle-tooltip {
@@ -1088,6 +1088,9 @@ export class TimelineScrubberComponent {
     adaptiveThrottling: false,
   };
 
+  // Timer cleanup
+  private announcementTimer: ReturnType<typeof setTimeout> | null = null;
+
   // Constants
   public readonly playbackSpeeds: readonly PlaybackSpeed[] = [0.5, 1, 2, 4];
 
@@ -1418,6 +1421,9 @@ export class TimelineScrubberComponent {
       if (this.animationFrameId) {
         cancelAnimationFrame(this.animationFrameId);
       }
+      if (this.announcementTimer) {
+        clearTimeout(this.announcementTimer);
+      }
     });
   }
 
@@ -1610,7 +1616,8 @@ export class TimelineScrubberComponent {
     liveRegion.textContent = message;
 
     // Clear after announcement to allow repeated messages
-    setTimeout(() => {
+    if (this.announcementTimer) clearTimeout(this.announcementTimer);
+    this.announcementTimer = setTimeout(() => {
       if (liveRegion) {
         liveRegion.textContent = '';
       }
@@ -1634,9 +1641,10 @@ export class TimelineScrubberComponent {
         this.performanceMetrics.frameRate < 30;
 
       if (this.performanceMetrics.adaptiveThrottling) {
-        console.warn(
-          `⚡ Timeline performance reduced: ${this.performanceMetrics.frameRate}fps - enabling adaptive throttling`,
-        );
+        // Performance warning - adaptive throttling enabled
+        // console.warn(
+        //   `⚡ Timeline performance reduced: ${this.performanceMetrics.frameRate}fps - enabling adaptive throttling`,
+        // );
       }
     }
   }

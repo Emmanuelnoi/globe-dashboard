@@ -3,6 +3,7 @@ import {
   Component,
   inject,
   computed,
+  DestroyRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { QuizStateService } from '../../services/quiz-state';
@@ -511,6 +512,10 @@ import { QuizStateService } from '../../services/quiz-state';
 })
 export class ResultsPanel {
   private readonly quizStateService = inject(QuizStateService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  // Timer reference for cleanup
+  private restartTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Quiz state getters
   readonly finalScore = computed(
@@ -563,6 +568,13 @@ export class ResultsPanel {
     return this.formatTime(totalMs);
   });
 
+  constructor() {
+    // Register cleanup for timer on component destroy
+    this.destroyRef.onDestroy(() => {
+      if (this.restartTimer) clearTimeout(this.restartTimer);
+    });
+  }
+
   /**
    * Get question prompt by question ID
    */
@@ -599,7 +611,8 @@ export class ResultsPanel {
     if (currentSession?.configuration) {
       this.quizStateService.resetToIdle();
       // Small delay to ensure state is reset
-      setTimeout(() => {
+      if (this.restartTimer) clearTimeout(this.restartTimer);
+      this.restartTimer = setTimeout(() => {
         this.quizStateService.startGame(currentSession.configuration);
       }, 100);
     }

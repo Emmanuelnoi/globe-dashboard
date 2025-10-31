@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { UserStatsService } from '../../../../core/services/user-stats.service';
+import { LoggerService } from '../../../../core/services/logger.service';
 import { UserStatsV1, GameSession } from '../../models/quiz.models';
 
 // Interface for exported stats data
@@ -679,6 +680,7 @@ interface ExportedStatsData {
 })
 export class StatsPanelComponent {
   private readonly userStatsService = inject(UserStatsService);
+  private readonly logger = inject(LoggerService);
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
   @Output() closeStats = new EventEmitter<void>();
@@ -797,7 +799,7 @@ export class StatsPanelComponent {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('❌ Failed to export statistics:', error);
+      this.logger.error('Failed to export statistics:', error, 'StatsPanel');
       alert('Failed to export statistics. Please try again.');
     }
   }
@@ -849,7 +851,7 @@ export class StatsPanelComponent {
       await this.userStatsService.importData(data);
       alert('Statistics imported successfully!');
     } catch (error) {
-      console.error('❌ Failed to import statistics:', error);
+      this.logger.error('Failed to import statistics:', error, 'StatsPanel');
       alert(
         'Failed to import statistics. Please check the file format and try again.',
       );

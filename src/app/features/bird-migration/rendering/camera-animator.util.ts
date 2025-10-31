@@ -68,7 +68,7 @@ export class CameraAnimator {
     transitions: readonly CameraTransition[],
   ): void {
     if (keyframes.length < 2) {
-      console.warn('Need at least 2 keyframes for animation');
+      // console.warn('Need at least 2 keyframes for animation');
       return;
     }
 
@@ -92,7 +92,7 @@ export class CameraAnimator {
    */
   start(): void {
     if (!this.camera || this.keyframes.length < 2) {
-      console.warn('Cannot start animation: camera or keyframes not ready');
+      // console.warn('Cannot start animation: camera or keyframes not ready');
       return;
     }
 
@@ -197,7 +197,7 @@ export class CameraAnimator {
     );
 
     if (!fromKeyframe || !toKeyframe) {
-      console.error('Keyframes not found for transition');
+      // console.error('Keyframes not found for transition');
       return false;
     }
 
@@ -246,7 +246,7 @@ export class CameraAnimator {
   seekToKeyframe(keyframeId: string): void {
     const keyframe = this.keyframes.find((k) => k.id === keyframeId);
     if (!keyframe) {
-      console.warn(`Keyframe ${keyframeId} not found`);
+      // console.warn(`Keyframe ${keyframeId} not found`);
       return;
     }
 

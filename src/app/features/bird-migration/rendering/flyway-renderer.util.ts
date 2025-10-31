@@ -111,7 +111,7 @@ export class FlywayRenderer {
     );
 
     if (positions.length < 2) {
-      console.warn('Path has fewer than 2 points, skipping render');
+      // console.warn('Path has fewer than 2 points, skipping render');
       return this.pathGroup;
     }
 

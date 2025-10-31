@@ -7,6 +7,7 @@ import {
   output,
   input,
   effect,
+  DestroyRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -1125,6 +1126,7 @@ interface SpeciesSearchResult extends SpeciesInfo {
 export class SpeciesSearchComponent {
   private gbifAdapter = inject(GbifAdapterService);
   private logger = inject(LoggerService);
+  private destroyRef = inject(DestroyRef);
 
   // Input properties
   readonly selectedSpecies = input<SpeciesInfo | null>(null);
@@ -1183,8 +1185,9 @@ export class SpeciesSearchComponent {
     },
   ]);
 
-  // Debounced search timeout
+  // Timer references for cleanup
   private searchTimeout: number | null = null;
+  private closeDropdownTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Computed values
   readonly hasResults = computed(() => this.searchResults().length > 0);
@@ -1205,6 +1208,12 @@ export class SpeciesSearchComponent {
         this.isSearching.set(false);
       }
     });
+
+    // Register cleanup for timers on component destroy
+    this.destroyRef.onDestroy(() => {
+      if (this.searchTimeout) clearTimeout(this.searchTimeout);
+      if (this.closeDropdownTimer) clearTimeout(this.closeDropdownTimer);
+    });
   }
 
   // Event handlers
@@ -1220,7 +1229,8 @@ export class SpeciesSearchComponent {
 
   onInputBlur(): void {
     // Delay closing to allow click events on dropdown items
-    setTimeout(() => this.closeDropdown(), 150);
+    if (this.closeDropdownTimer) clearTimeout(this.closeDropdownTimer);
+    this.closeDropdownTimer = setTimeout(() => this.closeDropdown(), 150);
   }
 
   onKeyDown(event: KeyboardEvent): void {

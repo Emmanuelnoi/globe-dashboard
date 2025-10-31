@@ -4,6 +4,7 @@ import {
   inject,
   signal,
   computed,
+  DestroyRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -27,6 +28,11 @@ import { LoggerService } from '@/core/services/logger.service';
 export class GameHub {
   private readonly quizStateService = inject(QuizStateService);
   private readonly logger = inject(LoggerService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  // Timer references for cleanup
+  private startingTimer: ReturnType<typeof setTimeout> | null = null;
+  private restartTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Form state signals
   readonly selectedMode = signal<GameMode>('find-country');
@@ -117,6 +123,14 @@ export class GameHub {
     return this.formatTime(totalMs);
   });
 
+  constructor() {
+    // Register cleanup for timers on component destroy
+    this.destroyRef.onDestroy(() => {
+      if (this.startingTimer) clearTimeout(this.startingTimer);
+      if (this.restartTimer) clearTimeout(this.restartTimer);
+    });
+  }
+
   // Start game with form configuration
   async startGame(): Promise<void> {
     if (this.isStarting()) return;
@@ -141,7 +155,8 @@ export class GameHub {
       this.logger.error('Failed to start game:', error, 'GameHub');
     } finally {
       // Reset loading state after a short delay
-      setTimeout(() => this.isStarting.set(false), 1000);
+      if (this.startingTimer) clearTimeout(this.startingTimer);
+      this.startingTimer = setTimeout(() => this.isStarting.set(false), 1000);
     }
   }
 
@@ -199,7 +214,8 @@ export class GameHub {
       this.showStats.set(false);
       this.quizStateService.resetToIdle();
       // Small delay to ensure state is reset
-      setTimeout(() => {
+      if (this.restartTimer) clearTimeout(this.restartTimer);
+      this.restartTimer = setTimeout(() => {
         this.quizStateService.startGame(currentSession.configuration);
       }, 100);
     }
