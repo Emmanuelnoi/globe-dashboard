@@ -41,7 +41,8 @@ dist
 .gitlab-ci.yml
 
 # Local development
-scripts/
+# Note: scripts/inject-env*.mjs are needed for build
+scripts/optimize-three-imports.mjs
 tests/
 e2e/
 *.spec.ts
