@@ -1,0 +1,52 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage
+.nyc_output
+*.log
+
+# Build artifacts
+dist
+.angular
+.cache
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Documentation (optional, uncomment if you don't want to deploy docs)
+# *.md
+# docs/
+
+# Git
+.git
+.gitignore
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Local development
+scripts/
+tests/
+e2e/
+*.spec.ts
+*.test.ts
+
+# Misc
+*.map
+*.tgz

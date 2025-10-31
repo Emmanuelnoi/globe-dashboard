@@ -1,0 +1,151 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
+
+jobs:
+  # Build job
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        run: pnpm run build
+        env:
+          NODE_ENV: production
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: dist/global-dashboard/browser
+          retention-days: 1
+
+  # Deploy to Vercel
+  deploy:
+    name: Deploy to Vercel
+    needs: build
+    runs-on: ubuntu-latest
+
+    # Set job outputs for downstream jobs
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: dist/global-dashboard/browser
+
+      - name: Deploy to Vercel
+        id: deploy
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./
+          # Production deployment on main branch, preview on PRs
+          vercel-args: ${{ github.ref == 'refs/heads/main' && '--prod' || '' }}
+
+      - name: Comment deployment URL on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Preview deployment ready!\n\n**URL:** ${{ steps.deploy.outputs.preview-url }}`
+            })
+
+  # Health check job
+  health-check:
+    name: Health Check
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Wait for deployment to be ready
+        run: sleep 30
+
+      - name: Check main page
+        run: |
+          URL="${{ needs.deploy.outputs.url }}"
+          echo "Checking URL: $URL"
+
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
+          echo "Main page HTTP status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "❌ Main page health check failed (status: $HTTP_CODE)"
+            exit 1
+          fi
+
+          echo "✅ Main page health check passed"
+
+      - name: Check manifest.json
+        run: |
+          URL="${{ needs.deploy.outputs.url }}/manifest.json"
+          echo "Checking manifest: $URL"
+
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
+          echo "Manifest HTTP status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "⚠️ Manifest check failed (status: $HTTP_CODE)"
+          else
+            echo "✅ Manifest check passed"
+          fi
+
+      - name: Check robots.txt
+        run: |
+          URL="${{ needs.deploy.outputs.url }}/robots.txt"
+          echo "Checking robots.txt: $URL"
+
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
+          echo "robots.txt HTTP status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "⚠️ robots.txt check failed (status: $HTTP_CODE)"
+          else
+            echo "✅ robots.txt check passed"
+          fi
+
+      - name: Summary
+        run: |
+          echo "🎉 Deployment successful and health checks passed!"
+          echo "🌐 Production URL: ${{ needs.deploy.outputs.url }}"
