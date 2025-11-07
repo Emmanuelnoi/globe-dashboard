@@ -21,12 +21,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/3d-global-dashboard.git"
+    "url": "https://github.com/Emmanuelnoi/3d-global-dashboard.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/3d-global-dashboard/issues"
+    "url": "https://github.com/Emmanuelnoi/3d-global-dashboard/issues"
   },
-  "homepage": "https://github.com/yourusername/3d-global-dashboard#readme",
+  "homepage": "https://github.com/Emmanuelnoi/3d-global-dashboard#readme",
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
@@ -51,6 +51,9 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "typecheck": "tsc --noEmit --skipLibCheck || true",
+    "docs": "compodoc -p tsconfig.json -d documentation --silent && compodoc -s -d documentation",
+    "docs:generate": "compodoc -p tsconfig.json -d documentation",
+    "docs:serve": "compodoc -s -d documentation",
     "clean": "rimraf dist",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -72,6 +75,7 @@
   },
   "private": true,
   "dependencies": {
+    "@angular/animations": "^20.3.10",
     "@angular/compiler": "^20.2.4",
     "@angular/forms": "^20.2.4",
     "@angular/router": "^20.2.4",
@@ -81,7 +85,7 @@
     "@tailwindcss/postcss": "^4.1.13",
     "earcut": "^3.0.0",
     "idb": "^8.0.3",
-    "lucide-angular": "^0.542.0",
+    "lucide-angular": "^0.552.0",
     "postcss": "^8.5.6",
     "rxjs": "~7.8.2",
     "tailwindcss": "^4.1.13",
@@ -91,7 +95,6 @@
   },
   "devDependencies": {
     "@angular-eslint/builder": "20.1.1",
-    "@angular/animations": "^20.3.1",
     "@angular/build": "^20.2.2",
     "@angular/cli": "^20.2.2",
     "@angular/common": "^20.2.4",
@@ -99,11 +102,13 @@
     "@angular/core": "^20.2.4",
     "@angular/platform-browser": "^20.2.4",
     "@angular/platform-browser-dynamic": "^20.2.4",
+    "@axe-core/playwright": "^4.11.0",
+    "@compodoc/compodoc": "^1.1.32",
     "@eslint/css": "^0.10.0",
     "@eslint/js": "^9.35.0",
     "@eslint/json": "^0.13.2",
     "@eslint/markdown": "^7.2.0",
-    "@playwright/test": "^1.55.0",
+    "@playwright/test": "^1.56.1",
     "@types/earcut": "^2.1.4",
     "@types/node": "^24.4.0",
     "@types/three": "^0.179.0",
@@ -132,7 +137,7 @@
     "ts-prune": "^0.10.3",
     "typescript": "~5.8.3",
     "typescript-eslint": "8.34.1",
-    "vite": "^7.1.5",
+    "vite": "^7.1.12",
     "vitest": "^3.2.4"
   },
   "pnpm": {

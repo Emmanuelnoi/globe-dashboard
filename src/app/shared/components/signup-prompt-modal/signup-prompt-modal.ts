@@ -7,11 +7,15 @@ import {
   ChangeDetectionStrategy,
   effect,
   DestroyRef,
+  computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { SupabaseService } from '../../../core/services/supabase.service';
+import {
+  SupabaseService,
+  PasswordStrength,
+} from '../../../core/services/supabase.service';
 import { CloudSyncService } from '../../../core/services/cloud-sync.service';
 import { LoggerService } from '../../../core/services/logger.service';
 
@@ -93,6 +97,55 @@ export class SignupPromptModalComponent {
     'prompt' | 'signup' | 'migrating' | 'email-confirmation'
   >('prompt');
 
+  // Password strength validation
+  readonly passwordStrength = computed<PasswordStrength>(() => {
+    const pwd = this.password();
+    if (!pwd) {
+      return { score: 0, label: 'Very Weak', feedback: [], isValid: false };
+    }
+    return this.supabase.calculatePasswordStrength(pwd);
+  });
+
+  // Individual password requirement checks for UI
+  readonly hasMinLength = computed<boolean>(() => this.password().length >= 8);
+  readonly hasMaxLength = computed<boolean>(() => this.password().length <= 72);
+  readonly hasLowercase = computed<boolean>(() =>
+    /[a-z]/.test(this.password()),
+  );
+  readonly hasUppercase = computed<boolean>(() =>
+    /[A-Z]/.test(this.password()),
+  );
+  readonly hasNumber = computed<boolean>(() => /\d/.test(this.password()));
+  readonly hasSpecial = computed<boolean>(() =>
+    /[^a-zA-Z0-9]/.test(this.password()),
+  );
+  readonly noCommonPatterns = computed<boolean>(() => {
+    const pwd = this.password();
+    const commonPatterns = [
+      /^password/i,
+      /^12345/,
+      /^qwerty/i,
+      /^admin/i,
+      /^letmein/i,
+      /^welcome/i,
+    ];
+    return !commonPatterns.some((pattern) => pattern.test(pwd));
+  });
+
+  // Password match validation
+  readonly passwordsMatch = computed<boolean>(() => {
+    const pwd = this.password();
+    const confirmPwd = this.confirmPassword();
+    return pwd.length > 0 && confirmPwd.length > 0 && pwd === confirmPwd;
+  });
+
+  // Can submit form
+  readonly canSubmit = computed<boolean>(() => {
+    return (
+      this.passwordStrength().isValid && this.passwordsMatch() && !!this.email()
+    );
+  });
+
   constructor() {
     // Watch directMode and automatically skip to signup step
     effect(() => {
@@ -132,13 +185,15 @@ export class SignupPromptModalComponent {
       return;
     }
 
-    if (this.password() !== this.confirmPassword()) {
-      this.error.set('Passwords do not match');
+    if (!this.passwordStrength().isValid) {
+      this.error.set(
+        'Please ensure your password meets all security requirements',
+      );
       return;
     }
 
-    if (this.password().length < 6) {
-      this.error.set('Password must be at least 6 characters');
+    if (this.password() !== this.confirmPassword()) {
+      this.error.set('Passwords do not match');
       return;
     }
 
@@ -251,5 +306,21 @@ export class SignupPromptModalComponent {
     if (event.target === event.currentTarget) {
       this.onClose();
     }
+  }
+
+  /**
+   * Get password strength color
+   */
+  getPasswordStrengthColor(): string {
+    const score = this.passwordStrength().score;
+    const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e'];
+    return colors[score];
+  }
+
+  /**
+   * Get password strength width percentage
+   */
+  getPasswordStrengthWidth(): number {
+    return (this.passwordStrength().score / 4) * 100;
   }
 }

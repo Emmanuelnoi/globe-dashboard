@@ -17,6 +17,12 @@
  * ```
  */
 
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable complexity */
+
 import { SupabaseService } from './core/services/supabase.service';
 import { CloudSyncService } from './core/services/cloud-sync.service';
 import { UserStatsService } from './core/services/user-stats.service';
@@ -90,7 +96,7 @@ export function getServices(): {
         // Try accessing injector through different paths
         injector =
           component.injector ||
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (component as any).__ngContext__?.[0] ||
           ng.getOwningComponent?.(appRoot)?.injector;
       }
@@ -116,7 +122,6 @@ export function getServices(): {
  * Test cloud sync functionality
  */
 export async function testCloudSync(): Promise<void> {
-  // eslint-disable-next-line no-console
   console.log('🧪 Testing Cloud Sync...\n');
 
   try {
@@ -429,17 +434,16 @@ export function initDevHelpers(): void {
     window.clearLocalData = clearLocalData;
     window.runFullDiagnostics = runFullDiagnostics;
 
-    // eslint-disable-next-line no-console
     console.log('🛠️ Dev helpers loaded! Available commands:');
-    // eslint-disable-next-line no-console
+
     console.log('   - getServices() - Access Angular services');
-    // eslint-disable-next-line no-console
+
     console.log('   - testCloudSync() - Test cloud sync');
-    // eslint-disable-next-line no-console
+
     console.log('   - checkAuthStatus() - Check auth status');
-    // eslint-disable-next-line no-console
+
     console.log('   - clearLocalData() - Clear local data (for testing)');
-    // eslint-disable-next-line no-console
+
     console.log('   - runFullDiagnostics() - Run complete test suite ⭐ NEW');
   }
 }

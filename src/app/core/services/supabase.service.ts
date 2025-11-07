@@ -641,13 +641,26 @@ export class SupabaseService {
         return { error: new Error('User not authenticated') };
       }
 
+      // Calculate aggregated stats from quiz sessions
+      const { data: sessions } = await this.supabase
+        .from('quiz_sessions')
+        .select('correct_answers, incorrect_answers, time_taken')
+        .eq('user_id', userId);
+
+      const totalCorrect =
+        sessions?.reduce((sum, s) => sum + (s.correct_answers || 0), 0) || 0;
+      const totalIncorrect =
+        sessions?.reduce((sum, s) => sum + (s.incorrect_answers || 0), 0) || 0;
+      const totalTime =
+        sessions?.reduce((sum, s) => sum + (s.time_taken || 0), 0) || 0;
+
       const { error } = await this.supabase.from('user_stats').upsert(
         {
           user_id: userId,
           total_games_played: stats.totalGames,
-          total_correct_answers: 0, // TODO: Calculate from sessions
-          total_incorrect_answers: 0, // TODO: Calculate from sessions
-          total_time_played: 0, // TODO: Calculate from sessions
+          total_correct_answers: totalCorrect,
+          total_incorrect_answers: totalIncorrect,
+          total_time_played: totalTime,
           average_score: stats.averageScore,
           best_score: stats.bestScore,
           stats_by_mode: stats.gamesByMode,

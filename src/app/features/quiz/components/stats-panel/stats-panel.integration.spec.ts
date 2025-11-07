@@ -209,7 +209,7 @@ describe('StatsPanelComponent Integration', () => {
 
       // Clear data
       await userStatsService.clearAllData();
-      let clearedStats = await userStatsService.getStats();
+      const clearedStats = await userStatsService.getStats();
       expect(clearedStats?.totalGames || 0).toBe(0);
 
       // Import data back

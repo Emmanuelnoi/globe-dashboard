@@ -1,58 +1,37 @@
 /**
  * Development Environment Configuration
- * This file is used for local development and testing
+ * This file is AUTO-GENERATED from .env.local
+ * DO NOT EDIT - Run "pnpm start" to regenerate
  */
 
 export const environment = {
-  // Environment identifier
   production: false,
-
-  // API Endpoints
   gbifApiUrl: 'https://api.gbif.org/v1',
-
-  // Feature Flags
   enableDebugLogging: true,
   enablePerformanceMonitoring: true,
   enableAnalytics: false,
-
-  // Cache Configuration
   cacheEnabled: true,
-  cacheTTL: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
-  cacheMaxSize: 50 * 1024 * 1024, // 50MB
+  cacheTTL: 7 * 24 * 60 * 60 * 1000,
+  cacheMaxSize: 50 * 1024 * 1024,
   cacheMaxEntries: 100,
-
-  // Rate Limiting
   rateLimitEnabled: true,
   maxRequestsPerMinute: 300,
   maxRequestsPerHour: 10000,
-
-  // Performance
   enableWebWorkers: true,
   maxWebWorkers: 6,
-
-  // Data Loading
   dataLoadingBatchSize: 1000,
   dataLoadingProgressiveStages: 5,
-
-  // Error Tracking (Sentry) - Disabled in development
   sentryDsn: '',
   sentryEnvironment: 'development',
   sentryTracesSampleRate: 1.0,
   sentryEnabled: false,
-
-  // Analytics
   googleAnalyticsId: '',
   analyticsEnabled: false,
-
-  // Supabase Configuration (Development)
-  // Loaded from .env.local file (create it if it doesn't exist)
-  // Get your credentials from: https://supabase.com/dashboard
-  supabaseUrl: import.meta.env['VITE_SUPABASE_URL'] || '',
-  supabaseAnonKey: import.meta.env['VITE_SUPABASE_ANON_KEY'] || '',
-
-  // Build Information
+  supabaseUrl: 'https://alqojsoikxxubdccovpp.supabase.co',
+  supabaseAnonKey:
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFscW9qc29pa3h4dWJkY2NvdnBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwODA5NjcsImV4cCI6MjA3NjY1Njk2N30.bQD23VZJwLrKW0bafU9UMjE_HxNorv_qxCcbdHNb_QU',
   version: '1.0.0-dev',
-  buildDate: new Date().toISOString(),
+  buildDate: '2025-11-07T21:51:44.366Z',
 } as const;
 
 export type Environment = typeof environment;

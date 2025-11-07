@@ -1,64 +1,36 @@
 /**
- * Production Environment Configuration
- * This file is used for production builds
- *
- * IMPORTANT: Update these values before deploying to production
+ * Production Environment Configuration (Generated)
+ * DO NOT EDIT - This file is auto-generated from environment variables
  */
 
 export const environment = {
-  // Environment identifier
   production: true,
-
-  // API Endpoints
   gbifApiUrl: 'https://api.gbif.org/v1',
-
-  // Feature Flags
-  enableDebugLogging: false, // Disable debug logs in production
+  enableDebugLogging: false,
   enablePerformanceMonitoring: true,
-  enableAnalytics: true, // Enable analytics in production
-
-  // Cache Configuration
+  enableAnalytics: true,
   cacheEnabled: true,
-  cacheTTL: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
-  cacheMaxSize: 50 * 1024 * 1024, // 50MB
+  cacheTTL: 7 * 24 * 60 * 60 * 1000,
+  cacheMaxSize: 50 * 1024 * 1024,
   cacheMaxEntries: 100,
-
-  // Rate Limiting
   rateLimitEnabled: true,
   maxRequestsPerMinute: 300,
   maxRequestsPerHour: 10000,
-
-  // Performance
   enableWebWorkers: true,
   maxWebWorkers: 6,
-
-  // Data Loading
   dataLoadingBatchSize: 1000,
   dataLoadingProgressiveStages: 5,
-
-  // Error Tracking (Sentry)
-  // Get your DSN from: https://sentry.io/settings/projects/
-  // Set via Netlify/Vercel environment variable: VITE_SENTRY_DSN
-  sentryDsn: import.meta?.env?.VITE_SENTRY_DSN || '',
+  sentryDsn: '',
   sentryEnvironment: 'production',
-  sentryTracesSampleRate: 0.1, // Sample 10% of transactions in production
-  sentryEnabled: !!import.meta?.env?.VITE_SENTRY_DSN, // Auto-enable if DSN is set
-
-  // Analytics (Google Analytics 4)
-  // Get your ID from: https://analytics.google.com/
-  // Set via Netlify/Vercel environment variable: VITE_GA_TRACKING_ID
-  googleAnalyticsId: import.meta?.env?.VITE_GA_TRACKING_ID || '',
-  analyticsEnabled: !!import.meta?.env?.VITE_GA_TRACKING_ID, // Auto-enable if ID is set
-
-  // Supabase Configuration (Production)
-  // Get your credentials from: https://supabase.com/dashboard
-  // Set via Netlify/Vercel environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
-  supabaseUrl: import.meta?.env?.VITE_SUPABASE_URL || '',
-  supabaseAnonKey: import.meta?.env?.VITE_SUPABASE_ANON_KEY || '',
-
-  // Build Information
+  sentryTracesSampleRate: 0.1,
+  sentryEnabled: false,
+  googleAnalyticsId: '',
+  analyticsEnabled: false,
+  supabaseUrl: 'https://alqojsoikxxubdccovpp.supabase.co',
+  supabaseAnonKey:
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFscW9qc29pa3h4dWJkY2NvdnBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwODA5NjcsImV4cCI6MjA3NjY1Njk2N30.bQD23VZJwLrKW0bafU9UMjE_HxNorv_qxCcbdHNb_QU',
   version: '1.0.0',
-  buildDate: new Date().toISOString(),
+  buildDate: '2025-11-06T20:43:20.542Z',
 } as const;
 
 export type Environment = typeof environment;

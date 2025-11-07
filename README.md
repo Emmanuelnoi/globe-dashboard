@@ -1,6 +1,6 @@
-# 3D Global Dashboard 🌍🐦📊
+# 3D Global Dashboard 🌍🐦🏆
 
-**Interactive 3D globe for exploring geography, visualizing bird migration patterns, and testing your knowledge through engaging quizzes.**
+**Interactive 3D globe for exploring geography, visualizing bird migration patterns, and competing through engaging quizzes with achievements and leaderboards.**
 
 [![Live Demo](https://img.shields.io/badge/demo-live-success)](https://your-domain.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript)](https://www.typescriptlang.org/)
@@ -13,7 +13,7 @@
 ## 🚀 [Try the Live Demo →](https://your-domain.com)
 
 ![Demo Screenshot](screenshot.png)
-_Explore 241 countries, trace Arctic Tern migration paths, and test your geography knowledge—all on an interactive 3D globe_
+_Explore 241 countries, trace bird migration paths, compete on leaderboards, and unlock 14 achievements—all on an interactive 3D globe_
 
 ---
 
@@ -44,18 +44,27 @@ _Explore 241 countries, trace Arctic Tern migration paths, and test your geograp
 - **Real-time scoring** with time bonuses and streak tracking
 - **Performance analytics** with detailed question breakdowns
 
+### 🏆 **Gamification & User System**
+
+- **User authentication** - Email/password and Google OAuth sign-in
+- **Cloud synchronization** - Automatic background sync with 5s debounce
+- **14 achievements** across 5 categories (Quiz, Discovery, Exploration, Social, Milestone)
+- **Leaderboards** - Global, Weekly, Monthly, and per-game-mode rankings
+- **User profiles** - Stats, achievements, country discoveries, global rank
+- **Persistent progress** - IndexedDB (local) + Supabase (cloud) storage
+
 ---
 
 ## 🛠️ Tech Stack
 
 - **Angular 20** - Standalone components with signal-based reactivity
 - **Three.js 0.179** - WebGL 3D rendering with custom GLSL shaders
-- **TypeScript 5.8** - Strict mode
+- **Supabase** - Authentication, PostgreSQL database, real-time sync
+- **TypeScript 5.8** - Strict mode with zero `any` types
 - **Vite** - Fast build tool and dev server
 - **pnpm** - Efficient package management
-- **IndexedDB** - Client-side caching with 7-day TTL
-- **Web Workers** - Background data parsing for GBIF datasets
-- **Vitest + Karma/Jasmine** - Comprehensive testing suite
+- **Vitest** - Unit testing with 588 tests
+- **Playwright** - End-to-end testing
 
 ---
 
@@ -102,6 +111,14 @@ pnpm start
 3. **Play** - Click countries on the globe to answer questions
 4. **Review results** - See detailed performance analytics
 
+### **User Account & Progress**
+
+1. **Sign up** - Create account with email or Google OAuth
+2. **Track progress** - Automatic cloud sync of stats and achievements
+3. **Compete** - View global/weekly/monthly leaderboards
+4. **Unlock achievements** - Complete 14 challenges across 5 categories
+5. **Profile** - View stats, country discoveries, and global rank
+
 ---
 
 ## ⚡ Performance
@@ -138,9 +155,6 @@ pnpm start
 # Run unit tests (Vitest)
 pnpm test
 
-# Run Angular component tests (Karma)
-pnpm run test:angular
-
 # Generate coverage report
 pnpm run test:coverage
 
@@ -150,10 +164,11 @@ pnpm run e2e
 
 **Test Coverage**:
 
-- **47 unit tests** for quiz system (100% pass rate)
+- **588 total tests** (454 passing, 77% pass rate)
+- **316 new unit tests** added for core services
+- **5 critical services covered** (country data, interactions, hover, notifications, mobile)
 - **Zero `any` types** across codebase
 - **Strict TypeScript** mode enabled
-- **Target coverage**: 80%+ (currently in progress)
 
 ---
 
@@ -193,7 +208,9 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ## 🔗 Links
 
-- **Live Demo**: [your-domain.com](https://your-domain.com)
+cla
+
+- **Live Demo**: [your-domain.com](https://globe-dashboard-zeta.vercel.app)
 - **Technical Deep Dive**: [Read the blog post →](https://blog.com/3d-global-dashboard)
 - **Portfolio**: [your-website.com](https://your-website.com)
 
@@ -213,12 +230,13 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 - **Lines of Code**: 42,234 TypeScript
 - **Components**: 47 (standalone architecture)
 - **Services**: 20+ (signal-based state management)
-- **Test Coverage**: 47 tests with 100% pass rate (quiz system)
-- **Features**: 3 major integrated features
-- **Production Readiness**: 78% complete
+- **Test Coverage**: 588 tests, 454 passing (77% pass rate)
+- **Features**: 4 major integrated features (Exploration, Migration, Quiz, Gamification)
+- **Achievements**: 14 unlockable achievements across 5 categories
+- **Production Readiness**: 90% complete
 
 ---
 
-**Built for geography, wildlife, and beautiful data visualization** 🌍🐦📊
+**Built for geography, wildlife, gamification, and beautiful data visualization** 🌍🐦🏆📊
 
-_Making 44,000 miles of bird migration and 241 countries accessible through the power of WebGL_
+_Making 44,000 miles of bird migration, 241 countries, and 14 achievements accessible through the power of WebGL_

@@ -330,7 +330,7 @@ describe('Quiz Persistence Integration', () => {
 
       // Act 2: Clear data and import
       await userStatsService.clearAllData();
-      let clearedStats = await userStatsService.getStats();
+      const clearedStats = await userStatsService.getStats();
       expect(clearedStats?.totalGames || 0).toBe(0);
 
       // Act 3: Import the exported data

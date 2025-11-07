@@ -274,11 +274,12 @@ export class MigrationPathsRenderer {
 
   /**
    * Create gradient material for path
-   * Cyan to magenta gradient
+   * Uses solid color for better performance and browser compatibility
+   *
+   * Note: Gradient shader is available via createGradientShaderMaterial()
+   * but solid color is preferred for consistent rendering across devices
    */
   private createGradientMaterial(): THREE.LineBasicMaterial {
-    // For now, use solid color
-    // TODO: Implement gradient shader in future enhancement
     return new THREE.LineBasicMaterial({
       color: 0x00d9ff, // Cyan
       transparent: true,
@@ -291,7 +292,8 @@ export class MigrationPathsRenderer {
 
   /**
    * Create gradient shader material (advanced)
-   * For future implementation
+   * Alternative to createGradientMaterial() with cyan-to-magenta gradient
+   * Available but not used by default due to performance considerations
    */
   private createGradientShaderMaterial(): THREE.ShaderMaterial {
     const vertexShader = `

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { App } from './app';
 import { NavigationStateService } from './core/services/navigation-state.service';

@@ -314,7 +314,7 @@ export class CountrySelectionService {
 
   private applySelectionGesture(event: CountrySelectionEvent): void {
     const currentSelection = new Set(this.selectedCountries());
-    let updates: SelectionUpdate[] = [];
+    const updates: SelectionUpdate[] = [];
 
     switch (event.gesture) {
       case 'click':

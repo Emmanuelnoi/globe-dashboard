@@ -1,0 +1,22 @@
+{
+  "$schema": "https://compodoc.app/schema.json",
+  "tsconfig": "./tsconfig.json",
+  "output": "./documentation",
+  "theme": "material",
+  "name": "3D Global Dashboard - API Documentation",
+  "disableSourceCode": false,
+  "disableGraph": false,
+  "disableCoverage": false,
+  "disablePrivate": true,
+  "disableProtected": false,
+  "disableInternal": true,
+  "disableLifeCycleHooks": false,
+  "disableRoutesGraph": false,
+  "hideGenerator": false,
+  "silent": false,
+  "serve": false,
+  "port": 8080,
+  "watch": false,
+  "exportFormat": "html",
+  "language": "en-US"
+}

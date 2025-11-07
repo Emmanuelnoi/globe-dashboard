@@ -25,7 +25,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['src/test-setup.ts', 'src/test-setup/webgl-setup.ts'],
     include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    exclude: ['node_modules', 'dist', '.angular'],
+    exclude: ['node_modules', 'dist', '.angular', 'documentation'],
     pool: 'forks',
     poolOptions: {
       forks: {
@@ -37,6 +37,7 @@ export default defineConfig({
       reporter: ['text', 'json', 'html', 'lcov'],
       exclude: [
         'node_modules/',
+        'documentation/',
         'src/test-setup.ts',
         'src/test-setup/**',
         '**/*.d.ts',

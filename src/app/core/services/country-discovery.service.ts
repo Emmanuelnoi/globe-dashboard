@@ -34,7 +34,6 @@ export interface DiscoveryStats {
   totalDiscovered: number;
   totalInteractions: number;
   countriesByMethod: Record<DiscoveryMethod, number>;
-  countriesByContinent: Record<string, number>;
   percentageExplored: number;
   recentDiscoveries: CountryDiscovery[];
 }
@@ -224,9 +223,6 @@ export class CountryDiscoveryService {
       countriesByMethod[d.discoveryMethod]++;
     });
 
-    // TODO: Count by continent (would need continent data mapping)
-    const countriesByContinent: Record<string, number> = {};
-
     const percentageExplored = (totalDiscovered / this.TOTAL_COUNTRIES) * 100;
 
     const recentDiscoveries = discoveries
@@ -239,7 +235,6 @@ export class CountryDiscoveryService {
       totalDiscovered,
       totalInteractions,
       countriesByMethod,
-      countriesByContinent,
       percentageExplored,
       recentDiscoveries,
     };

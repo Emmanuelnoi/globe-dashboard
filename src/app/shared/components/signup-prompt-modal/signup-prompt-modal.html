@@ -106,13 +106,12 @@
                 id="password"
                 [type]="showPassword() ? 'text' : 'password'"
                 class="form-input"
-                placeholder="At least 6 characters"
+                placeholder="Create a strong password"
                 [(ngModel)]="password"
                 [ngModelOptions]="{ standalone: true }"
                 required
                 autocomplete="new-password"
                 [disabled]="isLoading()"
-                minlength="6"
               />
               <button
                 type="button"
@@ -125,6 +124,88 @@
                 {{ showPassword() ? "👁️" : "👁️‍🗨️" }}
               </button>
             </div>
+
+            <!-- Password Strength Meter -->
+            <div *ngIf="password()" class="password-strength-container">
+              <div class="password-strength-bar">
+                <div
+                  class="password-strength-fill"
+                  [style.width.%]="getPasswordStrengthWidth()"
+                  [style.background-color]="getPasswordStrengthColor()"
+                ></div>
+              </div>
+              <div class="password-strength-label">
+                <span [style.color]="getPasswordStrengthColor()">
+                  {{ passwordStrength().label }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Password Requirements Checklist -->
+            <div *ngIf="password()" class="password-requirements">
+              <p class="requirements-title">Password must contain:</p>
+              <ul class="requirements-list">
+                <li
+                  [class.valid]="hasMinLength()"
+                  [class.invalid]="!hasMinLength()"
+                >
+                  <span class="requirement-icon">{{
+                    hasMinLength() ? "✅" : "❌"
+                  }}</span>
+                  <span class="requirement-text">At least 8 characters</span>
+                </li>
+                <li
+                  [class.valid]="hasUppercase()"
+                  [class.invalid]="!hasUppercase()"
+                >
+                  <span class="requirement-icon">{{
+                    hasUppercase() ? "✅" : "❌"
+                  }}</span>
+                  <span class="requirement-text"
+                    >One uppercase letter (A-Z)</span
+                  >
+                </li>
+                <li
+                  [class.valid]="hasLowercase()"
+                  [class.invalid]="!hasLowercase()"
+                >
+                  <span class="requirement-icon">{{
+                    hasLowercase() ? "✅" : "❌"
+                  }}</span>
+                  <span class="requirement-text"
+                    >One lowercase letter (a-z)</span
+                  >
+                </li>
+                <li [class.valid]="hasNumber()" [class.invalid]="!hasNumber()">
+                  <span class="requirement-icon">{{
+                    hasNumber() ? "✅" : "❌"
+                  }}</span>
+                  <span class="requirement-text">One number (0-9)</span>
+                </li>
+                <li
+                  [class.valid]="hasSpecial()"
+                  [class.invalid]="!hasSpecial()"
+                >
+                  <span class="requirement-icon">{{
+                    hasSpecial() ? "✅" : "❌"
+                  }}</span>
+                  <span class="requirement-text"
+                    >One special character (!&#64;#$%^&*)</span
+                  >
+                </li>
+                <li
+                  [class.valid]="noCommonPatterns()"
+                  [class.invalid]="!noCommonPatterns()"
+                >
+                  <span class="requirement-icon">{{
+                    noCommonPatterns() ? "✅" : "❌"
+                  }}</span>
+                  <span class="requirement-text"
+                    >No common patterns (password, 12345, etc.)</span
+                  >
+                </li>
+              </ul>
+            </div>
           </div>
 
           <div class="form-group">
@@ -135,20 +216,33 @@
               id="confirm-password"
               [type]="showPassword() ? 'text' : 'password'"
               class="form-input"
+              [class.input-error]="confirmPassword() && !passwordsMatch()"
+              [class.input-success]="confirmPassword() && passwordsMatch()"
               placeholder="Re-enter password"
               [(ngModel)]="confirmPassword"
               [ngModelOptions]="{ standalone: true }"
               required
               autocomplete="new-password"
               [disabled]="isLoading()"
-              minlength="6"
             />
+            <div
+              *ngIf="confirmPassword() && !passwordsMatch()"
+              class="validation-message error"
+            >
+              ❌ Passwords do not match
+            </div>
+            <div
+              *ngIf="confirmPassword() && passwordsMatch()"
+              class="validation-message success"
+            >
+              ✅ Passwords match
+            </div>
           </div>
 
           <button
             type="submit"
             class="button button-primary button-full-width"
-            [disabled]="isLoading()"
+            [disabled]="isLoading() || !canSubmit()"
           >
             <span *ngIf="!isLoading()">Create Account</span>
             <span *ngIf="isLoading()" class="loading-spinner">Creating...</span>
