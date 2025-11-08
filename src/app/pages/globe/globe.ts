@@ -186,6 +186,9 @@ export class Globe implements AfterViewInit, OnDestroy {
 
     this.migrationState.clearAllPaths();
 
+    // Request render to clear migration visuals immediately
+    this.globeSceneService.requestRender();
+
     this.logger.debug(
       `📊 Active paths AFTER clear: ${this.migrationState.activePaths().length}`,
       'GlobeComponent',
@@ -198,6 +201,9 @@ export class Globe implements AfterViewInit, OnDestroy {
 
   protected readonly handleRemoveMigration = (migrationId: string) => {
     this.migrationState.removeActivePath(migrationId);
+
+    // Request render to update migration visuals
+    this.globeSceneService.requestRender();
   };
 
   // 3D objects (component-specific, not managed by services)
@@ -260,6 +266,9 @@ export class Globe implements AfterViewInit, OnDestroy {
       // Clear quiz highlight when candidate is cleared or game ends
       if (!selectedCandidate || gameState === 'idle' || gameState === 'ended') {
         this.quizIntegration.clearQuizCandidateHighlight();
+
+        // Request render to clear quiz highlighting
+        this.globeSceneService.requestRender();
       }
     });
 
@@ -279,6 +288,9 @@ export class Globe implements AfterViewInit, OnDestroy {
         if (this.countries) {
           this.countrySelection.resetAllCountrySelections(this.countries);
         }
+
+        // Request render to show cleared selections
+        this.globeSceneService.requestRender();
 
         this.logger.debug(
           `Cleared all selections and tooltips (quiz mode: ${isQuizMode}, quiz view: ${isGameQuizView})`,
@@ -306,6 +318,9 @@ export class Globe implements AfterViewInit, OnDestroy {
           this.countrySelection.resetAllCountrySelections(this.countries);
         }
 
+        // Request render to show cleared selections and migration view
+        this.globeSceneService.requestRender();
+
         this.logger.debug(
           `Cleared all selections and tooltips (bird migration view active)`,
           'GlobeComponent',
@@ -327,6 +342,9 @@ export class Globe implements AfterViewInit, OnDestroy {
       } else {
         this.interactionModeService.enableExploreMode();
       }
+
+      // Request render when navigation mode changes
+      this.globeSceneService.requestRender();
     });
 
     // Setup effect to clear all selections when entering leaderboard view
@@ -345,6 +363,9 @@ export class Globe implements AfterViewInit, OnDestroy {
           this.countrySelection.resetAllCountrySelections(this.countries);
         }
 
+        // Request render to show cleared selections
+        this.globeSceneService.requestRender();
+
         this.logger.debug(
           `Cleared all selections and tooltips (leaderboard view active)`,
           'GlobeComponent',
@@ -353,6 +374,21 @@ export class Globe implements AfterViewInit, OnDestroy {
 
       // Update previous state
       this.previousWasInLeaderboardView = isLeaderboardView;
+    });
+
+    // Setup effect to request render when migration paths change
+    effect(() => {
+      // Watch for changes in active migration paths
+      const activePaths = this.migrationState.activePaths();
+
+      // Request render to update migration visualizations
+      // This ensures geometry updates from renderers are displayed
+      this.globeSceneService.requestRender();
+
+      this.logger.debug(
+        `Migration paths changed (${activePaths.length} active), render requested`,
+        'GlobeComponent',
+      );
     });
 
     // Setup bi-directional sync: comparison table → globe visual selections
@@ -433,6 +469,11 @@ export class Globe implements AfterViewInit, OnDestroy {
 
         // Update previous state
         this.previousSelectedCodes = currentCodes;
+
+        // Request render to show selection changes
+        if (removedCodes.length > 0 || addedCodes.length > 0) {
+          this.globeSceneService.requestRender();
+        }
 
         this.logger.debug(
           `Synced globe: +${addedCodes.length} -${removedCodes.length}`,
@@ -1029,6 +1070,9 @@ export class Globe implements AfterViewInit, OnDestroy {
               this.countries,
             );
 
+            // Request render to show quiz highlighting
+            this.globeSceneService.requestRender();
+
             // NO TOOLTIPS in quiz mode - the quiz HUD shows the selection
 
             return; // Exit early - don't process explore mode logic
@@ -1061,6 +1105,9 @@ export class Globe implements AfterViewInit, OnDestroy {
 
             // For toggle, we don't change selectedCountry signal
             // Keep the info card on the first selected country
+
+            // Request render to show visual changes
+            this.globeSceneService.requestRender();
           } else if (isShiftClick) {
             // Shift+click: Add to existing selection (multiple countries)
             // Check if country is already selected
@@ -1079,6 +1126,9 @@ export class Globe implements AfterViewInit, OnDestroy {
 
             // For Shift+click, we don't change selectedCountry signal
             // Just apply visual highlighting - the info card stays on the first selected country
+
+            // Request render to show visual changes
+            this.globeSceneService.requestRender();
           } else {
             // Single-click: Select only this country (clear previous selections)
             // Set the selected country to show the detailed info card
@@ -1094,6 +1144,9 @@ export class Globe implements AfterViewInit, OnDestroy {
             // console.log(
             //   `🎯 [Globe] Selected (cleared others): "${countryName}"`,
             // );
+
+            // Request render to show visual changes
+            this.globeSceneService.requestRender();
           }
 
           // Show immediate feedback tooltip for all cases
@@ -1125,6 +1178,9 @@ export class Globe implements AfterViewInit, OnDestroy {
         // Clear selection when clicking on empty space (both single and shift-click)
         this.selectedCountry.set(null);
         this.countrySelection.resetAllCountrySelections(this.countries);
+
+        // Request render to show cleared selections
+        this.globeSceneService.requestRender();
       }
     } catch (error) {
       this.logger.error(

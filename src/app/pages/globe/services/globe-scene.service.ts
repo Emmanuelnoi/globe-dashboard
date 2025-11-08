@@ -344,7 +344,7 @@ export class GlobeSceneService {
   }
 
   /**
-   * Main animation loop with frame throttling
+   * Main animation loop with frame throttling and render-on-demand optimization
    */
   private animate(currentTime: number = 0): void {
     this.animationId = requestAnimationFrame((time) => this.animate(time));
@@ -359,15 +359,25 @@ export class GlobeSceneService {
     const deltaTimeSeconds = deltaTime / 1000.0;
     this.lastFrameTime = currentTime;
 
-    // Update controls
+    // Update controls (this may set needsRender to true via 'change' event)
     this.controls.update();
 
-    // Animate migration visualizations
-    this.globeMigrationService.animate(deltaTimeSeconds);
+    // Check if there are active migration animations
+    const hasActiveMigrations =
+      this.globeMigrationService.isInitialized() &&
+      this.globeMigrationService.hasActiveAnimations();
 
-    // Always render to show animations (migration particles, etc.)
-    this.renderer.render(this.scene, this.camera);
-    this.needsRender = false;
+    // Animate migration visualizations if they exist
+    if (hasActiveMigrations) {
+      this.globeMigrationService.animate(deltaTimeSeconds);
+      this.needsRender = true; // Ensure we render when migrations are animating
+    }
+
+    // Only render when something changed OR migrations are animating
+    if (this.needsRender || hasActiveMigrations) {
+      this.renderer.render(this.scene, this.camera);
+      this.needsRender = false;
+    }
   }
 
   /**

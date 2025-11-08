@@ -31,7 +31,7 @@ export const environment = {
   supabaseAnonKey:
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFscW9qc29pa3h4dWJkY2NvdnBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwODA5NjcsImV4cCI6MjA3NjY1Njk2N30.bQD23VZJwLrKW0bafU9UMjE_HxNorv_qxCcbdHNb_QU',
   version: '1.0.0-dev',
-  buildDate: '2025-11-07T21:51:44.366Z',
+  buildDate: '2025-11-08T07:23:26.321Z',
 } as const;
 
 export type Environment = typeof environment;

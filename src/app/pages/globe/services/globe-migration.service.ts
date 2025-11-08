@@ -470,6 +470,20 @@ export class GlobeMigrationService {
   }
 
   /**
+   * Check if there are any active animations that require continuous rendering
+   * @returns True if migrations are active and need animation
+   */
+  hasActiveAnimations(): boolean {
+    if (!this.isInitialized()) {
+      return false;
+    }
+
+    // Check if there are any active migration paths
+    const activePaths = this.migrationState.activePaths();
+    return activePaths.length > 0;
+  }
+
+  /**
    * Animate migration visualizations (call from globe render loop)
    * @param deltaTime - Time since last frame in seconds
    */

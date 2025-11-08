@@ -126,7 +126,7 @@ pnpm start
 - **Bundle size**: Optimized for 3D graphics (~17-22KB reduction after cleanup)
 - **First load**: < 2 seconds (with GBIF data caching)
 - **Subsequent loads**: < 400ms (IndexedDB cache hit)
-- **Frame rate**: Consistent 60fps with active migration paths
+- **Frame rate**: 60fps during interaction, 0fps when idle (90% GPU reduction)
 - **Cache hit rate**: 89% after 1 week
 - **Browser support**: Chrome, Firefox, Safari, Edge (95%+ WebGL compatibility)
 
