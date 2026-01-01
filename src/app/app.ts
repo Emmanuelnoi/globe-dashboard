@@ -76,6 +76,11 @@ declare global {
         Skip to main content
       </a>
 
+      <!-- Page heading for screen readers (WCAG 2.1 AA requirement) -->
+      <h1 class="sr-only">
+        3D Global Dashboard - Interactive Geography Visualization
+      </h1>
+
       <main
         id="main-content"
         #globeContainer
