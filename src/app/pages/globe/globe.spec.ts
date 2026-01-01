@@ -163,7 +163,7 @@ describe('Globe Component', () => {
   });
 
   afterEach(() => {
-    fixture.destroy();
+    fixture?.destroy();
   });
 
   describe('Initialization', () => {

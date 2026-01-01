@@ -16,8 +16,9 @@ describe('GeoJSON Utils', () => {
     it('should convert latitude/longitude to 3D coordinates', () => {
       const result = latLonToVector3(0, 0, 2);
       expect(result).toBeInstanceOf(THREE.Vector3);
-      expect(result.x).toBeCloseTo(0, 5);
-      expect(result.y).toBeCloseTo(2, 5);
+      // At equator (lat=0), prime meridian (lon=0), the point is on the x-axis
+      expect(result.x).toBeCloseTo(2, 5);
+      expect(result.y).toBeCloseTo(0, 5);
       expect(result.z).toBeCloseTo(0, 5);
     });
 
@@ -37,13 +38,15 @@ describe('GeoJSON Utils', () => {
 
     it('should use default radius of 2 when not specified', () => {
       const result = latLonToVector3(0, 0);
-      expect(result.y).toBeCloseTo(2, 5);
+      // At equator, prime meridian with default radius=2, point is at x=2
+      expect(result.x).toBeCloseTo(2, 5);
     });
 
     it('should handle custom radius', () => {
       const radius = 5;
       const result = latLonToVector3(0, 0, radius);
-      expect(result.y).toBeCloseTo(radius, 5);
+      // At equator, prime meridian with custom radius=5, point is at x=5
+      expect(result.x).toBeCloseTo(radius, 5);
     });
   });
 

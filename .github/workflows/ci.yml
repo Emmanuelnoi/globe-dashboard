@@ -51,7 +51,7 @@ jobs:
 
       - name: Run TypeScript type check
         run: pnpm run typecheck
-        continue-on-error: true # Non-blocking due to test file type issues
+        continue-on-error: false # Blocking - TypeScript errors must be fixed
 
       - name: Check code formatting
         run: |
@@ -94,9 +94,20 @@ jobs:
         env:
           SKIP_OPTIONAL_DEPS: true
 
-      - name: Run unit tests
-        run: pnpm test -- --run --coverage
-        continue-on-error: true # Non-blocking - tests need refactoring
+      # Strategy: Two-phase test enforcement
+      # Phase 1: Service/utility/integration tests (487 tests, 100% passing) - BLOCKING
+      # Phase 2: All tests including failing ones (604 tests total) - NON-BLOCKING
+      # This ensures quality gates while allowing incremental fixes on component tests
+
+      - name: Run passing tests only (BLOCKING - 487 tests)
+        run: pnpm run test:blocking
+        continue-on-error: false # BLOCKING - All 487 tests must pass (100% pass rate)
+        env:
+          NODE_ENV: test
+
+      - name: Run all tests with coverage (NON-BLOCKING - 604 tests)
+        run: pnpm run test:ci
+        continue-on-error: true # Non-blocking - Includes 82 failing tests being fixed
         env:
           NODE_ENV: test
 
@@ -206,16 +217,38 @@ jobs:
         env:
           SKIP_OPTIONAL_DEPS: true
 
-      - name: Run security audit
-        run: pnpm audit --audit-level=moderate
-        continue-on-error: true
+      # Strategy: Three-tier security enforcement
+      # Tier 1: Block on CRITICAL vulnerabilities (zero-tolerance) - BLOCKING
+      # Tier 2: Warn on HIGH vulnerabilities (3 known dev-dependency issues) - WARNING
+      # Tier 3: Report MODERATE/LOW for monitoring - NON-BLOCKING
+      #
+      # Known HIGH vulnerabilities (dev dependencies only, not in production build):
+      # - inflight@1.0.6 (inefficient regex) - via braces
+      # - glob@7.2.3 (path traversal) - via @compodoc/compodoc
+      # - @modelcontextprotocol/sdk@<1.24.0 (DNS rebinding) - via @angular/cli
 
-      - name: Check for vulnerable dependencies
+      - name: Check for critical vulnerabilities (BLOCKING)
+        run: pnpm audit --audit-level=critical
+        continue-on-error: false # BLOCKING - Critical CVEs must be fixed immediately
+
+      - name: Check for high vulnerabilities (WARNING)
         run: |
-          echo "🔍 Checking for known vulnerabilities..."
+          echo "🔍 Checking for high-severity vulnerabilities..."
+          pnpm audit --audit-level=high || echo "⚠️ High vulnerabilities found (see report below)"
+        continue-on-error: true # Non-blocking - 3 known dev-dependency issues
+
+      - name: Check for moderate vulnerabilities (MONITORING)
+        run: |
+          echo "📊 Checking for moderate/low vulnerabilities..."
+          pnpm audit --audit-level=moderate || echo "ℹ️ Moderate vulnerabilities found - review recommended"
+        continue-on-error: true # Non-blocking - for awareness only
+
+      - name: Generate security report
+        run: |
+          echo "📄 Generating detailed security audit report..."
           pnpm audit --json > audit-results.json || true
           if [ -f audit-results.json ]; then
-            cat audit-results.json
+            echo "✅ Security audit results saved to artifacts"
           fi
         continue-on-error: true
 

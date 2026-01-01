@@ -97,6 +97,7 @@ export const environment = {
   supabaseUrl: '${envVars.supabaseUrl}',
   supabaseAnonKey: '${envVars.supabaseAnonKey}',
   version: '1.0.0-dev',
+  cacheVersion: '1.0.0',
   buildDate: '${new Date().toISOString()}',
 } as const;
 

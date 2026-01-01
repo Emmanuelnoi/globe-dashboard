@@ -289,10 +289,11 @@ describe('MemoryManagementService', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       expect(() => service.disposeAll()).not.toThrow();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Error disposing resource:',
-        expect.any(Error),
-      );
+      // Logger formats the output with timestamp, so just check it was called
+      expect(consoleSpy).toHaveBeenCalled();
+      const callArgs = consoleSpy.mock.calls[0];
+      expect(callArgs.join(' ')).toContain('Error disposing resource');
+      expect(callArgs.join(' ')).toContain('Disposal failed');
 
       consoleSpy.mockRestore();
     });

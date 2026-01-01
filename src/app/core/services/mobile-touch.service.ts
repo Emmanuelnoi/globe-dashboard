@@ -103,7 +103,7 @@ export class MobileTouchService {
       if ('vibrate' in navigator) {
         const pattern =
           options.pattern || this.getVibrationPattern(options.type);
-        navigator.vibrate(pattern);
+        (navigator as any).vibrate(pattern);
       }
     } catch (error) {
       this.logger.debug(
@@ -226,7 +226,7 @@ export class MobileTouchService {
     element.style.userSelect = 'none';
 
     // Add webkit-tap-highlight-color for iOS
-    element.style.webkitTapHighlightColor = 'transparent';
+    (element.style as any).webkitTapHighlightColor = 'transparent';
 
     // Add optimal cursor for touch devices
     if (this.isMobile()) {
@@ -263,7 +263,7 @@ export class MobileTouchService {
    */
   preventOverscroll(element: HTMLElement): void {
     element.style.overscrollBehavior = 'contain';
-    element.style.webkitOverflowScrolling = 'touch';
+    (element.style as any).webkitOverflowScrolling = 'touch';
   }
 
   /**

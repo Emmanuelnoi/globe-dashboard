@@ -1,58 +1,87 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { LoggerService } from './logger.service';
+import {
+  BaseNotificationService,
+  BaseNotification,
+} from './base-notification.service';
+import { NOTIFICATION_DURATIONS } from './notification-helpers';
 
-export interface ErrorNotification {
-  id: string;
+export interface ErrorNotification extends BaseNotification {
   title: string;
   message: string;
   type: 'error' | 'warning' | 'info';
-  timestamp: Date;
-  duration?: number; // Auto-dismiss after milliseconds
 }
 
 @Injectable({
   providedIn: 'root',
 })
-export class ErrorNotificationService {
+export class ErrorNotificationService extends BaseNotificationService<ErrorNotification> {
   private readonly logger = inject(LoggerService);
-  private notifications = signal<ErrorNotification[]>([]);
 
-  readonly activeNotifications = this.notifications.asReadonly();
+  // Alias for backward compatibility
+  readonly activeNotifications = this.notifications;
 
   /**
    * Show a user-friendly error notification
    */
-  showError(title: string, message: string, duration = 5000): void {
-    this.addNotification({
+  showError(
+    title: string,
+    message: string,
+    duration: number = NOTIFICATION_DURATIONS.quizError,
+  ): void {
+    const id = this.generateId('error');
+    const notification: ErrorNotification = {
+      id,
       title,
       message,
       type: 'error',
+      timestamp: new Date(),
+      autoClose: true,
       duration,
-    });
+    };
+    this.addNotification(notification, { autoClose: true, duration });
   }
 
   /**
    * Show a warning notification
    */
-  showWarning(title: string, message: string, duration = 4000): void {
-    this.addNotification({
+  showWarning(
+    title: string,
+    message: string,
+    duration: number = NOTIFICATION_DURATIONS.quizWarning,
+  ): void {
+    const id = this.generateId('warning');
+    const notification: ErrorNotification = {
+      id,
       title,
       message,
       type: 'warning',
+      timestamp: new Date(),
+      autoClose: true,
       duration,
-    });
+    };
+    this.addNotification(notification, { autoClose: true, duration });
   }
 
   /**
    * Show an info notification
    */
-  showInfo(title: string, message: string, duration = 3000): void {
-    this.addNotification({
+  showInfo(
+    title: string,
+    message: string,
+    duration: number = NOTIFICATION_DURATIONS.quizInfo,
+  ): void {
+    const id = this.generateId('info');
+    const notification: ErrorNotification = {
+      id,
       title,
       message,
       type: 'info',
+      timestamp: new Date(),
+      autoClose: true,
       duration,
-    });
+    };
+    this.addNotification(notification, { autoClose: true, duration });
   }
 
   /**
@@ -114,40 +143,9 @@ export class ErrorNotificationService {
   }
 
   /**
-   * Dismiss a specific notification
-   */
-  dismiss(id: string): void {
-    this.notifications.update((notifications) =>
-      notifications.filter((n) => n.id !== id),
-    );
-  }
-
-  /**
-   * Clear all notifications
+   * Clear all notifications (alias for backward compatibility)
    */
   clearAll(): void {
-    this.notifications.set([]);
-  }
-
-  private addNotification(
-    notification: Omit<ErrorNotification, 'id' | 'timestamp'>,
-  ): void {
-    const fullNotification: ErrorNotification = {
-      ...notification,
-      id: crypto.randomUUID(),
-      timestamp: new Date(),
-    };
-
-    this.notifications.update((notifications) => [
-      ...notifications,
-      fullNotification,
-    ]);
-
-    // Auto-dismiss if duration is specified
-    if (notification.duration) {
-      setTimeout(() => {
-        this.dismiss(fullNotification.id);
-      }, notification.duration);
-    }
+    this.clear();
   }
 }

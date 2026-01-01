@@ -11,9 +11,11 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GbifAdapterService } from '../../services/gbif-adapter.service';
+import {
+  GbifAdapterService,
+  GbifSpeciesSearchResult,
+} from '../../services/gbif-adapter.service';
 import { SpeciesInfo } from '../../models/ui.models';
-import { GBIFSpecies } from '../../models/gbif.types';
 import { LoggerService } from '../../../../core/services/logger.service';
 
 interface SpeciesSearchResult extends SpeciesInfo {
@@ -1357,7 +1359,11 @@ export class SpeciesSearchComponent {
 
       this.searchResults.set(enhancedResults.slice(0, 10)); // Limit to top 10 results
     } catch (error) {
-      this.logger.error('Species search failed:', 'SpeciesSearch', error);
+      this.logger.error(
+        'Species search failed:',
+        'SpeciesSearch',
+        String(error),
+      );
       this.searchResults.set([]);
     } finally {
       this.isSearching.set(false);
@@ -1365,10 +1371,11 @@ export class SpeciesSearchComponent {
     }
   }
 
-  private extractCommonName(result: GBIFSpecies): string {
+  private extractCommonName(result: GbifSpeciesSearchResult): string {
     if (result.vernacularNames?.length && result.vernacularNames.length > 0) {
       const englishName = result.vernacularNames.find(
-        (vn) => vn.language === 'eng',
+        (vn: { vernacularName: string; language: string }) =>
+          vn.language === 'eng',
       );
       if (englishName) return englishName.vernacularName;
     }
@@ -1377,29 +1384,35 @@ export class SpeciesSearchComponent {
     return result.canonicalName || result.scientificName;
   }
 
-  private extractVernacularNames(species: GBIFSpecies): string[] {
+  private extractVernacularNames(species: GbifSpeciesSearchResult): string[] {
     // Extract vernacular names from GBIF species data
     if (species.vernacularNames && Array.isArray(species.vernacularNames)) {
       return species.vernacularNames
-        .filter((vn) => vn.language === 'en')
-        .map((vn) => vn.vernacularName)
-        .filter((name: string) => name && name !== species.vernacularName);
+        .filter(
+          (vn: { vernacularName: string; language: string }) =>
+            vn.language === 'en',
+        )
+        .map(
+          (vn: { vernacularName: string; language: string }) =>
+            vn.vernacularName,
+        )
+        .filter((name: string) => name && name.length > 0);
     }
     return [];
   }
 
-  private extractFamily(species: GBIFSpecies): string | undefined {
+  private extractFamily(species: GbifSpeciesSearchResult): string | undefined {
     // Extract family from GBIF species data
     return species.family || undefined;
   }
 
-  private extractOrder(species: GBIFSpecies): string | undefined {
+  private extractOrder(species: GbifSpeciesSearchResult): string | undefined {
     // Extract order from GBIF species data
     return species.order || undefined;
   }
 
   private estimateMigrationRange(
-    species: GBIFSpecies,
+    species: GbifSpeciesSearchResult,
   ): 'short' | 'medium' | 'long' | 'transcontinental' | 'polar' {
     // Basic migration range estimation based on scientific name patterns
     const scientificName = (species.scientificName || '').toLowerCase();
@@ -1435,10 +1448,13 @@ export class SpeciesSearchComponent {
     return 'medium';
   }
 
-  private calculateMatchScore(query: string, species: GBIFSpecies): number {
+  private calculateMatchScore(
+    query: string,
+    species: GbifSpeciesSearchResult,
+  ): number {
     // Simple fuzzy matching score
     const queryLower = query.toLowerCase();
-    const commonNameLower = (species.commonName || '').toLowerCase();
+    const commonNameLower = this.extractCommonName(species).toLowerCase();
     const scientificNameLower = (species.scientificName || '').toLowerCase();
 
     let score = 0;
@@ -1478,7 +1494,9 @@ export class SpeciesSearchComponent {
     return score;
   }
 
-  private generateImageUrl(species: GBIFSpecies): string | undefined {
+  private generateImageUrl(
+    species: GbifSpeciesSearchResult,
+  ): string | undefined {
     // For now, return placeholder. In real implementation, would call GBIF multimedia API
     // return `https://api.gbif.org/v1/species/${species.id}/media`;
     return undefined;

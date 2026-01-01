@@ -1,11 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { App } from './app';
 import { NavigationStateService } from './core/services/navigation-state.service';
 import { CountryDataService } from './core/services/country-data.service';
-import { PerformanceMonitorService } from './core/services/performance-monitor.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
+// Performance monitor service doesn't exist - using mock only
+abstract class PerformanceMonitorService {
+  abstract isEnabled(): boolean;
+  abstract getStats(): unknown;
+  abstract startMonitoring(): void;
+  abstract stopMonitoring(): void;
+  abstract recordRenderStart(): void;
+  abstract recordRenderEnd(): void;
+  abstract updateStats(): void;
+}
 
 // Mock NavigationStateService
 class MockNavigationStateService {

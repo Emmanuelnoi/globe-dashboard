@@ -44,7 +44,7 @@ describe('StatsPanelComponent Integration', () => {
             mode: 'find-country',
             difficulty: 'medium',
             questionCount: 5,
-            seed: 12345,
+            seed: '12345',
           },
           questions: [],
           results: [
@@ -79,7 +79,7 @@ describe('StatsPanelComponent Integration', () => {
             mode: 'capital-match',
             difficulty: 'easy',
             questionCount: 3,
-            seed: 54321,
+            seed: '54321',
           },
           questions: [],
           results: [
@@ -142,7 +142,7 @@ describe('StatsPanelComponent Integration', () => {
           mode: 'flag-id',
           difficulty: 'hard',
           questionCount: 2,
-          seed: 99999,
+          seed: '99999',
         },
         questions: [],
         results: [
@@ -279,7 +279,7 @@ describe('StatsPanelComponent Integration', () => {
             mode: 'find-country',
             difficulty: 'easy',
             questionCount: 1,
-            seed: 1,
+            seed: '1',
           },
           questions: [],
           results: [],
@@ -295,7 +295,7 @@ describe('StatsPanelComponent Integration', () => {
             mode: 'find-country',
             difficulty: 'easy',
             questionCount: 1,
-            seed: 2,
+            seed: '2',
           },
           questions: [],
           results: [],
@@ -311,7 +311,7 @@ describe('StatsPanelComponent Integration', () => {
             mode: 'find-country',
             difficulty: 'easy',
             questionCount: 1,
-            seed: 3,
+            seed: '3',
           },
           questions: [],
           results: [],
@@ -327,7 +327,7 @@ describe('StatsPanelComponent Integration', () => {
             mode: 'find-country',
             difficulty: 'easy',
             questionCount: 1,
-            seed: 4,
+            seed: '4',
           },
           questions: [],
           results: [],
@@ -364,7 +364,7 @@ describe('StatsPanelComponent Integration', () => {
       );
 
       // Initialize component
-      await userStatsService.loadStats();
+      await (userStatsService as any).loadStats();
       await new Promise((resolve) => setTimeout(resolve, 100));
       fixture.detectChanges();
 
@@ -384,7 +384,7 @@ describe('StatsPanelComponent Integration', () => {
       );
 
       // Trigger loading
-      userStatsService.loadStats();
+      (userStatsService as any).loadStats();
       fixture.detectChanges();
 
       // Check for loading state

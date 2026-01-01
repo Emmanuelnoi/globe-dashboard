@@ -134,7 +134,7 @@ describe('Quiz Flow Integration', () => {
         mode: 'find-country',
         difficulty: 'medium',
         questionCount: 2,
-        seed: 12345,
+        seed: '12345',
       };
 
       // Act: Start quiz
@@ -159,7 +159,7 @@ describe('Quiz Flow Integration', () => {
         mode: 'capital-match',
         difficulty: 'easy',
         questionCount: 1,
-        seed: 54321,
+        seed: '54321',
       };
 
       quizStateService.startGame(config);
@@ -183,7 +183,7 @@ describe('Quiz Flow Integration', () => {
         mode: 'flag-id',
         difficulty: 'hard',
         questionCount: 1,
-        seed: 99999,
+        seed: '99999',
       };
 
       quizStateService.startGame(config);
@@ -260,7 +260,7 @@ describe('Quiz Flow Integration', () => {
           mode,
           difficulty: 'medium',
           questionCount: 3,
-          seed: 12345,
+          seed: '12345',
         };
 
         quizStateService.startGame(config);
@@ -312,7 +312,7 @@ describe('Quiz Flow Integration', () => {
           mode: 'find-country',
           difficulty,
           questionCount: 2,
-          seed: 12345,
+          seed: '12345',
         };
 
         quizStateService.startGame(config);
@@ -344,7 +344,7 @@ describe('Quiz Flow Integration', () => {
         mode: 'find-country',
         difficulty: 'medium',
         questionCount: 1,
-        seed: 12345,
+        seed: '12345',
       };
 
       quizStateService.startGame(config);
@@ -366,7 +366,7 @@ describe('Quiz Flow Integration', () => {
         mode: 'find-country',
         difficulty: 'easy',
         questionCount: 2,
-        seed: 12345,
+        seed: '12345',
       };
 
       quizStateService.startGame(config);
@@ -390,7 +390,7 @@ describe('Quiz Flow Integration', () => {
         mode: 'find-country',
         difficulty: 'easy',
         questionCount: 1,
-        seed: 12345,
+        seed: '12345',
       };
 
       quizStateService.startGame(config);
@@ -426,7 +426,7 @@ describe('Quiz Flow Integration', () => {
         mode: 'find-country',
         difficulty: 'medium',
         questionCount: 1,
-        seed: 12345,
+        seed: '12345',
       };
 
       quizStateService.startGame(config);

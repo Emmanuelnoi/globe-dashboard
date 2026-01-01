@@ -1,18 +1,26 @@
 import { Injectable, signal, effect, inject } from '@angular/core';
 import { AchievementsService } from './achievements.service';
 import { LoggerService } from './logger.service';
+import {
+  BaseNotificationService,
+  BaseNotification,
+} from './base-notification.service';
+import {
+  NOTIFICATION_DURATIONS,
+  getTierColor,
+  getCategoryIcon,
+  NotificationSoundPlayer,
+} from './notification-helpers';
 
 /**
  * Achievement Notification Item
  */
-export interface AchievementNotification {
-  id: string;
+export interface AchievementNotification extends BaseNotification {
   achievementId: string;
   name: string;
   description: string;
   category: string;
   tier: string;
-  timestamp: Date;
   isVisible: boolean;
 }
 
@@ -32,21 +40,20 @@ export interface AchievementNotification {
 @Injectable({
   providedIn: 'root',
 })
-export class AchievementNotificationService {
+export class AchievementNotificationService extends BaseNotificationService<AchievementNotification> {
   private readonly achievementsService = inject(AchievementsService);
   private readonly logger = inject(LoggerService);
+  private readonly soundPlayer = new NotificationSoundPlayer();
 
-  // State
-  private readonly _notifications = signal<AchievementNotification[]>([]);
+  // Queue management
   private readonly _queue = signal<AchievementNotification[]>([]);
   private lastUnlockedCount = 0;
   private notificationTimeout: any = null;
-
-  // Public readonly signals
-  readonly notifications = this._notifications.asReadonly();
-  readonly hasNotifications = () => this._notifications().length > 0;
+  private queueIntervalId: number | null = null;
 
   constructor() {
+    super();
+
     // Watch for new achievement unlocks
     effect(() => {
       const recent = this.achievementsService.recentUnlocks();
@@ -78,6 +85,8 @@ export class AchievementNotificationService {
       category: achievement.category,
       tier: achievement.tier,
       timestamp: new Date(),
+      autoClose: true,
+      duration: NOTIFICATION_DURATIONS.achievement,
       isVisible: false,
     };
 
@@ -93,8 +102,13 @@ export class AchievementNotificationService {
   /**
    * Process notification queue (show one at a time)
    */
-  private async processQueue(): Promise<void> {
-    setInterval(() => {
+  private processQueue(): void {
+    // Clear any existing interval to prevent memory leaks
+    if (this.queueIntervalId !== null) {
+      clearInterval(this.queueIntervalId);
+    }
+
+    this.queueIntervalId = window.setInterval(() => {
       const queue = this._queue();
       const current = this._notifications();
 
@@ -116,7 +130,7 @@ export class AchievementNotificationService {
 
         this.notificationTimeout = setTimeout(() => {
           this.dismissNotification(next.id);
-        }, 4000);
+        }, NOTIFICATION_DURATIONS.achievement);
       }
     }, 500); // Check queue every 500ms
   }
@@ -142,38 +156,24 @@ export class AchievementNotificationService {
   }
 
   /**
+   * Cleanup on service destroy
+   */
+  ngOnDestroy(): void {
+    if (this.queueIntervalId !== null) {
+      clearInterval(this.queueIntervalId);
+    }
+    if (this.notificationTimeout) {
+      clearTimeout(this.notificationTimeout);
+    }
+    this.soundPlayer.destroy();
+  }
+
+  /**
    * Play achievement unlock sound (optional)
    */
   private playSound(): void {
     try {
-      // Create a simple success sound using Web Audio API
-      const audioContext = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-
-      // Achievement unlock sound: two-tone chime
-      oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-      oscillator.frequency.setValueAtTime(
-        659.25,
-        audioContext.currentTime + 0.1,
-      ); // E5
-      oscillator.frequency.setValueAtTime(
-        783.99,
-        audioContext.currentTime + 0.2,
-      ); // G5
-
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(
-        0.01,
-        audioContext.currentTime + 0.5,
-      );
-
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.5);
+      this.soundPlayer.playAchievementSound();
     } catch (error) {
       // Silent fail - sound is optional
       this.logger.debug('Failed to play sound:', error);
@@ -184,27 +184,13 @@ export class AchievementNotificationService {
    * Get tier color for notification
    */
   getTierColor(tier: string): string {
-    const colors: Record<string, string> = {
-      bronze: '#cd7f32',
-      silver: '#c0c0c0',
-      gold: '#ffd700',
-      platinum: '#e5e4e2',
-      diamond: '#b9f2ff',
-    };
-    return colors[tier] || '#10b981';
+    return getTierColor(tier);
   }
 
   /**
    * Get category icon for notification
    */
   getCategoryIcon(category: string): string {
-    const icons: Record<string, string> = {
-      quiz: '🎯',
-      discovery: '🗺️',
-      exploration: '🔍',
-      social: '👥',
-      milestone: '⭐',
-    };
-    return icons[category] || '🏆';
+    return getCategoryIcon(category);
   }
 }

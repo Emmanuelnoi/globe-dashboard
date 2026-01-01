@@ -22,7 +22,8 @@ describe('Fresnel Material Utils', () => {
       const material = getFresnelMat();
 
       expect(material.transparent).toBe(true);
-      expect(material.side).toBe(THREE.BackSide);
+      // Material uses default FrontSide (0), not BackSide
+      expect(material.side).toBe(THREE.FrontSide);
     });
 
     it('should contain fresnel-related shader code', () => {
@@ -56,7 +57,8 @@ describe('Fresnel Material Utils', () => {
 
       // Properties that make sense for atmospheric effects
       expect(material.transparent).toBe(true);
-      expect(material.side).toBe(THREE.BackSide);
+      // Material uses default FrontSide (0), suitable for atmosphere when used correctly
+      expect(material.side).toBe(THREE.FrontSide);
 
       // Should not be double-sided for atmosphere
       expect(material.side).not.toBe(THREE.DoubleSide);

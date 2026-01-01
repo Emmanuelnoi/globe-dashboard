@@ -6,7 +6,7 @@
  * and easier configuration across different environments.
  */
 
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 /**
  * GBIF API Configuration

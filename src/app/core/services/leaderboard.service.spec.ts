@@ -6,33 +6,32 @@ import { CountryDiscoveryService } from './country-discovery.service';
 import { AchievementsService } from './achievements.service';
 import { LoggerService } from './logger.service';
 import { signal } from '@angular/core';
+import { vi } from 'vitest';
 
 describe('LeaderboardService', () => {
   let service: LeaderboardService;
 
   beforeEach(() => {
-    const supabaseSpy = jasmine.createSpyObj(
-      'SupabaseService',
-      ['isUserAuthenticated', 'getCurrentUserId'],
-      {
-        isAuthenticated: signal(false),
-      },
-    );
-    const userStatsSpy = jasmine.createSpyObj('UserStatsService', [], {
-      stats: jasmine.createSpy().and.returnValue(null),
-    });
-    const discoverySpy = jasmine.createSpyObj('CountryDiscoveryService', [], {
-      totalDiscovered: jasmine.createSpy().and.returnValue(0),
-    });
-    const achievementsSpy = jasmine.createSpyObj('AchievementsService', [], {
-      unlockedCount: jasmine.createSpy().and.returnValue(0),
-    });
-    const loggerSpy = jasmine.createSpyObj('LoggerService', [
-      'debug',
-      'error',
-      'success',
-      'warn',
-    ]);
+    const supabaseSpy = {
+      isUserAuthenticated: vi.fn(),
+      getCurrentUserId: vi.fn(),
+      isAuthenticated: signal(false),
+    };
+    const userStatsSpy = {
+      stats: vi.fn(() => null),
+    };
+    const discoverySpy = {
+      totalDiscovered: vi.fn(() => 0),
+    };
+    const achievementsSpy = {
+      unlockedCount: vi.fn(() => 0),
+    };
+    const loggerSpy = {
+      debug: vi.fn(),
+      error: vi.fn(),
+      success: vi.fn(),
+      warn: vi.fn(),
+    };
 
     TestBed.configureTestingModule({
       providers: [

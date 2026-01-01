@@ -4,6 +4,7 @@ import {
   provideZoneChangeDetection,
   ErrorHandler,
   isDevMode,
+  APP_INITIALIZER,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -13,6 +14,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { routes } from './app.routes';
 import { GlobalErrorHandlerService } from './core/services/global-error-handler.service';
 import { httpErrorInterceptor } from './core/interceptors/http-error.interceptor';
+import { CacheVersionService } from './core/services/cache-version.service';
 
 // Icons are now handled directly in the icon component
 
@@ -26,6 +28,14 @@ export const appConfig: ApplicationConfig = {
     {
       provide: ErrorHandler,
       useClass: GlobalErrorHandlerService,
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (cacheVersionService: CacheVersionService) => {
+        return () => cacheVersionService.checkAndMigrate();
+      },
+      deps: [CacheVersionService],
+      multi: true,
     },
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),

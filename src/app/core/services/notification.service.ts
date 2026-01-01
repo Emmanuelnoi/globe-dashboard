@@ -1,36 +1,22 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable } from '@angular/core';
+import {
+  BaseNotificationService,
+  BaseNotification,
+} from './base-notification.service';
+import { NOTIFICATION_DURATIONS } from './notification-helpers';
 
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
 
-export interface Notification {
-  readonly id: string;
+export interface Notification extends BaseNotification {
   readonly type: NotificationType;
   readonly title: string;
   readonly message: string;
-  readonly timestamp: number;
-  readonly autoClose?: boolean;
-  readonly duration?: number; // in milliseconds
 }
 
 @Injectable({
   providedIn: 'root',
 })
-export class NotificationService {
-  private readonly _notifications = signal<readonly Notification[]>([]);
-  private notificationCounter = 0;
-
-  // Public read-only signals
-  readonly notifications = this._notifications.asReadonly();
-  readonly hasNotifications = computed(() => this._notifications().length > 0);
-
-  // Default durations for auto-close
-  private readonly DEFAULT_DURATIONS = {
-    success: 4000,
-    info: 5000,
-    warning: 6000,
-    error: 8000,
-  } as const;
-
+export class NotificationService extends BaseNotificationService<Notification> {
   /**
    * Show a success notification
    */
@@ -69,47 +55,21 @@ export class NotificationService {
     autoClose = true,
     duration?: number,
   ): string {
-    const id = `notification-${++this.notificationCounter}`;
+    const id = this.generateId('notification');
     const notification: Notification = {
       id,
       type,
       title,
       message,
-      timestamp: Date.now(),
+      timestamp: new Date(),
       autoClose,
-      duration: duration ?? this.DEFAULT_DURATIONS[type],
+      duration: duration ?? NOTIFICATION_DURATIONS[type],
     };
 
-    // Add to notifications array
-    this._notifications.update((notifications) => [
-      ...notifications,
-      notification,
-    ]);
-
-    // Auto-close if enabled
-    if (autoClose) {
-      setTimeout(() => {
-        this.dismiss(id);
-      }, notification.duration);
-    }
-
-    return id;
-  }
-
-  /**
-   * Dismiss a specific notification
-   */
-  dismiss(id: string): void {
-    this._notifications.update((notifications) =>
-      notifications.filter((n) => n.id !== id),
-    );
-  }
-
-  /**
-   * Clear all notifications
-   */
-  clear(): void {
-    this._notifications.set([]);
+    return this.addNotification(notification, {
+      autoClose,
+      duration: notification.duration,
+    });
   }
 
   /**

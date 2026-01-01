@@ -240,13 +240,14 @@ describe('Globe Component', () => {
     });
 
     it('should add countries to scene', async () => {
+      // @ts-expect-error - Accessing private property for testing
       const scene = component['scene'];
 
       // Wait for async data loading
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       const countriesGroup = scene.children.find(
-        (child) => child instanceof THREE.Group,
+        (child: THREE.Object3D) => child instanceof THREE.Group,
       );
       expect(countriesGroup).toBeDefined();
     });
@@ -258,27 +259,34 @@ describe('Globe Component', () => {
     });
 
     it('should update controls in animation loop', () => {
+      // @ts-expect-error - Accessing private properties for testing
       const controls = component['controls'];
       const updateSpy = vi.spyOn(controls, 'update');
 
+      // @ts-expect-error - Accessing private method for testing
       component['animate']();
 
       expect(updateSpy).toHaveBeenCalled();
     });
 
     it('should render scene in animation loop', () => {
+      // @ts-expect-error - Accessing private properties for testing
       const renderer = component['renderer'];
       const renderSpy = vi.spyOn(renderer, 'render');
 
+      // @ts-expect-error - Accessing private method for testing
       component['animate']();
 
       expect(renderSpy).toHaveBeenCalledWith(
+        // @ts-expect-error - Accessing private property for testing
         component['scene'],
+        // @ts-expect-error - Accessing private property for testing
         component['camera'],
       );
     });
 
     it('should set animation loop on renderer', () => {
+      // @ts-expect-error - Accessing private property for testing
       const renderer = component['renderer'];
       const setAnimationLoopSpy = vi.spyOn(renderer, 'setAnimationLoop');
 
@@ -286,6 +294,7 @@ describe('Globe Component', () => {
       component.ngOnDestroy();
       component.ngAfterViewInit();
 
+      // @ts-expect-error - Accessing private method for testing
       expect(setAnimationLoopSpy).toHaveBeenCalledWith(component['animate']);
     });
   });
@@ -296,7 +305,9 @@ describe('Globe Component', () => {
     });
 
     it('should handle window resize', () => {
+      // @ts-expect-error - Accessing private properties for testing
       const camera = component['camera'];
+      // @ts-expect-error - Accessing private property for testing
       const renderer = component['renderer'];
 
       const updateProjectionMatrixSpy = vi.spyOn(
@@ -312,6 +323,7 @@ describe('Globe Component', () => {
     });
 
     it('should update camera aspect ratio on resize', () => {
+      // @ts-expect-error - Accessing private property for testing
       const camera = component['camera'];
       const initialAspect = camera.aspect;
 
@@ -339,7 +351,9 @@ describe('Globe Component', () => {
     });
 
     it('should handle resize when components are not initialized', () => {
+      // @ts-expect-error - Accessing private properties for testing
       component['camera'] = undefined as unknown as THREE.PerspectiveCamera;
+      // @ts-expect-error - Accessing private property for testing
       component['renderer'] = undefined as unknown as THREE.WebGLRenderer;
 
       expect(() => component.onWindowResize()).not.toThrow();
@@ -352,6 +366,7 @@ describe('Globe Component', () => {
     });
 
     it('should dispose renderer on destroy', () => {
+      // @ts-expect-error - Accessing private property for testing
       const renderer = component['renderer'];
       const disposeSpy = vi.spyOn(renderer, 'dispose');
 
@@ -364,6 +379,7 @@ describe('Globe Component', () => {
       const cancelAnimationFrameSpy = vi.spyOn(global, 'cancelAnimationFrame');
 
       // Set animation ID
+      // @ts-expect-error - Accessing private property for testing
       component['animationId'] = 123;
 
       component.ngOnDestroy();
@@ -372,6 +388,7 @@ describe('Globe Component', () => {
     });
 
     it('should handle destroy when animation ID is undefined', () => {
+      // @ts-expect-error - Accessing private property for testing
       component['animationId'] = undefined;
 
       expect(() => component.ngOnDestroy()).not.toThrow();

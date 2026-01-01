@@ -122,6 +122,44 @@ export class UserStatsService {
       return;
     }
 
+    // Validate session data types
+    if (typeof session.finalScore !== 'number' || isNaN(session.finalScore)) {
+      throw new Error('Invalid session: finalScore must be a valid number');
+    }
+
+    if (typeof session.completed !== 'boolean') {
+      throw new Error('Invalid session: completed must be a boolean');
+    }
+
+    // Validate session data before saving
+    if (!session.completed) {
+      this.logger.warn('⚠️ Cannot save incomplete session');
+      return;
+    }
+
+    if (session.finalScore < 0) {
+      this.logger.error(
+        '❌ Invalid negative score detected:',
+        session.finalScore,
+      );
+      return;
+    }
+
+    if (session.finalScore > 10000) {
+      this.logger.warn(
+        '⚠️ Unusually high score detected:',
+        session.finalScore,
+        '- Saving anyway but flagged for review',
+      );
+    }
+
+    if (!session.id || !session.startTime) {
+      this.logger.error(
+        '❌ Invalid session: missing required fields (id or startTime)',
+      );
+      return;
+    }
+
     try {
       this._lastError.set(null);
 
@@ -273,6 +311,8 @@ export class UserStatsService {
    * Export all data as JSON for backup/migration
    */
   async exportData(): Promise<{
+    version: number;
+    exportDate: string;
     sessions: GameSession[];
     stats: UserStatsV1 | null;
   } | null> {
@@ -283,7 +323,12 @@ export class UserStatsService {
       const sessions = await tx.objectStore('sessions').getAll();
       const stats = await this.getStatsFromDatabase(tx.objectStore('meta'));
 
-      return { sessions, stats };
+      return {
+        version: 1,
+        exportDate: new Date().toISOString(),
+        sessions,
+        stats,
+      };
     } catch (error) {
       this.logger.error('❌ Failed to export data:', error);
       this._lastError.set(
@@ -301,6 +346,22 @@ export class UserStatsService {
     stats: UserStatsV1 | null;
   }): Promise<void> {
     if (!this.db) return;
+
+    // Validate import data structure
+    if (
+      !data ||
+      data === null ||
+      typeof data !== 'object' ||
+      Array.isArray(data)
+    ) {
+      throw new Error('Invalid import data: must be a non-null object');
+    }
+    if (!('sessions' in data) || !Array.isArray(data.sessions)) {
+      throw new Error('Invalid import data: sessions must be an array');
+    }
+    if (!('stats' in data)) {
+      throw new Error('Invalid import data: stats field is required');
+    }
 
     try {
       const tx = this.db.transaction(['sessions', 'meta'], 'readwrite');
@@ -375,7 +436,7 @@ export class UserStatsService {
     // Calculate updated aggregate stats
     const totalGames = currentStats.totalGames + 1;
     const totalScore = currentStats.totalScore + newSession.finalScore;
-    const averageScore = totalScore / totalGames;
+    const averageScore = Math.round(totalScore / totalGames);
     const bestScore = Math.max(currentStats.bestScore, newSession.finalScore);
     const bestStreak = Math.max(currentStats.bestStreak, newSession.bestStreak);
 
@@ -384,7 +445,7 @@ export class UserStatsService {
     const currentModeStats = currentStats.gamesByMode[modeKey];
     const modeGamesPlayed = currentModeStats.gamesPlayed + 1;
     const modeTotalScore = currentModeStats.totalScore + newSession.finalScore;
-    const modeAverageScore = modeTotalScore / modeGamesPlayed;
+    const modeAverageScore = Math.round(modeTotalScore / modeGamesPlayed);
     const modeBestScore = Math.max(
       currentModeStats.bestScore,
       newSession.finalScore,

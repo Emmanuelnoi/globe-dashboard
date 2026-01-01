@@ -121,16 +121,19 @@ describe('DataLoadingService', () => {
 
   // Test data factories
   const createMockSpecies = (): SpeciesInfo => ({
-    gbifKey: '212',
+    id: '212',
     commonName: 'Arctic Tern',
     scientificName: 'Sterna paradisaea',
     imageUrl: '',
     description: 'Test species',
+    migrationRange: 'long',
+    isPopular: true,
   });
 
   const createMockDateRange = (): DateRange => ({
-    start: new Date('2023-01-01'),
-    end: new Date('2023-12-31'),
+    startDate: new Date('2023-01-01'),
+    endDate: new Date('2023-12-31'),
+    granularity: 'day',
   });
 
   const createMockGbifResponse = (count: number = 10): GbifSearchResponse => ({
@@ -296,6 +299,9 @@ describe('DataLoadingService', () => {
             decimalLongitude: -75.0,
             eventDate: '2023-01-01',
             countryCode: 'US',
+            locality: null,
+            coordinateUncertaintyInMeters: null,
+            issues: [],
           },
           {
             key: 2,
@@ -304,6 +310,9 @@ describe('DataLoadingService', () => {
             decimalLongitude: 0,
             eventDate: '2023-01-02',
             countryCode: 'US',
+            locality: null,
+            coordinateUncertaintyInMeters: null,
+            issues: [],
           },
           {
             key: 3,
@@ -312,6 +321,9 @@ describe('DataLoadingService', () => {
             decimalLongitude: -75.0,
             eventDate: '2023-01-03',
             countryCode: 'US',
+            locality: null,
+            coordinateUncertaintyInMeters: null,
+            issues: [],
           },
         ],
       };
@@ -456,6 +468,9 @@ describe('DataLoadingService', () => {
             decimalLongitude: -75.0,
             eventDate: '2023-01-01',
             countryCode: 'US',
+            locality: null,
+            coordinateUncertaintyInMeters: null,
+            issues: [],
           },
           {
             key: 2,
@@ -464,6 +479,9 @@ describe('DataLoadingService', () => {
             decimalLongitude: -75.0,
             eventDate: '2023-01-02',
             countryCode: 'US',
+            locality: null,
+            coordinateUncertaintyInMeters: null,
+            issues: [],
           },
         ],
       };
@@ -496,6 +514,9 @@ describe('DataLoadingService', () => {
             decimalLongitude: -75.0,
             eventDate: '2023-01-01',
             countryCode: 'US',
+            locality: null,
+            coordinateUncertaintyInMeters: null,
+            issues: [],
           },
           {
             key: 2,
@@ -504,6 +525,9 @@ describe('DataLoadingService', () => {
             decimalLongitude: -75.0,
             eventDate: 'invalid-date',
             countryCode: 'US',
+            locality: null,
+            coordinateUncertaintyInMeters: null,
+            issues: [],
           },
         ],
       };

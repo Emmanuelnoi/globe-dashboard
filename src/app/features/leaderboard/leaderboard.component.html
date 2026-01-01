@@ -64,9 +64,9 @@
         </div>
         <div class="rank-stats">
           <div class="stat-item">
-            <span class="stat-value">{{
-              formatNumber(myRankInCurrent()!.totalScore)
-            }}</span>
+            <span class="stat-value">
+              {{ myRankInCurrent()!.totalScore | number: "1.0-0" }}
+            </span>
             <span class="stat-label">Score</span>
           </div>
           <div class="stat-item">
@@ -74,7 +74,9 @@
             <span class="stat-label">Games</span>
           </div>
           <div class="stat-item">
-            <span class="stat-value">{{ myRankInCurrent()!.bestStreak }}</span>
+            <span class="stat-value">
+              {{ myRankInCurrent()!.bestStreak }}
+            </span>
             <span class="stat-label">Streak</span>
           </div>
         </div>
@@ -134,15 +136,15 @@
             <span class="player-badge" *ngIf="isCurrentUser(entry)">You</span>
           </div>
           <div class="cell-score">
-            <span class="score-value">{{
-              formatNumber(entry.totalScore)
-            }}</span>
+            <span class="score-value">
+              {{ entry.totalScore | number: "1.0-0" }}
+            </span>
           </div>
           <div class="cell-games">
             {{ entry.totalGames }}
           </div>
           <div class="cell-avg">
-            {{ entry.averageScore.toFixed(0) }}
+            {{ entry.averageScore | number: "1.0-0" }}
           </div>
         </div>
       </div>

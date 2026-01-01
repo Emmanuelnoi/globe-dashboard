@@ -124,19 +124,6 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Format large numbers with K/M suffix
-   */
-  formatNumber(num: number): string {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
-    }
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
-    }
-    return num.toString();
-  }
-
-  /**
    * Get percentile display text
    */
   getPercentileText(percentile: number | undefined): string {

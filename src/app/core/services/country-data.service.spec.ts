@@ -58,9 +58,9 @@ describe('CountryDataService', () => {
     });
 
     it('should get country by valid code', () => {
-      const usa = service.getCountryByCode('US');
+      const usa = service.getCountryByCode('USA');
       expect(usa).toBeDefined();
-      expect(usa?.code).toBe('US');
+      expect(usa?.code).toBe('USA');
       expect(usa?.name).toBe('United States');
     });
 
@@ -72,11 +72,11 @@ describe('CountryDataService', () => {
     it('should get country by name (case-insensitive)', () => {
       const usa = service.getCountryByName('United States');
       expect(usa).toBeDefined();
-      expect(usa?.code).toBe('US');
+      expect(usa?.code).toBe('USA');
 
       const usaLowercase = service.getCountryByName('united states');
       expect(usaLowercase).toBeDefined();
-      expect(usaLowercase?.code).toBe('US');
+      expect(usaLowercase?.code).toBe('USA');
     });
 
     it('should return undefined for invalid country name', () => {
@@ -121,72 +121,72 @@ describe('CountryDataService', () => {
     });
 
     it('should toggle country selection (add)', () => {
-      service.toggleCountrySelection('US');
-      expect(service.selectedCountries()).toContain('US');
+      service.toggleCountrySelection('USA');
+      expect(service.selectedCountries()).toContain('USA');
       expect(service.hasSelectedCountries()).toBe(true);
     });
 
     it('should toggle country selection (remove)', () => {
-      service.toggleCountrySelection('US');
-      expect(service.selectedCountries()).toContain('US');
+      service.toggleCountrySelection('USA');
+      expect(service.selectedCountries()).toContain('USA');
 
-      service.toggleCountrySelection('US');
-      expect(service.selectedCountries()).not.toContain('US');
+      service.toggleCountrySelection('USA');
+      expect(service.selectedCountries()).not.toContain('USA');
     });
 
     it('should select multiple countries', () => {
-      service.selectCountries(['US', 'CA', 'MX']);
+      service.selectCountries(['USA', 'CAN', 'MEX']);
       expect(service.selectedCountries().length).toBe(3);
-      expect(service.selectedCountries()).toContain('US');
-      expect(service.selectedCountries()).toContain('CA');
-      expect(service.selectedCountries()).toContain('MX');
+      expect(service.selectedCountries()).toContain('USA');
+      expect(service.selectedCountries()).toContain('CAN');
+      expect(service.selectedCountries()).toContain('MEX');
     });
 
     it('should filter out invalid country codes when selecting', () => {
-      service.selectCountries(['US', 'INVALID', 'CA']);
+      service.selectCountries(['USA', 'INVALID', 'CAN']);
       expect(service.selectedCountries().length).toBe(2);
-      expect(service.selectedCountries()).toContain('US');
-      expect(service.selectedCountries()).toContain('CA');
+      expect(service.selectedCountries()).toContain('USA');
+      expect(service.selectedCountries()).toContain('CAN');
       expect(service.selectedCountries()).not.toContain('INVALID');
     });
 
     it('should add to existing selection', () => {
-      service.selectCountries(['US']);
-      service.addToSelection(['CA', 'MX']);
+      service.selectCountries(['USA']);
+      service.addToSelection(['CAN', 'MEX']);
       expect(service.selectedCountries().length).toBe(3);
     });
 
     it('should not add duplicates when adding to selection', () => {
-      service.selectCountries(['US', 'CA']);
-      service.addToSelection(['CA', 'MX']);
+      service.selectCountries(['USA', 'CAN']);
+      service.addToSelection(['CAN', 'MEX']);
       expect(service.selectedCountries().length).toBe(3);
-      expect(service.selectedCountries().filter((c) => c === 'CA').length).toBe(
-        1,
-      );
+      expect(
+        service.selectedCountries().filter((c) => c === 'CAN').length,
+      ).toBe(1);
     });
 
     it('should remove countries from selection', () => {
-      service.selectCountries(['US', 'CA', 'MX']);
-      service.removeFromSelection(['CA']);
+      service.selectCountries(['USA', 'CAN', 'MEX']);
+      service.removeFromSelection(['CAN']);
       expect(service.selectedCountries().length).toBe(2);
-      expect(service.selectedCountries()).not.toContain('CA');
+      expect(service.selectedCountries()).not.toContain('CAN');
     });
 
     it('should clear all selections', () => {
-      service.selectCountries(['US', 'CA', 'MX']);
+      service.selectCountries(['USA', 'CAN', 'MEX']);
       service.clearSelection();
       expect(service.selectedCountries()).toEqual([]);
       expect(service.hasSelectedCountries()).toBe(false);
     });
 
     it('should check if country is selected by code', () => {
-      service.selectCountries(['US']);
-      expect(service.isCountrySelected('US')).toBe(true);
-      expect(service.isCountrySelected('CA')).toBe(false);
+      service.selectCountries(['USA']);
+      expect(service.isCountrySelected('USA')).toBe(true);
+      expect(service.isCountrySelected('CAN')).toBe(false);
     });
 
     it('should check if country is selected by name', () => {
-      service.selectCountries(['US']);
+      service.selectCountries(['USA']);
       expect(service.isCountrySelectedByName('United States')).toBe(true);
       expect(service.isCountrySelectedByName('Canada')).toBe(false);
     });
@@ -196,9 +196,9 @@ describe('CountryDataService', () => {
     });
 
     it('should get selected country codes', () => {
-      service.selectCountries(['US', 'CA']);
+      service.selectCountries(['USA', 'CAN']);
       const codes = service.getSelectedCountryCodes();
-      expect(codes).toEqual(['US', 'CA']);
+      expect(codes).toEqual(['USA', 'CAN']);
     });
   });
 
@@ -210,27 +210,27 @@ describe('CountryDataService', () => {
     });
 
     it('should compute selectedCountryData correctly', () => {
-      service.selectCountries(['US', 'CA']);
+      service.selectCountries(['USA', 'CAN']);
       const data = service.selectedCountryData();
       expect(data.length).toBe(2);
-      expect(data[0]?.code).toBe('US');
-      expect(data[1]?.code).toBe('CA');
+      expect(data[0]?.code).toBe('USA');
+      expect(data[1]?.code).toBe('CAN');
     });
 
     it('should filter out invalid codes from selectedCountryData', () => {
-      service.selectCountries(['US']);
+      service.selectCountries(['USA']);
       // Manually add invalid code to test computed filtering
       service['_selectedCountries'].update((arr) => [...arr, 'INVALID']);
       const data = service.selectedCountryData();
       expect(data.length).toBe(1);
-      expect(data[0]?.code).toBe('US');
+      expect(data[0]?.code).toBe('USA');
     });
 
     it('should compute canCompare correctly', () => {
-      service.selectCountries(['US']);
+      service.selectCountries(['USA']);
       expect(service.canCompare()).toBe(false);
 
-      service.addToSelection(['CA']);
+      service.addToSelection(['CAN']);
       expect(service.canCompare()).toBe(true);
     });
 
@@ -302,11 +302,11 @@ describe('CountryDataService', () => {
 
     it('should search specific fields only', () => {
       const results = service.searchCountries(service.getAllCountries(), {
-        query: 'US',
+        query: 'USA',
         fields: ['code'],
       });
       expect(results.length).toBeGreaterThan(0);
-      expect(results.some((c) => c.code === 'US')).toBe(true);
+      expect(results.some((c) => c.code === 'USA')).toBe(true);
     });
 
     it('should return all countries when query is empty', () => {
@@ -440,7 +440,7 @@ describe('CountryDataService', () => {
     });
 
     it('should export selected countries as CSV', () => {
-      service.selectCountries(['US', 'CA']);
+      service.selectCountries(['USA', 'CAN']);
       const csv = service.exportSelectedAsCSV();
       expect(csv).toBeTruthy();
       expect(csv).toContain('Country,Code,Capital');
@@ -478,7 +478,7 @@ describe('CountryDataService', () => {
     it('should add country from globe using exact name', () => {
       const result = service.addCountryFromGlobe('United States');
       expect(result).toBe(true);
-      expect(service.selectedCountries()).toContain('US');
+      expect(service.selectedCountries()).toContain('USA');
     });
 
     it('should not add duplicate country from globe', () => {
@@ -490,9 +490,9 @@ describe('CountryDataService', () => {
 
     it('should handle fuzzy matching for special cases', () => {
       const specialCases = [
-        { input: 'USA', expectedCode: 'US' },
-        { input: 'United States of America', expectedCode: 'US' },
-        { input: 'United Kingdom', expectedCode: 'GB' },
+        { input: 'USA', expectedCode: 'USA' },
+        { input: 'United States of America', expectedCode: 'USA' },
+        { input: 'United Kingdom', expectedCode: 'GBR' },
       ];
 
       specialCases.forEach(({ input, expectedCode }) => {
@@ -510,14 +510,14 @@ describe('CountryDataService', () => {
     });
 
     it('should remove country from selection by code', () => {
-      service.selectCountries(['US']);
-      const result = service.removeCountryFromSelection('US');
+      service.selectCountries(['USA']);
+      const result = service.removeCountryFromSelection('USA');
       expect(result).toBe(true);
-      expect(service.selectedCountries()).not.toContain('US');
+      expect(service.selectedCountries()).not.toContain('USA');
     });
 
     it('should return false when removing non-selected country', () => {
-      const result = service.removeCountryFromSelection('US');
+      const result = service.removeCountryFromSelection('USA');
       expect(result).toBe(false);
     });
   });
@@ -539,7 +539,7 @@ describe('CountryDataService', () => {
 
     it('should update statistics when selection changes', () => {
       const statsBeforeSelection = service.getDataStatistics();
-      service.selectCountries(['US', 'CA']);
+      service.selectCountries(['USA', 'CAN']);
       const statsAfterSelection = service.getDataStatistics();
 
       expect(statsAfterSelection.selected).toBe(2);
@@ -549,13 +549,13 @@ describe('CountryDataService', () => {
 
   describe('Similar Countries', () => {
     it('should find similar countries by region and HDI', () => {
-      const similar = service.getSimilarCountries('US', 5);
+      const similar = service.getSimilarCountries('USA', 5);
       expect(similar.length).toBeGreaterThan(0);
       expect(similar.length).toBeLessThanOrEqual(5);
 
-      const target = service.getCountryByCode('US');
+      const target = service.getCountryByCode('USA');
       similar.forEach((country) => {
-        expect(country.code).not.toBe('US');
+        expect(country.code).not.toBe('USA');
         expect(country.region).toBe(target?.region);
         expect(country.hdiCategory).toBe(target?.hdiCategory);
       });
@@ -567,14 +567,14 @@ describe('CountryDataService', () => {
     });
 
     it('should respect limit parameter', () => {
-      const similar = service.getSimilarCountries('US', 3);
+      const similar = service.getSimilarCountries('USA', 3);
       expect(similar.length).toBeLessThanOrEqual(3);
     });
   });
 
   describe('Visualization Data', () => {
     it('should get countries for visualization', () => {
-      service.selectCountries(['US', 'CA']);
+      service.selectCountries(['USA', 'CAN']);
       const vizData = service.getCountriesForVisualization();
 
       expect(vizData.length).toBeGreaterThan(0);
@@ -585,17 +585,17 @@ describe('CountryDataService', () => {
       expect(vizData[0]).toHaveProperty('population');
       expect(vizData[0]).toHaveProperty('isSelected');
 
-      const usData = vizData.find((d) => d.code === 'US');
+      const usData = vizData.find((d) => d.code === 'USA');
       expect(usData?.isSelected).toBe(true);
 
-      const frData = vizData.find((d) => d.code === 'FR');
+      const frData = vizData.find((d) => d.code === 'FRA');
       expect(frData?.isSelected).toBe(false);
     });
   });
 
   describe('Reset Functionality', () => {
     it('should reset all state to defaults', () => {
-      service.selectCountries(['US', 'CA']);
+      service.selectCountries(['USA', 'CAN']);
       service.setSearchQuery('United');
       service.setFilter({ regions: ['Europe' as CountryRegion] });
 

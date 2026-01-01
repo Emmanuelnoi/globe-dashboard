@@ -27,6 +27,23 @@ import { LeaderboardComponent } from './features/leaderboard/leaderboard.compone
 import { UserProfileComponent } from './features/user-profile/user-profile.component';
 import { AchievementNotificationComponent } from './shared/components/achievement-notification/achievement-notification';
 import { AchievementsGalleryComponent } from './features/achievements-gallery/achievements-gallery.component';
+import { CacheVersionService } from './core/services/cache-version.service';
+import type {
+  MigrationResult,
+  DatabaseConfig,
+} from './core/services/cache-version.service';
+
+// Extend Window interface for cache version debugging API
+declare global {
+  interface Window {
+    cacheVersion?: {
+      check: () => string;
+      clearApiCaches: () => Promise<void>;
+      getDatabases: () => readonly DatabaseConfig[];
+      migrate: () => Promise<MigrationResult>;
+    };
+  }
+}
 
 @Component({
   selector: 'app-root',
@@ -419,6 +436,7 @@ export class App implements AfterViewInit {
   private readonly userStatsService = inject(UserStatsService);
   private readonly discoveryService = inject(CountryDiscoveryService);
   private readonly achievementsService = inject(AchievementsService);
+  private readonly cacheVersionService = inject(CacheVersionService);
 
   protected readonly title = signal('global-dashboard');
 
@@ -494,6 +512,22 @@ export class App implements AfterViewInit {
         'AppComponent',
       );
     }
+
+    // Add cache version debugging helpers to browser console
+    window.cacheVersion = {
+      check: (): string => this.cacheVersionService.getCurrentVersion(),
+      clearApiCaches: (): Promise<void> =>
+        this.cacheVersionService.clearAllApiCaches(),
+      getDatabases: (): readonly DatabaseConfig[] =>
+        this.cacheVersionService.getDatabases(),
+      migrate: (): Promise<MigrationResult> =>
+        this.cacheVersionService.checkAndMigrate(),
+    };
+
+    this.logger.debug(
+      'Cache version console helpers available: cacheVersion.check(), cacheVersion.getDatabases(), cacheVersion.clearApiCaches(), cacheVersion.migrate()',
+      'AppComponent',
+    );
   }
 
   /**
