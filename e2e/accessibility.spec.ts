@@ -12,10 +12,18 @@ test.describe('Accessibility Tests', () => {
   test.beforeEach(async ({ page }) => {
     // Wait for the app to be fully loaded
     await page.goto('/');
+
+    // Wait for Angular to fully bootstrap and render
+    // This ensures the HTML is fully loaded before accessibility scans
+    await page.waitForSelector('app-root', { timeout: 15000 });
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForLoadState('networkidle');
 
     // Wait for globe to render (critical visual element)
     await page.waitForSelector('canvas', { timeout: 10000 });
+
+    // Additional wait to ensure all dynamic content is loaded
+    await page.waitForTimeout(1000);
   });
 
   test('Home page should not have any automatically detectable accessibility issues', async ({
@@ -254,8 +262,11 @@ test.describe('Accessibility Tests', () => {
 test.describe('Accessibility - Notification System', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    await page.waitForSelector('app-root', { timeout: 15000 });
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('canvas', { timeout: 10000 });
+    await page.waitForTimeout(1000);
   });
 
   test('Notification toasts should be accessible', async ({ page }) => {
@@ -357,8 +368,11 @@ test.describe('Accessibility - Notification System', () => {
 test.describe('Accessibility - Authentication Modals', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    await page.waitForSelector('app-root', { timeout: 15000 });
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('canvas', { timeout: 10000 });
+    await page.waitForTimeout(1000);
   });
 
   test('Sign-in modal should be accessible', async ({ page }) => {
@@ -464,8 +478,11 @@ test.describe('Accessibility - Authentication Modals', () => {
 test.describe('Accessibility - Interactive Components', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    await page.waitForSelector('app-root', { timeout: 15000 });
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('canvas', { timeout: 10000 });
+    await page.waitForTimeout(1000);
   });
 
   test('Country comparison card should be accessible', async ({ page }) => {

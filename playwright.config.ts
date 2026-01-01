@@ -82,5 +82,10 @@ export default defineConfig({
     url: 'http://localhost:4200',
     reuseExistingServer: !process.env['CI'],
     timeout: 120 * 1000,
+    env: {
+      CI: process.env['CI'] || '',
+      VITE_SUPABASE_URL: process.env['VITE_SUPABASE_URL'] || '',
+      VITE_SUPABASE_ANON_KEY: process.env['VITE_SUPABASE_ANON_KEY'] || '',
+    },
   },
 });
