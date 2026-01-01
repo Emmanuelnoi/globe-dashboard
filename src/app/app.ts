@@ -67,24 +67,8 @@ declare global {
       role="application"
       aria-label="3D Global Dashboard"
     >
-      <!-- Skip to main content link for keyboard users -->
-      <a
-        href="#main-content"
-        class="skip-link"
-        aria-label="Skip to main content"
-      >
-        Skip to main content
-      </a>
-
-      <!-- Page heading for screen readers (WCAG 2.1 AA requirement) -->
-      <h1 class="sr-only">
-        3D Global Dashboard - Interactive Geography Visualization
-      </h1>
-
       <main
-        id="main-content"
         #globeContainer
-        role="main"
         aria-label="Interactive 3D globe visualization"
         aria-describedby="globe-description"
       ></main>

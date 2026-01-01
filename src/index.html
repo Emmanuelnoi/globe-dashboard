@@ -121,6 +121,14 @@
     </script>
   </head>
   <body>
-    <app-root></app-root>
+    <!-- Page heading for screen readers (WCAG 2.1 AA requirement) -->
+    <h1 class="sr-only">
+      3D Global Dashboard - Interactive Geography Visualization
+    </h1>
+
+    <!-- Skip to main content link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <app-root id="main-content" role="main"></app-root>
   </body>
 </html>
