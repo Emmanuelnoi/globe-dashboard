@@ -67,11 +67,12 @@ declare global {
       role="application"
       aria-label="3D Global Dashboard"
     >
-      <main
+      <div
         #globeContainer
+        role="region"
         aria-label="Interactive 3D globe visualization"
         aria-describedby="globe-description"
-      ></main>
+      ></div>
 
       <!-- Hidden description for screen readers -->
       <div id="globe-description" class="sr-only">

@@ -41,6 +41,11 @@ test.describe('Accessibility Tests', () => {
     await page.click('[data-testid="quiz-link"], button:has-text("Quiz")');
     await page.waitForLoadState('networkidle');
 
+    // Wait for Angular to fully render the page
+    await page.waitForSelector('main', { timeout: 10000 });
+    await page.waitForSelector('h1', { timeout: 5000 });
+    await page.waitForTimeout(1000);
+
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
       .analyze();
@@ -52,6 +57,11 @@ test.describe('Accessibility Tests', () => {
     // Navigate to bird migration
     await page.click('[data-testid="migration-link"], button:has-text("Bird")');
     await page.waitForLoadState('networkidle');
+
+    // Wait for Angular to fully render the page
+    await page.waitForSelector('main', { timeout: 10000 });
+    await page.waitForSelector('h1', { timeout: 5000 });
+    await page.waitForTimeout(1000);
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
@@ -597,6 +607,22 @@ test.describe('Accessibility - Interactive Components', () => {
 });
 
 test.describe('Accessibility - Detailed Reports', () => {
+  test.beforeEach(async ({ page }) => {
+    // Wait for the app to be fully loaded
+    await page.goto('/');
+
+    // Wait for Angular to fully bootstrap and render
+    await page.waitForSelector('app-root', { timeout: 15000 });
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('networkidle');
+
+    // Wait for globe to render
+    await page.waitForSelector('canvas', { timeout: 10000 });
+
+    // Additional wait to ensure all dynamic content is loaded
+    await page.waitForTimeout(1000);
+  });
+
   test('Generate detailed accessibility report for home page', async ({
     page,
   }) => {
