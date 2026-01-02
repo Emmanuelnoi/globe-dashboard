@@ -352,7 +352,8 @@ test.describe('Accessibility - Notification System', () => {
   test('Notification toast container should have proper ARIA attributes', async ({
     page,
   }) => {
-    const notificationToast = page.locator('app-notification-toast');
+    // Check the inner notification toast div where ARIA attributes actually exist
+    const notificationToast = page.locator('.notification-toast').first();
 
     if ((await notificationToast.count()) > 0) {
       // Check for ARIA role and live region
@@ -365,7 +366,16 @@ test.describe('Accessibility - Notification System', () => {
 
       if (!hasProperAria) {
         console.warn('⚠️ Notification toast missing ARIA attributes');
+      } else {
+        console.log(
+          `✅ Notification toast has proper ARIA: role="${hasRole}", aria-live="${hasAriaLive}"`,
+        );
       }
+
+      // Assert that ARIA attributes exist
+      expect(hasProperAria).toBeTruthy();
+    } else {
+      console.log('ℹ️ No notifications visible - skipping ARIA check');
     }
   });
 
