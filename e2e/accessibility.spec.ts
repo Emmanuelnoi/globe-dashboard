@@ -37,6 +37,16 @@ test.describe('Accessibility Tests', () => {
       expect(accessibilityScanResults.violations).toEqual([]);
     });
 
+    test('should have no accessibility violations on main page', async ({
+      page,
+    }) => {
+      const results = await new AxeBuilder({ page }).analyze();
+      if (results.violations.length > 0) {
+        console.log('Accessibility violations:', results.violations);
+      }
+      expect(results.violations).toEqual([]);
+    });
+
     test('Home page should not have any automatically detectable accessibility issues', async ({
       page,
     }) => {
