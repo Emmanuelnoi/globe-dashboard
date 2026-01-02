@@ -30,12 +30,12 @@ export default defineConfig({
   // HTML report for local viewing
   reporter: isCI ? [['html'], ['github']] : 'html',
 
-  // Global test timeout (2 minutes per test)
-  timeout: 120_000,
+  // Global test timeout - more aggressive in CI
+  timeout: isCI ? 60_000 : 120_000, // CI: 1 min/test, Local: 2 min/test
 
   // Expect timeout for assertions
   expect: {
-    timeout: 10_000,
+    timeout: isCI ? 5_000 : 10_000, // CI: 5s, Local: 10s
   },
 
   use: {
@@ -51,9 +51,9 @@ export default defineConfig({
     headless: isCI,
     viewport: { width: 1600, height: 900 },
 
-    // Timeouts for actions and navigation
-    actionTimeout: 30_000,
-    navigationTimeout: 60_000,
+    // Timeouts for actions and navigation - more aggressive in CI
+    actionTimeout: isCI ? 15_000 : 30_000, // CI: 15s, Local: 30s
+    navigationTimeout: isCI ? 30_000 : 60_000, // CI: 30s, Local: 60s
 
     // Ignore HTTPS errors (for development)
     ignoreHTTPSErrors: true,
@@ -119,8 +119,8 @@ export default defineConfig({
     command: 'pnpm run start',
     url: 'http://localhost:4200',
     reuseExistingServer: !isCI,
-    timeout: 180_000, // 3 minutes for dev server to start
-    stdout: 'ignore',
+    timeout: isCI ? 120_000 : 180_000, // CI: 2 min, Local: 3 min for dev server
+    stdout: isCI ? 'ignore' : 'pipe',
     stderr: 'pipe',
     env: {
       CI: process.env['CI'] || '',

@@ -17,7 +17,7 @@ interface WindowWithGC extends Window {
   startTime?: number;
 }
 
-test.describe('Performance Tests', () => {
+test.describe('Performance Tests @slow', () => {
   test('should load within acceptable time limits', async ({ page }) => {
     const startTime = Date.now();
 

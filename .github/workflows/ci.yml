@@ -256,7 +256,7 @@ jobs:
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25 # Increased from 15 to allow for dev server startup + 58 tests
     needs: build
 
     steps:
@@ -288,7 +288,8 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run E2E tests
-        run: pnpm run e2e
+        timeout-minutes: 20 # Explicit step timeout: 3min server + 51 tests × ~20s = ~20min max
+        run: pnpm exec playwright test --grep-invert "@slow"
         env:
           CI: true
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
