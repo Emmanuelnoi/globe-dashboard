@@ -62,11 +62,7 @@ declare global {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div
-      class="app-container"
-      role="application"
-      aria-label="3D Global Dashboard"
-    >
+    <div class="app-container" aria-label="3D Global Dashboard">
       <div
         #globeContainer
         role="region"
