@@ -54,6 +54,12 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
 
+    # Permissions for commenting on PRs
+    permissions:
+      pull-requests: write
+      issues: write
+      contents: read
+
     # Set job outputs for downstream jobs
     outputs:
       url: ${{ steps.deploy.outputs.preview-url }}
