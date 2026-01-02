@@ -252,11 +252,11 @@ jobs:
           fi
         continue-on-error: true
 
-  # Job 5: E2E Tests
+  # Job 5: E2E Tests (Fast smoke tests only - comprehensive tests run nightly)
   e2e:
-    name: E2E Tests
+    name: E2E Tests (Smoke)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 15 # Fast smoke tests only + dev server startup
     needs: build
 
     steps:
@@ -287,8 +287,9 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run E2E tests
-        run: pnpm run e2e
+      - name: Run E2E tests (smoke + fast tests only)
+        timeout-minutes: 15 # Fast tests only: ~8 smoke tests × 3s = ~1min + buffer
+        run: pnpm exec playwright test --project=chromium --grep-invert "@slow|@a11y"
         env:
           CI: true
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}

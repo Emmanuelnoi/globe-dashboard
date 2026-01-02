@@ -27,11 +27,19 @@ body {
     sans-serif;
 }
 
-/* Ensure root element takes full space */
-app-root {
+/* Ensure main landmark and root element take full space */
+main {
   display: block;
   width: 100%;
   height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+app-root {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* Custom scrollbar for components that need it */

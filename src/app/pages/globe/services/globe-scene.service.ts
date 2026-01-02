@@ -279,6 +279,13 @@ export class GlobeSceneService {
     // Append canvas to container
     nativeElement.appendChild(this.renderer.domElement);
 
+    // Add ARIA attributes to canvas for accessibility
+    this.renderer.domElement.setAttribute(
+      'aria-label',
+      'Interactive 3D globe visualization showing countries and data',
+    );
+    this.renderer.domElement.setAttribute('role', 'img');
+
     // this.logger.debug('✅ Renderer setup complete', 'GlobeSceneService');
   }
 

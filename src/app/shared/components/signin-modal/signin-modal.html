@@ -1,11 +1,25 @@
 <!-- Backdrop -->
 <div *ngIf="isOpen()" class="modal-backdrop" [@fadeIn]>
   <!-- Modal Container -->
-  <div class="modal-container" [@slideIn]>
+  <div
+    class="modal-container"
+    [@slideIn]
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="
+      currentStep() === 'signin'
+        ? 'signin-title'
+        : currentStep() === 'reset-password'
+          ? 'reset-title'
+          : currentStep() === 'reset-sent'
+            ? 'reset-sent-title'
+            : 'new-password-title'
+    "
+  >
     <!-- Sign In Step -->
     <div *ngIf="currentStep() === 'signin'" class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title">Welcome Back!</h2>
+        <h2 id="signin-title" class="modal-title">Welcome Back!</h2>
         <button
           class="close-button"
           (click)="onClose()"
@@ -121,7 +135,7 @@
     <!-- Password Reset Step -->
     <div *ngIf="currentStep() === 'reset-password'" class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title">Reset Password</h2>
+        <h2 id="reset-title" class="modal-title">Reset Password</h2>
         <button
           class="close-button"
           (click)="onClose()"
@@ -182,7 +196,7 @@
     <!-- Reset Email Sent Step -->
     <div *ngIf="currentStep() === 'reset-sent'" class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title">📧 Check Your Email</h2>
+        <h2 id="reset-sent-title" class="modal-title">📧 Check Your Email</h2>
         <button
           class="close-button"
           (click)="onClose()"
@@ -223,7 +237,7 @@
     <!-- Set New Password Step (After clicking email link) -->
     <div *ngIf="currentStep() === 'set-new-password'" class="modal-content">
       <div class="modal-header">
-        <h2 class="modal-title">🔒 Set New Password</h2>
+        <h2 id="new-password-title" class="modal-title">🔒 Set New Password</h2>
         <button
           class="close-button"
           (click)="onClose()"

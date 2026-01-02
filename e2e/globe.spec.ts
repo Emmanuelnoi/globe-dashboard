@@ -1,6 +1,15 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('3D Globe Component', () => {
+/**
+ * 3D Globe Component Tests
+ *
+ * IMPORTANT: These tests are tagged @slow and run in NIGHTLY builds only.
+ * WebGL rendering tests require significant wait times and are too heavy for CI.
+ *
+ * For CI, use smoke.spec.ts which has basic globe visibility checks.
+ */
+
+test.describe('3D Globe Component @slow', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
   });

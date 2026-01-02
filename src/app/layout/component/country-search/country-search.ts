@@ -40,11 +40,17 @@ import { CountryDataService } from '../../../core/services/country-data.service'
             placeholder="Search countries..."
             [(ngModel)]="searchQuery"
             (input)="onSearchInput($event)"
+            role="combobox"
             [attr.aria-expanded]="
               showResults() && filteredCountries().length > 0
             "
+            [attr.aria-controls]="showResults() ? 'search-results-list' : null"
+            [attr.aria-activedescendant]="
+              focusedIndex() !== -1 ? 'country-result-' + focusedIndex() : null
+            "
             aria-label="Search for countries by name, capital, or region"
             aria-describedby="search-description"
+            aria-autocomplete="list"
             autocomplete="off"
             spellcheck="false"
           />
@@ -70,10 +76,10 @@ import { CountryDataService } from '../../../core/services/country-data.service'
       <!-- Search Results -->
       @if (showResults() && filteredCountries().length > 0) {
         <div
+          id="search-results-list"
           class="search-results"
           role="listbox"
           aria-label="Search results"
-          [attr.aria-activedescendant]="'country-result-' + focusedIndex()"
         >
           @for (
             country of filteredCountries();

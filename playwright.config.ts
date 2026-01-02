@@ -1,61 +1,103 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
+ * Playwright Configuration for 3D Global Dashboard
+ *
+ * Optimized for:
+ * - Fast CI execution (chromium only, 15-minute timeout)
+ * - Comprehensive local testing (all browsers)
+ * - Heavy 3D rendering workloads
+ * - Accessibility testing
  */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
+const isCI = !!process.env['CI'];
+
 export default defineConfig({
   testDir: './e2e',
-  /* Run tests in files in parallel */
-  fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env['CI'],
-  /* Retry on CI only */
-  retries: process.env['CI'] ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env['CI'] ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:4200',
 
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+  // Run tests in parallel locally, serial in CI for stability
+  fullyParallel: !isCI,
 
-    /* Take screenshot on failure */
-    screenshot: 'only-on-failure',
+  // Fail CI build if test.only is committed
+  forbidOnly: isCI,
 
-    /* Capture video on failure */
-    video: 'retain-on-failure',
+  // Retry failed tests in CI
+  retries: isCI ? 2 : 0,
+
+  // Single worker in CI for heavy 3D pages, auto-detect locally
+  workers: isCI ? 1 : undefined,
+
+  // HTML report for local viewing
+  reporter: isCI ? [['html'], ['github']] : 'html',
+
+  // Global test timeout - more aggressive in CI
+  timeout: isCI ? 60_000 : 120_000, // CI: 1 min/test, Local: 2 min/test
+
+  // Expect timeout for assertions
+  expect: {
+    timeout: isCI ? 5_000 : 10_000, // CI: 5s, Local: 10s
   },
 
-  /* Configure projects for major browsers */
+  use: {
+    // Base URL for all tests
+    baseURL: 'http://localhost:4200',
+
+    // Debugging features
+    trace: isCI ? 'on-first-retry' : 'retain-on-failure',
+    screenshot: 'only-on-failure',
+    video: isCI ? 'retain-on-failure' : 'off',
+
+    // Browser settings
+    headless: isCI,
+    viewport: { width: 1600, height: 900 },
+
+    // Timeouts for actions and navigation - more aggressive in CI
+    actionTimeout: isCI ? 15_000 : 30_000, // CI: 15s, Local: 30s
+    navigationTimeout: isCI ? 30_000 : 60_000, // CI: 30s, Local: 60s
+
+    // Ignore HTTPS errors (for development)
+    ignoreHTTPSErrors: true,
+
+    // Browser launch options
+    launchOptions: {
+      args: [
+        '--disable-dev-shm-usage', // Prevents memory issues on GitHub runners
+        '--no-sandbox', // Required for CI environments
+        '--disable-gpu', // Prevents GPU issues in headless mode
+        '--disable-web-security', // For local API testing
+      ],
+    },
+  },
+
+  // Browser projects - always define all browsers
+  // CI workflow selects chromium only via: playwright test --project=chromium
+  // Nightly workflow runs all browsers via matrix strategy
+  // Local runs all browsers for comprehensive testing
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: {
+          args: isCI
+            ? [
+                '--disable-dev-shm-usage',
+                '--no-sandbox',
+                '--disable-gpu',
+                '--disable-software-rasterizer',
+              ]
+            : [],
+        },
+      },
     },
-
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
-
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
-
-    /* Test against mobile viewports. */
     {
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 5'] },
@@ -64,23 +106,20 @@ export default defineConfig({
       name: 'Mobile Safari',
       use: { ...devices['iPhone 12'] },
     },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
   ],
 
-  /* Run your local dev server before starting the tests */
+  // Dev server configuration
   webServer: {
     command: 'pnpm run start',
     url: 'http://localhost:4200',
-    reuseExistingServer: !process.env['CI'],
-    timeout: 120 * 1000,
+    reuseExistingServer: !isCI,
+    timeout: isCI ? 120_000 : 180_000, // CI: 2 min, Local: 3 min for dev server
+    stdout: isCI ? 'ignore' : 'pipe',
+    stderr: 'pipe',
+    env: {
+      CI: process.env['CI'] || '',
+      VITE_SUPABASE_URL: process.env['VITE_SUPABASE_URL'] || '',
+      VITE_SUPABASE_ANON_KEY: process.env['VITE_SUPABASE_ANON_KEY'] || '',
+    },
   },
 });
