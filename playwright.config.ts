@@ -69,50 +69,44 @@ export default defineConfig({
     },
   },
 
-  // Browser projects
-  // CI: Only chromium (58 tests × 8s = ~8 minutes, stays under 15-minute timeout)
-  // Local: All browsers for comprehensive testing
-  projects: isCI
-    ? [
-        {
-          name: 'chromium',
-          use: {
-            ...devices['Desktop Chrome'],
-            // Additional chromium settings for CI
-            launchOptions: {
-              args: [
+  // Browser projects - always define all browsers
+  // CI workflow selects chromium only via: playwright test --project=chromium
+  // Nightly workflow runs all browsers via matrix strategy
+  // Local runs all browsers for comprehensive testing
+  projects: [
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: {
+          args: isCI
+            ? [
                 '--disable-dev-shm-usage',
                 '--no-sandbox',
                 '--disable-gpu',
                 '--disable-software-rasterizer',
-                '--disable-dev-shm-usage',
-              ],
-            },
-          },
+              ]
+            : [],
         },
-      ]
-    : [
-        {
-          name: 'chromium',
-          use: { ...devices['Desktop Chrome'] },
-        },
-        {
-          name: 'firefox',
-          use: { ...devices['Desktop Firefox'] },
-        },
-        {
-          name: 'webkit',
-          use: { ...devices['Desktop Safari'] },
-        },
-        {
-          name: 'Mobile Chrome',
-          use: { ...devices['Pixel 5'] },
-        },
-        {
-          name: 'Mobile Safari',
-          use: { ...devices['iPhone 12'] },
-        },
-      ],
+      },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+    {
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
+    },
+  ],
 
   // Dev server configuration
   webServer: {
