@@ -22,19 +22,20 @@ test.describe('Sidebar Navigation', () => {
   });
 
   test('should toggle sidebar collapse/expand', async ({ page }) => {
-    const sidebar = page.locator('app-sidebar');
+    // The 'collapsed' class is on the inner <aside> element, not <app-sidebar>
+    const sidebarAside = page.locator('app-sidebar aside.sidebar');
     const toggleButton = page.locator('app-sidebar .toggle');
 
     // Initially expanded
-    await expect(sidebar).not.toHaveClass(/collapsed/);
+    await expect(sidebarAside).not.toHaveClass(/collapsed/);
 
     // Click to collapse
     await toggleButton.click();
-    await expect(sidebar).toHaveClass(/collapsed/);
+    await expect(sidebarAside).toHaveClass(/collapsed/);
 
     // Click to expand
     await toggleButton.click();
-    await expect(sidebar).not.toHaveClass(/collapsed/);
+    await expect(sidebarAside).not.toHaveClass(/collapsed/);
   });
 
   test('should display navigation menu items', async ({ page }) => {
@@ -54,7 +55,7 @@ test.describe('Sidebar Navigation', () => {
       page.locator('app-sidebar [aria-label="Bird Migration"]'),
     ).toBeVisible();
     await expect(
-      page.locator('app-sidebar [aria-label="Crop & Cuisine Mapper"]'),
+      page.locator('app-sidebar [aria-label="Leaderboard"]'),
     ).toBeVisible();
   });
 
@@ -103,13 +104,14 @@ test.describe('Sidebar Navigation', () => {
   });
 
   test('should work in collapsed mode', async ({ page }) => {
-    const sidebar = page.locator('app-sidebar');
+    // The 'collapsed' class is on the inner <aside> element, not <app-sidebar>
+    const sidebarAside = page.locator('app-sidebar aside.sidebar');
     const toggleButton = page.locator('app-sidebar .toggle');
     const menuItems = page.locator('app-sidebar .menu-item');
 
     // Collapse sidebar
     await toggleButton.click();
-    await expect(sidebar).toHaveClass(/collapsed/);
+    await expect(sidebarAside).toHaveClass(/collapsed/);
 
     // Menu items should still be clickable
     await menuItems.nth(1).click();
