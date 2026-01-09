@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Basic Functionality Tests for 3D Global Dashboard
+ * Basic Functionality Tests for GlobePlay
  *
  * These tests verify core UI elements are rendered correctly.
  * Uses proper wait strategies to ensure Angular app is fully loaded.
  */
 
-test.describe('3D Global Dashboard - Basic Functionality', () => {
+test.describe('GlobePlay - Basic Functionality', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     // Wait for Angular app to bootstrap and render
@@ -17,8 +17,8 @@ test.describe('3D Global Dashboard - Basic Functionality', () => {
   });
 
   test('should load the main page', async ({ page }) => {
-    // Match actual title: "3D Global Dashboard - Interactive Geography, Bird Migration & Quiz"
-    await expect(page).toHaveTitle(/3D Global Dashboard/);
+    // Match actual title: "GlobePlay - Interactive Geography, Bird Migration & Quiz"
+    await expect(page).toHaveTitle(/GlobePlay/);
   });
 
   test('should display the globe component', async ({ page }) => {
