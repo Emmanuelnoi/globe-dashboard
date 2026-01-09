@@ -97,14 +97,25 @@ import { QuizStateService } from '../../services/quiz-state';
                       [class.correct]="result.isCorrect"
                       [class.incorrect]="!result.isCorrect"
                     >
-                      {{ getCountryName(result.selectedAnswer) }}
+                      {{
+                        getAnswerDisplay(
+                          result.selectedAnswer,
+                          result.questionId
+                        )
+                      }}
                     </span>
                   }
                   @if (
                     !result.isCorrect && result.selectedAnswer !== 'SKIPPED'
                   ) {
                     <span class="correct-answer">
-                      Correct: {{ getCountryName(result.correctAnswer) }}
+                      Correct:
+                      {{
+                        getAnswerDisplay(
+                          result.correctAnswer,
+                          result.questionId
+                        )
+                      }}
                     </span>
                   }
                 </div>
@@ -584,13 +595,38 @@ export class ResultsPanel {
   }
 
   /**
-   * Get country name from country ID (simplified - could be enhanced with country service)
+   * Get display-friendly answer text based on question type
+   * - For capital-match: returns the capital city name directly
+   * - For find-country: returns the country name from metadata
+   * - For flag-id/facts-guess: returns the answer directly (already country name)
    */
-  getCountryName(countryId: string): string {
-    const question = this.questions().find(
-      (q) => q.correctAnswer === countryId,
-    );
-    return question?.metadata?.['countryName'] || countryId;
+  getAnswerDisplay(answer: string, questionId: string): string {
+    const question = this.questions().find((q) => q.id === questionId);
+
+    if (!question) {
+      return answer;
+    }
+
+    // For capital-match, the answer IS the capital city name - display it directly
+    if (question.type === 'capital-match') {
+      return answer;
+    }
+
+    // For find-country, the answer is a country ID - get the country name from metadata
+    if (question.type === 'find-country') {
+      // If this answer matches the correct answer, use metadata.countryName
+      if (answer === question.correctAnswer) {
+        return question.metadata?.['countryName'] || answer;
+      }
+      // For incorrect answers, try to find the question where this was the correct answer
+      const matchingQuestion = this.questions().find(
+        (q) => q.correctAnswer === answer,
+      );
+      return matchingQuestion?.metadata?.['countryName'] || answer;
+    }
+
+    // For flag-id and facts-guess, the answer is already the country name
+    return answer;
   }
 
   /**

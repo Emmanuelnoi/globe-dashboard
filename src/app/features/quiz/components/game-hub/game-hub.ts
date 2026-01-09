@@ -194,11 +194,39 @@ export class GameHub {
     return question?.prompt || 'Question';
   }
 
-  getCountryName(countryId: string): string {
-    const question = this.questions().find(
-      (q) => q.correctAnswer === countryId,
-    );
-    return question?.metadata?.['countryName'] || countryId;
+  /**
+   * Get display-friendly answer text based on question type
+   * - For capital-match: returns the capital city name directly
+   * - For find-country: returns the country name from metadata
+   * - For flag-id/facts-guess: returns the answer directly (already country name)
+   */
+  getAnswerDisplay(answer: string, questionId: string): string {
+    const question = this.questions().find((q) => q.id === questionId);
+
+    if (!question) {
+      return answer;
+    }
+
+    // For capital-match, the answer IS the capital city name - display it directly
+    if (question.type === 'capital-match') {
+      return answer;
+    }
+
+    // For find-country, the answer is a country ID - get the country name from metadata
+    if (question.type === 'find-country') {
+      // If this answer matches the correct answer, use metadata.countryName
+      if (answer === question.correctAnswer) {
+        return question.metadata?.['countryName'] || answer;
+      }
+      // For incorrect answers, try to find the question where this was the correct answer
+      const matchingQuestion = this.questions().find(
+        (q) => q.correctAnswer === answer,
+      );
+      return matchingQuestion?.metadata?.['countryName'] || answer;
+    }
+
+    // For flag-id and facts-guess, the answer is already the country name
+    return answer;
   }
 
   formatTime(timeMs: number): string {

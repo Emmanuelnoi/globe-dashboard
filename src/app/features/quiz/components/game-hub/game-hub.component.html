@@ -479,14 +479,25 @@
                           [class.correct]="result.isCorrect"
                           [class.incorrect]="!result.isCorrect"
                         >
-                          {{ getCountryName(result.selectedAnswer) }}
+                          {{
+                            getAnswerDisplay(
+                              result.selectedAnswer,
+                              result.questionId
+                            )
+                          }}
                         </span>
                       }
                       @if (
                         !result.isCorrect && result.selectedAnswer !== "SKIPPED"
                       ) {
                         <span class="correct-answer">
-                          Correct: {{ getCountryName(result.correctAnswer) }}
+                          Correct:
+                          {{
+                            getAnswerDisplay(
+                              result.correctAnswer,
+                              result.questionId
+                            )
+                          }}
                         </span>
                       }
                     </div>

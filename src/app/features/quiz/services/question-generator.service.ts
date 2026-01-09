@@ -1,10 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  GameMode,
-  Difficulty,
-  GameConfiguration,
-  Question,
-} from '../models/quiz.models';
+import { GameMode, Difficulty, Question } from '../models/quiz.models';
 import { CountryDataService } from '../../../core/services/country-data.service';
 import { CountryDataRecord } from '../../../core/types/country-data.types';
 import { LoggerService } from '../../../core/services/logger.service';
@@ -18,12 +13,21 @@ import { LoggerService } from '../../../core/services/logger.service';
  * - Similar characteristics (population, GDP, etc.)
  * - Reproducible sessions with seed support
  */
+// Storage key for recent questions tracker
+const RECENT_QUESTIONS_KEY = 'quiz_recent_questions';
+
+// How many recent countries to track per mode (prevents repetition)
+const RECENT_COUNTRIES_LIMIT = 50;
+
 @Injectable({
   providedIn: 'root',
 })
 export class QuestionGeneratorService {
   private readonly countryDataService = inject(CountryDataService);
   private readonly logger = inject(LoggerService);
+
+  // In-memory cache of recent countries per mode
+  private recentCountriesCache: Map<GameMode, Set<string>> = new Map();
 
   // Distractor count by difficulty
   private readonly CHOICE_COUNTS = {
@@ -128,6 +132,7 @@ export class QuestionGeneratorService {
     const selectedCountries = this.selectRandomCountries(
       eligibleCountries,
       count,
+      'find-country',
     );
 
     return selectedCountries.map((country, index) => ({
@@ -223,6 +228,7 @@ export class QuestionGeneratorService {
     const selectedCountries = this.selectRandomCountries(
       eligibleCountries,
       count,
+      'capital-match',
     );
 
     return selectedCountries.map((country, index) => {
@@ -332,6 +338,7 @@ export class QuestionGeneratorService {
     const selectedCountries = this.selectRandomCountries(
       eligibleCountries,
       count,
+      'flag-id',
     );
 
     return selectedCountries.map((country, index) => {
@@ -454,8 +461,30 @@ export class QuestionGeneratorService {
       'islands',
     ];
 
+    // Shuffle fact types to avoid repetition within the same quiz session
+    const shuffledFactTypes = this.shuffleArray([...factTypes]);
+
+    // Track used fact types to avoid back-to-back duplicates
+    const usedFactTypes: string[] = [];
+
     for (let i = 0; i < count; i++) {
-      const factType = factTypes[Math.floor(Math.random() * factTypes.length)];
+      // Use shuffled fact types in order, cycling through if we need more questions than fact types
+      let factType: string;
+
+      if (i < shuffledFactTypes.length) {
+        // First pass: use each fact type once
+        factType = shuffledFactTypes[i];
+      } else {
+        // If we need more questions than fact types, pick randomly but avoid the last used type
+        const availableTypes = factTypes.filter(
+          (ft) => ft !== usedFactTypes[usedFactTypes.length - 1],
+        );
+        factType =
+          availableTypes[Math.floor(Math.random() * availableTypes.length)];
+      }
+
+      usedFactTypes.push(factType);
+
       const question = this.generateFactsQuestion(factType, difficulty, i + 1);
       if (question) {
         questions.push(question);
@@ -550,6 +579,41 @@ export class QuestionGeneratorService {
     }
   }
 
+  /**
+   * Select a random tier of countries from a sorted list for variety
+   * Instead of always showing top 4, might show countries ranked 5-8, 9-12, etc.
+   */
+  private selectRandomTier(
+    sortedCountries: CountryDataRecord[],
+    choiceCount: number,
+    fromTop: boolean,
+  ): { countries: CountryDataRecord[]; tierLabel: string } {
+    // Define possible tier offsets (0 = top/bottom, 1 = next tier, etc.)
+    const maxTiers = Math.floor(sortedCountries.length / choiceCount) - 1;
+    const tierOffset = Math.floor(Math.random() * Math.min(maxTiers, 3)); // Max 3 tiers deep
+
+    let startIndex: number;
+    if (fromTop) {
+      startIndex = tierOffset * choiceCount;
+    } else {
+      startIndex = sortedCountries.length - (tierOffset + 1) * choiceCount;
+    }
+
+    // Ensure valid bounds
+    startIndex = Math.max(
+      0,
+      Math.min(startIndex, sortedCountries.length - choiceCount),
+    );
+
+    const countries = sortedCountries.slice(
+      startIndex,
+      startIndex + choiceCount,
+    );
+    const tierLabel = tierOffset === 0 ? '' : ` (among these countries)`;
+
+    return { countries, tierLabel };
+  }
+
   private generatePopulationFactsQuestion(
     countries: readonly CountryDataRecord[],
     difficulty: Difficulty,
@@ -565,9 +629,12 @@ export class QuestionGeneratorService {
     const choiceCount = this.CHOICE_COUNTS[difficulty];
     const isLargest = Math.random() < 0.5;
 
-    const selectedCountries = isLargest
-      ? sortedByPopulation.slice(0, choiceCount)
-      : sortedByPopulation.slice(-choiceCount).reverse();
+    // Select a random tier for variety
+    const { countries: selectedCountries, tierLabel } = this.selectRandomTier(
+      isLargest ? sortedByPopulation : [...sortedByPopulation].reverse(),
+      choiceCount,
+      true,
+    );
 
     const correctAnswer = selectedCountries[0];
     const shuffledChoices = this.shuffleArray(
@@ -577,7 +644,7 @@ export class QuestionGeneratorService {
     return {
       id: `facts_population_${questionNumber}`,
       type: 'facts-guess' as GameMode,
-      prompt: `Which country has the ${isLargest ? 'largest' : 'smallest'} population?`,
+      prompt: `Which country has the ${isLargest ? 'largest' : 'smallest'} population${tierLabel}?`,
       correctAnswer: correctAnswer.name,
       choices: shuffledChoices,
       metadata: {
@@ -604,9 +671,12 @@ export class QuestionGeneratorService {
     const choiceCount = this.CHOICE_COUNTS[difficulty];
     const isLargest = Math.random() < 0.5;
 
-    const selectedCountries = isLargest
-      ? sortedByArea.slice(0, choiceCount)
-      : sortedByArea.slice(-choiceCount).reverse();
+    // Select a random tier for variety
+    const { countries: selectedCountries, tierLabel } = this.selectRandomTier(
+      isLargest ? sortedByArea : [...sortedByArea].reverse(),
+      choiceCount,
+      true,
+    );
 
     const correctAnswer = selectedCountries[0];
     const shuffledChoices = this.shuffleArray(
@@ -616,7 +686,7 @@ export class QuestionGeneratorService {
     return {
       id: `facts_area_${questionNumber}`,
       type: 'facts-guess' as GameMode,
-      prompt: `Which country has the ${isLargest ? 'largest' : 'smallest'} land area?`,
+      prompt: `Which country has the ${isLargest ? 'largest' : 'smallest'} land area${tierLabel}?`,
       correctAnswer: correctAnswer.name,
       choices: shuffledChoices,
       metadata: {
@@ -643,9 +713,12 @@ export class QuestionGeneratorService {
     const choiceCount = this.CHOICE_COUNTS[difficulty];
     const isHighest = Math.random() < 0.5;
 
-    const selectedCountries = isHighest
-      ? sortedByGdp.slice(0, choiceCount)
-      : sortedByGdp.slice(-choiceCount).reverse();
+    // Select a random tier for variety
+    const { countries: selectedCountries, tierLabel } = this.selectRandomTier(
+      isHighest ? sortedByGdp : [...sortedByGdp].reverse(),
+      choiceCount,
+      true,
+    );
 
     const correctAnswer = selectedCountries[0];
     const shuffledChoices = this.shuffleArray(
@@ -655,7 +728,7 @@ export class QuestionGeneratorService {
     return {
       id: `facts_gdp_${questionNumber}`,
       type: 'facts-guess' as GameMode,
-      prompt: `Which country has the ${isHighest ? 'highest' : 'lowest'} GDP per capita?`,
+      prompt: `Which country has the ${isHighest ? 'highest' : 'lowest'} GDP per capita${tierLabel}?`,
       correctAnswer: correctAnswer.name,
       choices: shuffledChoices,
       metadata: {
@@ -690,9 +763,21 @@ export class QuestionGeneratorService {
     const choiceCount = this.CHOICE_COUNTS[difficulty];
     const isHighest = Math.random() < 0.5;
 
-    const selectedCountries = isHighest
-      ? sortedByDensity.slice(0, choiceCount)
-      : sortedByDensity.slice(-choiceCount).reverse();
+    // Select a random tier for variety
+    const orderedList = isHighest
+      ? sortedByDensity
+      : [...sortedByDensity].reverse();
+    const maxTiers = Math.floor(orderedList.length / choiceCount) - 1;
+    const tierOffset = Math.floor(Math.random() * Math.min(maxTiers, 3));
+    const startIndex = Math.max(
+      0,
+      Math.min(tierOffset * choiceCount, orderedList.length - choiceCount),
+    );
+    const selectedCountries = orderedList.slice(
+      startIndex,
+      startIndex + choiceCount,
+    );
+    const tierLabel = tierOffset === 0 ? '' : ' (among these countries)';
 
     const correctAnswer = selectedCountries[0];
     const shuffledChoices = this.shuffleArray(
@@ -702,7 +787,7 @@ export class QuestionGeneratorService {
     return {
       id: `facts_density_${questionNumber}`,
       type: 'facts-guess' as GameMode,
-      prompt: `Which country has the ${isHighest ? 'highest' : 'lowest'} population density?`,
+      prompt: `Which country has the ${isHighest ? 'highest' : 'lowest'} population density${tierLabel}?`,
       correctAnswer: correctAnswer.name,
       choices: shuffledChoices,
       metadata: {
@@ -1082,7 +1167,11 @@ export class QuestionGeneratorService {
     );
 
     // Select one landlocked (correct answer)
-    const correctCountries = this.selectRandomCountries(landlockedChoices, 1);
+    const correctCountries = this.selectRandomCountries(
+      landlockedChoices,
+      1,
+      'facts-guess',
+    );
     if (correctCountries.length === 0) {
       // Fallback to population question if no landlocked countries
       return this.generatePopulationFactsQuestion(
@@ -1094,7 +1183,7 @@ export class QuestionGeneratorService {
 
     const correctAnswer = correctCountries[0];
 
-    // Select coastal distractors
+    // Select coastal distractors (no mode tracking needed for distractors)
     const distractors = this.selectRandomCountries(
       coastalChoices,
       choiceCount - 1,
@@ -1476,12 +1565,157 @@ export class QuestionGeneratorService {
     }
   }
 
+  /**
+   * Select random countries while avoiding recently used ones
+   * This prevents the same questions from appearing frequently
+   */
   private selectRandomCountries(
     countries: CountryDataRecord[],
     count: number,
+    mode?: GameMode,
   ): CountryDataRecord[] {
-    const shuffled = this.shuffleArray([...countries]);
-    return shuffled.slice(0, Math.min(count, countries.length));
+    // Get recently used countries for this mode
+    const recentCountries = mode
+      ? this.getRecentCountries(mode)
+      : new Set<string>();
+
+    // Separate countries into fresh (not recently used) and recent
+    const freshCountries = countries.filter((c) => !recentCountries.has(c.id));
+    const recentlyUsedCountries = countries.filter((c) =>
+      recentCountries.has(c.id),
+    );
+
+    // If we've used most of the pool, reset the tracker
+    if (freshCountries.length < count && mode) {
+      this.logger.info(
+        `Resetting recent countries for ${mode} (only ${freshCountries.length} fresh countries left)`,
+        'QuestionGeneratorService',
+      );
+      this.clearRecentCountries(mode);
+      // After reset, all countries are fresh
+      const shuffled = this.shuffleArray([...countries]);
+      const selected = shuffled.slice(0, Math.min(count, countries.length));
+      // Track the newly selected countries
+      if (mode) {
+        this.addRecentCountries(
+          mode,
+          selected.map((c) => c.id),
+        );
+      }
+      return selected;
+    }
+
+    // Prioritize fresh countries, then fill with recent if needed
+    const shuffledFresh = this.shuffleArray([...freshCountries]);
+    const shuffledRecent = this.shuffleArray([...recentlyUsedCountries]);
+
+    const selected: CountryDataRecord[] = [];
+
+    // First, take from fresh countries
+    const freshToTake = Math.min(count, shuffledFresh.length);
+    selected.push(...shuffledFresh.slice(0, freshToTake));
+
+    // If we need more, take from recently used (least bad option)
+    if (selected.length < count) {
+      const remaining = count - selected.length;
+      selected.push(...shuffledRecent.slice(0, remaining));
+    }
+
+    // Track the selected countries
+    if (mode) {
+      this.addRecentCountries(
+        mode,
+        selected.map((c) => c.id),
+      );
+    }
+
+    return selected;
+  }
+
+  /**
+   * Get the set of recently used country IDs for a game mode
+   */
+  private getRecentCountries(mode: GameMode): Set<string> {
+    // Try to get from cache first
+    if (this.recentCountriesCache.has(mode)) {
+      return this.recentCountriesCache.get(mode)!;
+    }
+
+    // Load from localStorage
+    try {
+      const stored = localStorage.getItem(RECENT_QUESTIONS_KEY);
+      if (stored) {
+        const data = JSON.parse(stored) as Record<string, string[]>;
+        const modeData = data[mode] || [];
+        const set = new Set(modeData);
+        this.recentCountriesCache.set(mode, set);
+        return set;
+      }
+    } catch {
+      this.logger.warn(
+        'Failed to load recent questions from storage',
+        'QuestionGeneratorService',
+      );
+    }
+
+    // Return empty set if nothing found
+    const emptySet = new Set<string>();
+    this.recentCountriesCache.set(mode, emptySet);
+    return emptySet;
+  }
+
+  /**
+   * Add country IDs to the recent list for a game mode
+   */
+  private addRecentCountries(mode: GameMode, countryIds: string[]): void {
+    const recent = this.getRecentCountries(mode);
+
+    // Add new countries
+    for (const id of countryIds) {
+      recent.add(id);
+    }
+
+    // Trim to limit (remove oldest entries if needed)
+    if (recent.size > RECENT_COUNTRIES_LIMIT) {
+      const arr = Array.from(recent);
+      const trimmed = arr.slice(arr.length - RECENT_COUNTRIES_LIMIT);
+      recent.clear();
+      for (const id of trimmed) {
+        recent.add(id);
+      }
+    }
+
+    // Update cache
+    this.recentCountriesCache.set(mode, recent);
+
+    // Persist to localStorage
+    this.saveRecentCountries();
+  }
+
+  /**
+   * Clear recent countries for a game mode
+   */
+  private clearRecentCountries(mode: GameMode): void {
+    this.recentCountriesCache.set(mode, new Set());
+    this.saveRecentCountries();
+  }
+
+  /**
+   * Save recent countries to localStorage
+   */
+  private saveRecentCountries(): void {
+    try {
+      const data: Record<string, string[]> = {};
+      for (const [mode, set] of this.recentCountriesCache) {
+        data[mode] = Array.from(set);
+      }
+      localStorage.setItem(RECENT_QUESTIONS_KEY, JSON.stringify(data));
+    } catch {
+      this.logger.warn(
+        'Failed to save recent questions to storage',
+        'QuestionGeneratorService',
+      );
+    }
   }
 
   private shuffleArray<T>(array: T[]): T[] {
@@ -1514,22 +1748,20 @@ export class QuestionGeneratorService {
     return questions;
   }
 
-  private seedRandom(seed: string): void {
-    // Simple seeding for reproducible randomness
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) {
-      const char = seed.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32bit integer
-    }
-
-    // Override Math.random with seeded version
-    const seededRandom = () => {
-      hash = Math.abs(Math.sin(hash) * 10000);
-      return hash - Math.floor(hash);
-    };
-
-    // Note: In production, use a proper seeded random number generator
-    Math.random = seededRandom;
+  /**
+   * Create a seeded random number generator (does NOT override global Math.random)
+   * Note: The seed is currently not used for shuffle operations to ensure variety.
+   * If reproducible sessions are needed, the seeded generator should be used
+   * instead of Math.random in shuffleArray.
+   */
+  private seedRandom(_seed: string): void {
+    // Previously this overrode Math.random globally which caused issues.
+    // Now we log that seeding was requested but don't override global state.
+    // For reproducible sessions, a more sophisticated approach is needed
+    // that doesn't pollute global state.
+    this.logger.info(
+      `Seed requested: ${_seed} (seeding disabled to prevent repetition issues)`,
+      'QuestionGeneratorService',
+    );
   }
 }
