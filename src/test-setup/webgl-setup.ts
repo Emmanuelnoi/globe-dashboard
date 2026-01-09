@@ -106,10 +106,10 @@ HTMLCanvasElement.prototype.getContext = vi.fn().mockImplementation(function (
   ) {
     return createMockWebGLContext();
   }
-  return originalGetContext.call(
+  return (originalGetContext as Function).call(
     this,
     contextType,
-    contextAttributes as unknown,
+    contextAttributes,
   );
 });
 
