@@ -16,9 +16,15 @@ export class CountryHoverService {
   private readonly logger = inject(LoggerService);
   private raycaster = new Raycaster();
 
+  // Performance optimization: cache selection meshes to avoid repeated traversal
+  private cachedSelectionMeshes: Object3D[] | null = null;
+  private cachedCountriesGroup: Group | null = null;
+
   /**
    * Detect country hover based on TopoJSON mesh structure
    * This service understands the specific mesh hierarchy created by geojson.utils.ts
+   *
+   * Performance optimized: Uses cached selection meshes for O(1) lookup
    */
   detectCountryHover(
     mousePosition: { x: number; y: number },
@@ -30,11 +36,18 @@ export class CountryHoverService {
       const mouseVector = new Vector2(mousePosition.x, mousePosition.y);
       this.raycaster.setFromCamera(mouseVector, camera);
 
-      // Strategy 1: Direct intersection with selection meshes
-      const selectionMeshResult = this.findSelectionMeshes(countriesGroup);
-      if (selectionMeshResult.length > 0) {
+      // Build cache if needed (only on first call or after invalidation)
+      if (
+        !this.cachedSelectionMeshes ||
+        this.cachedCountriesGroup !== countriesGroup
+      ) {
+        this.buildSelectionMeshCache(countriesGroup);
+      }
+
+      // Single-pass raycasting against cached meshes (optimized)
+      if (this.cachedSelectionMeshes && this.cachedSelectionMeshes.length > 0) {
         const intersects = this.raycaster.intersectObjects(
-          selectionMeshResult,
+          this.cachedSelectionMeshes,
           false,
         );
 
@@ -49,78 +62,6 @@ export class CountryHoverService {
               object: intersect.object,
             };
           }
-        }
-      }
-
-      // Strategy 2: Traverse hierarchy to find selection meshes
-      const allObjects = this.collectAllObjects(countriesGroup);
-      const allSelectionMeshes = allObjects.filter(
-        (obj) => obj.name && obj.name.startsWith('selection-mesh-'),
-      );
-
-      if (allSelectionMeshes.length > 0) {
-        const intersects = this.raycaster.intersectObjects(
-          allSelectionMeshes,
-          false,
-        );
-
-        for (const intersect of intersects) {
-          const countryName = this.extractCountryNameFromSelectionMesh(
-            intersect.object,
-          );
-          if (countryName) {
-            return {
-              countryName,
-              meshName: intersect.object.name,
-              object: intersect.object,
-            };
-          }
-        }
-      }
-
-      // Strategy 3: Check all intersections and filter for countries
-      const allIntersects = this.raycaster.intersectObjects(
-        countriesGroup.children,
-        true,
-      );
-
-      for (const intersect of allIntersects) {
-        // Skip unified borders
-        if (
-          intersect.object.name === 'unified-borders' ||
-          intersect.object.userData?.['isUnifiedBorder']
-        ) {
-          continue;
-        }
-
-        // Check if this is a selection mesh
-        if (
-          intersect.object.name &&
-          intersect.object.name.startsWith('selection-mesh-')
-        ) {
-          const countryName = this.extractCountryNameFromSelectionMesh(
-            intersect.object,
-          );
-          if (countryName) {
-            return {
-              countryName,
-              meshName: intersect.object.name,
-              object: intersect.object,
-            };
-          }
-        }
-
-        // Check userData for country information
-        const countryInfo = this.extractCountryInfoFromUserData(
-          intersect.object,
-        );
-        if (countryInfo) {
-          return {
-            countryName: countryInfo.name,
-            countryId: countryInfo.id,
-            meshName: intersect.object.name,
-            object: intersect.object,
-          };
         }
       }
 
@@ -133,6 +74,35 @@ export class CountryHoverService {
       );
       return null;
     }
+  }
+
+  /**
+   * Build cache of selection meshes for fast raycasting
+   * Called once on first hover, then reused
+   */
+  private buildSelectionMeshCache(countriesGroup: Group): void {
+    this.cachedSelectionMeshes = [];
+    this.cachedCountriesGroup = countriesGroup;
+
+    countriesGroup.traverse((child) => {
+      if (child.name && child.name.startsWith('selection-mesh-')) {
+        this.cachedSelectionMeshes!.push(child);
+      }
+    });
+
+    // this.logger.debug(
+    //   `Cached ${this.cachedSelectionMeshes.length} selection meshes for hover detection`,
+    //   'CountryHoverService',
+    // );
+  }
+
+  /**
+   * Invalidate the selection mesh cache
+   * Call this when countries are added/removed from the scene
+   */
+  invalidateCache(): void {
+    this.cachedSelectionMeshes = null;
+    this.cachedCountriesGroup = null;
   }
 
   /**

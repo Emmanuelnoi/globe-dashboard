@@ -4,6 +4,9 @@
  *
  * @module path-particles.renderer
  * @description Creates flowing particles along migration paths
+ *
+ * Performance optimized: Uses InstancedMesh for single draw call rendering
+ * instead of individual sprites (N draw calls -> 1 draw call)
  */
 
 import * as THREE from 'three';
@@ -17,13 +20,14 @@ import {
 import { migrationLogger } from '../utils/migration-logger.utils';
 
 /**
- * Single particle state
+ * Single particle state (lightweight, no Three.js objects)
  */
-interface Particle {
-  readonly sprite: THREE.Sprite;
+interface ParticleState {
   distance: number; // Current distance along path
   speed: number; // Travel speed
   startDelay: number; // Stagger delay
+  visible: boolean; // Visibility state
+  opacity: number; // Current opacity for fade effects
 }
 
 /**
@@ -33,23 +37,35 @@ interface PathParticleSystem {
   readonly migrationId: string;
   readonly pathPoints: THREE.Vector3[];
   readonly pathLength: number;
-  readonly particles: Particle[];
+  readonly particles: ParticleState[];
+  readonly startIndex: number; // Index in the instanced mesh
 }
 
 /**
  * Path Particles Renderer
  * Manages animated particles flowing along migration paths
+ *
+ * Performance: Uses InstancedMesh for all particles (single draw call)
  */
 export class PathParticlesRenderer {
   private particleGroup: THREE.Group;
   private particleSystems: Map<string, PathParticleSystem> = new Map();
-  private particleTexture: THREE.Texture | null = null;
   private globeRadius: number = 2.02;
+
+  // Instanced mesh for all particles (single draw call)
+  private instancedMesh: THREE.InstancedMesh | null = null;
+  private particleGeometry: THREE.SphereGeometry;
+  private particleMaterial: THREE.MeshBasicMaterial;
+  private dummy = new THREE.Object3D();
 
   // Particle configuration
   private readonly PARTICLES_PER_PATH = 8;
-  private readonly PARTICLE_SIZE = 0.02; // Reduced from 0.04 to make particles smaller
+  private readonly PARTICLE_SIZE = 0.015; // Sphere radius
   private readonly TRAVEL_TIME = 4.0; // seconds to complete path
+  private readonly MAX_PARTICLES = 200; // Max particles across all paths
+
+  // Track total active particles
+  private activeParticleCount = 0;
 
   constructor(
     private scene: THREE.Scene,
@@ -59,10 +75,37 @@ export class PathParticlesRenderer {
     this.particleGroup.name = 'migration-particles';
     this.scene.add(this.particleGroup);
 
-    // Create particle texture
-    this.particleTexture = this.createParticleTexture();
+    // Create shared geometry and material for instancing
+    this.particleGeometry = new THREE.SphereGeometry(this.PARTICLE_SIZE, 8, 8);
+    this.particleMaterial = new THREE.MeshBasicMaterial({
+      color: 0x00d9ff, // Cyan
+      transparent: true,
+      opacity: 0.6,
+      depthTest: false,
+      depthWrite: false,
+    });
 
-    // migrationLogger.success('PathParticlesRenderer initialized');
+    // Create instanced mesh
+    this.createInstancedMesh();
+
+    // migrationLogger.success('PathParticlesRenderer initialized (InstancedMesh)');
+  }
+
+  /**
+   * Create the instanced mesh for all particles
+   */
+  private createInstancedMesh(): void {
+    this.instancedMesh = new THREE.InstancedMesh(
+      this.particleGeometry,
+      this.particleMaterial,
+      this.MAX_PARTICLES,
+    );
+    this.instancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    this.instancedMesh.renderOrder = 600; // Render above paths
+    this.instancedMesh.frustumCulled = false; // Always render (small objects)
+    this.instancedMesh.count = 0; // Start with no visible instances
+
+    this.particleGroup.add(this.instancedMesh);
   }
 
   /**
@@ -73,7 +116,7 @@ export class PathParticlesRenderer {
     const activeIds = new Set(activePaths.map((p) => p.migrationId));
 
     // Remove particle systems for inactive paths
-    this.particleSystems.forEach((system, id) => {
+    this.particleSystems.forEach((_, id) => {
       if (!activeIds.has(id)) {
         this.removeParticleSystem(id);
       }
@@ -86,56 +129,76 @@ export class PathParticlesRenderer {
       }
     });
 
+    // Rebuild instance indices after changes
+    this.rebuildInstanceIndices();
+
     migrationLogger.debug(`Updated ${activePaths.length} particle systems`);
   }
 
   /**
    * Animate particles (call from animation loop)
+   * Uses InstancedMesh for single draw call
    * @param deltaTime Time since last frame (seconds)
    */
   animate(deltaTime: number): void {
+    if (!this.instancedMesh || this.particleSystems.size === 0) return;
+
+    let instanceIndex = 0;
+
     this.particleSystems.forEach((system) => {
       system.particles.forEach((particle) => {
         // Handle start delay
         if (particle.startDelay > 0) {
           particle.startDelay -= deltaTime;
-          particle.sprite.visible = false;
-          return;
-        }
+          particle.visible = false;
+        } else {
+          particle.visible = true;
 
-        particle.sprite.visible = true;
+          // Update particle distance along path
+          particle.distance += particle.speed * deltaTime;
 
-        // Update particle distance along path
-        particle.distance += particle.speed * deltaTime;
-
-        // Loop particle when it reaches the end
-        if (particle.distance > system.pathLength) {
-          particle.distance = particle.distance % system.pathLength;
-        }
-
-        // Get position at current distance
-        const position = getPointAtDistance(
-          system.pathPoints,
-          particle.distance,
-        );
-        if (position) {
-          particle.sprite.position.copy(position);
-
-          // Fade effect near start/end
-          const progress = particle.distance / system.pathLength;
-          const fadeDistance = 0.1; // Fade in first/last 10%
-
-          let opacity = 1.0;
-          if (progress < fadeDistance) {
-            opacity = progress / fadeDistance;
-          } else if (progress > 1 - fadeDistance) {
-            opacity = (1 - progress) / fadeDistance;
+          // Loop particle when it reaches the end
+          if (particle.distance > system.pathLength) {
+            particle.distance = particle.distance % system.pathLength;
           }
 
-          particle.sprite.material.opacity = opacity * 0.8; // Max 80% opacity
+          // Calculate fade effect
+          const progress = particle.distance / system.pathLength;
+          const fadeDistance = 0.1;
+
+          if (progress < fadeDistance) {
+            particle.opacity = (progress / fadeDistance) * 0.8;
+          } else if (progress > 1 - fadeDistance) {
+            particle.opacity = ((1 - progress) / fadeDistance) * 0.8;
+          } else {
+            particle.opacity = 0.8;
+          }
+        }
+
+        // Update instance matrix
+        if (particle.visible && instanceIndex < this.MAX_PARTICLES) {
+          const position = getPointAtDistance(
+            system.pathPoints,
+            particle.distance,
+          );
+
+          if (position) {
+            // Scale based on opacity for fade effect
+            const scale = particle.opacity > 0.1 ? 1.0 : particle.opacity * 10;
+            this.dummy.position.copy(position);
+            this.dummy.scale.setScalar(scale);
+            this.dummy.updateMatrix();
+            this.instancedMesh!.setMatrixAt(instanceIndex, this.dummy.matrix);
+            instanceIndex++;
+          }
         }
       });
     });
+
+    // Update instance count and mark for GPU update
+    this.instancedMesh!.count = instanceIndex;
+    this.instancedMesh!.instanceMatrix.needsUpdate = true;
+    this.activeParticleCount = instanceIndex;
   }
 
   /**
@@ -146,17 +209,25 @@ export class PathParticlesRenderer {
   }
 
   /**
+   * Get active particle count (for performance monitoring)
+   */
+  getActiveParticleCount(): number {
+    return this.activeParticleCount;
+  }
+
+  /**
    * Cleanup and dispose resources
    */
   dispose(): void {
-    this.particleSystems.forEach((system) => {
-      system.particles.forEach((particle) => {
-        particle.sprite.material.dispose();
-      });
-    });
-
     this.particleSystems.clear();
-    this.particleTexture?.dispose();
+
+    if (this.instancedMesh) {
+      this.particleGroup.remove(this.instancedMesh);
+      this.instancedMesh.dispose();
+    }
+
+    this.particleGeometry.dispose();
+    this.particleMaterial.dispose();
     this.scene.remove(this.particleGroup);
 
     migrationLogger.info('PathParticlesRenderer disposed');
@@ -195,45 +266,28 @@ export class PathParticlesRenderer {
     // Calculate travel speed
     const speed = pathLength / this.TRAVEL_TIME;
 
-    // Create particles
-    const particles: Particle[] = [];
+    // Create particle states (lightweight, no Three.js objects)
+    const particles: ParticleState[] = [];
 
     for (let i = 0; i < this.PARTICLES_PER_PATH; i++) {
-      const sprite = this.createParticleSprite();
-
-      migrationLogger.debug(
-        `🟣 Created particle ${i}: scale=${sprite.scale.x.toFixed(3)}, material opacity=${sprite.material.opacity}`,
-        'PathParticlesRenderer',
-      );
-
-      // Stagger particles along the path
       const startDistance = (i / this.PARTICLES_PER_PATH) * pathLength;
-      const startDelay = (i / this.PARTICLES_PER_PATH) * 0.5; // 0.5s stagger
+      const startDelay = (i / this.PARTICLES_PER_PATH) * 0.5;
 
       particles.push({
-        sprite,
         distance: startDistance,
         speed,
         startDelay,
+        visible: false,
+        opacity: 0,
       });
-
-      this.particleGroup.add(sprite);
     }
-
-    migrationLogger.debug(
-      '🟣 Created',
-      'PathParticlesRenderer',
-      particles.length,
-      'particles, particleGroup now has',
-      this.particleGroup.children.length,
-      'children',
-    );
 
     const system: PathParticleSystem = {
       migrationId,
       pathPoints,
       pathLength,
       particles,
+      startIndex: 0, // Will be set in rebuildInstanceIndices
     };
 
     this.particleSystems.set(migrationId, system);
@@ -247,82 +301,20 @@ export class PathParticlesRenderer {
    * Remove particle system
    */
   private removeParticleSystem(migrationId: string): void {
-    const system = this.particleSystems.get(migrationId);
-    if (!system) return;
-
-    system.particles.forEach((particle) => {
-      this.particleGroup.remove(particle.sprite);
-      particle.sprite.material.dispose();
-    });
-
     this.particleSystems.delete(migrationId);
-
     migrationLogger.info(
       `Removed particle system for migration: ${migrationId}`,
     );
   }
 
   /**
-   * Create a single particle sprite
+   * Rebuild instance indices after systems are added/removed
    */
-  private createParticleSprite(): THREE.Sprite {
-    const material = new THREE.SpriteMaterial({
-      map: this.particleTexture,
-      transparent: true,
-      opacity: 0.4, // Reduced from 0.6 for more subtlety
-      sizeAttenuation: false,
-      depthTest: false,
-      depthWrite: false,
-      blending: THREE.NormalBlending, // Changed from AdditiveBlending to prevent extreme glow
+  private rebuildInstanceIndices(): void {
+    let index = 0;
+    this.particleSystems.forEach((system) => {
+      (system as { startIndex: number }).startIndex = index;
+      index += system.particles.length;
     });
-
-    const sprite = new THREE.Sprite(material);
-    sprite.scale.set(this.PARTICLE_SIZE, this.PARTICLE_SIZE, 1);
-    sprite.renderOrder = 600; // Render above paths
-    sprite.visible = false; // Start invisible (handle delay)
-
-    return sprite;
-  }
-
-  /**
-   * Create particle texture (bird silhouette with glow)
-   */
-  private createParticleTexture(): THREE.Texture {
-    const size = 32;
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-
-    const ctx = canvas.getContext('2d')!;
-    const center = size / 2;
-
-    // Create very tight radial gradient for minimal glow
-    const gradient = ctx.createRadialGradient(
-      center,
-      center,
-      0,
-      center,
-      center,
-      center * 0.5,
-    );
-    gradient.addColorStop(0, '#ffffff'); // White center
-    gradient.addColorStop(0.4, '#00d9ff'); // Cyan
-    gradient.addColorStop(0.7, '#00d9ff22'); // Cyan 13% opacity (reduced from 25%)
-    gradient.addColorStop(1, '#00d9ff00'); // Transparent
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, size, size);
-
-    // Draw bird silhouette in center
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 16px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('🐦', center, center);
-
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.needsUpdate = true;
-
-    return texture;
   }
 }

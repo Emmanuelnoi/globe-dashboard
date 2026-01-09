@@ -47,6 +47,10 @@ export class GlobeInteractionService {
   // Quiz candidate state (for quiz mode highlighting)
   private readonly quizCandidate = signal<string | null>(null);
 
+  // Performance optimization: pre-indexed country meshes by name for O(1) lookup
+  private countryMeshIndex = new Map<string, Mesh[]>();
+  private indexedCountriesGroup: Group | null = null;
+
   /**
    * Handle country selection from mouse clicks (optimized)
    * @param event Mouse click event
@@ -275,15 +279,15 @@ export class GlobeInteractionService {
   }
 
   /**
-   * Apply persistent visual selection to country (for comparison table integration)
-   * @param countryName Country name to select
+   * Build index of country meshes by name for O(1) lookup
+   * Called once when countries are loaded, then reused for all selections
    * @param countries Group containing all country meshes
    */
-  applyCountrySelection(countryName: string, countries: Group): void {
-    if (!countries) return;
+  buildCountryIndex(countries: Group): void {
+    if (!countries || this.indexedCountriesGroup === countries) return;
 
-    // Use the same approach as applyCountrySelectionToGroup - search for selection meshes directly
-    const selectionMeshes: Mesh[] = [];
+    this.countryMeshIndex.clear();
+    this.indexedCountriesGroup = countries;
 
     countries.traverse((child) => {
       if (
@@ -294,27 +298,96 @@ export class GlobeInteractionService {
         const meshName = child.name
           .replace('selection-mesh-', '')
           .split('_')[0];
-
-        // Apply the same name formatting as the country hover service
         const formattedMeshName = this.formatCountryName(meshName);
 
-        // Enhanced matching logic for USA and other problematic countries
-        const isMatch = this.isCountryNameMatch(
-          countryName,
-          meshName,
-          formattedMeshName,
-        );
+        // Index by formatted name
+        if (!this.countryMeshIndex.has(formattedMeshName)) {
+          this.countryMeshIndex.set(formattedMeshName, []);
+        }
+        this.countryMeshIndex.get(formattedMeshName)!.push(child as Mesh);
 
-        if (isMatch) {
-          selectionMeshes.push(child as Mesh);
+        // Also index by raw mesh name for fallback matching
+        if (meshName !== formattedMeshName) {
+          if (!this.countryMeshIndex.has(meshName)) {
+            this.countryMeshIndex.set(meshName, []);
+          }
+          this.countryMeshIndex.get(meshName)!.push(child as Mesh);
         }
       }
     });
 
+    // Add common aliases for problematic countries
+    this.addCountryAliases();
+  }
+
+  /**
+   * Add aliases for countries with multiple naming conventions
+   */
+  private addCountryAliases(): void {
+    const aliases: Record<string, string[]> = {
+      'United States': ['USA', 'US', 'America', 'United States of America'],
+      Mexico: ['United Mexican States'],
+      'United Kingdom': ['UK', 'Britain', 'Great Britain'],
+      Czechia: ['Czech Republic'],
+    };
+
+    for (const [canonical, aliasList] of Object.entries(aliases)) {
+      const meshes = this.countryMeshIndex.get(canonical);
+      if (meshes) {
+        for (const alias of aliasList) {
+          if (!this.countryMeshIndex.has(alias)) {
+            this.countryMeshIndex.set(alias, meshes);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Invalidate the country mesh index
+   * Call this when countries are added/removed from the scene
+   */
+  invalidateIndex(): void {
+    this.countryMeshIndex.clear();
+    this.indexedCountriesGroup = null;
+  }
+
+  /**
+   * Apply persistent visual selection to country (for comparison table integration)
+   * Performance optimized: Uses pre-built index for O(1) lookup
+   * @param countryName Country name to select
+   * @param countries Group containing all country meshes
+   */
+  applyCountrySelection(countryName: string, countries: Group): void {
+    if (!countries) return;
+
+    // Build index if not already built
+    if (this.indexedCountriesGroup !== countries) {
+      this.buildCountryIndex(countries);
+    }
+
+    // O(1) lookup using index
+    let selectionMeshes = this.countryMeshIndex.get(countryName);
+
+    // Fallback: try normalized name
+    if (!selectionMeshes || selectionMeshes.length === 0) {
+      const normalizedName =
+        this.normalizeCountryNameForDataService(countryName);
+      selectionMeshes = this.countryMeshIndex.get(normalizedName);
+    }
+
+    // Fallback: try formatted name
+    if (!selectionMeshes || selectionMeshes.length === 0) {
+      const formattedName = this.formatCountryName(countryName);
+      selectionMeshes = this.countryMeshIndex.get(formattedName);
+    }
+
     // Apply selection styling to all found meshes
-    selectionMeshes.forEach((mesh) => {
-      this.applySelectionMaterial(mesh);
-    });
+    if (selectionMeshes) {
+      selectionMeshes.forEach((mesh) => {
+        this.applySelectionMaterial(mesh);
+      });
+    }
   }
 
   /**
@@ -351,6 +424,7 @@ export class GlobeInteractionService {
 
   /**
    * Apply quiz candidate highlighting to a country (distinct from explore mode selection)
+   * Performance optimized: Uses pre-built index for O(1) lookup
    * @param countryName Country name to highlight
    * @param countries Group containing all country meshes
    */
@@ -360,37 +434,33 @@ export class GlobeInteractionService {
     // Clear any previous quiz highlight first
     this.clearQuizCandidateHighlight(countries);
 
-    // Find selection meshes for this country
-    const selectionMeshes: Mesh[] = [];
+    // Build index if not already built
+    if (this.indexedCountriesGroup !== countries) {
+      this.buildCountryIndex(countries);
+    }
 
-    countries.traverse((child) => {
-      if (
-        child.name &&
-        child.name.startsWith('selection-mesh-') &&
-        child.type === 'Mesh'
-      ) {
-        const meshName = child.name
-          .replace('selection-mesh-', '')
-          .split('_')[0];
+    // O(1) lookup using index
+    let selectionMeshes = this.countryMeshIndex.get(countryName);
 
-        const formattedMeshName = this.formatCountryName(meshName);
+    // Fallback: try normalized name
+    if (!selectionMeshes || selectionMeshes.length === 0) {
+      const normalizedName =
+        this.normalizeCountryNameForDataService(countryName);
+      selectionMeshes = this.countryMeshIndex.get(normalizedName);
+    }
 
-        const isMatch = this.isCountryNameMatch(
-          countryName,
-          meshName,
-          formattedMeshName,
-        );
-
-        if (isMatch) {
-          selectionMeshes.push(child as Mesh);
-        }
-      }
-    });
+    // Fallback: try formatted name
+    if (!selectionMeshes || selectionMeshes.length === 0) {
+      const formattedName = this.formatCountryName(countryName);
+      selectionMeshes = this.countryMeshIndex.get(formattedName);
+    }
 
     // Apply quiz-specific styling with radial offset
-    selectionMeshes.forEach((mesh) => {
-      this.applyQuizCandidateSelectionMaterial(mesh);
-    });
+    if (selectionMeshes) {
+      selectionMeshes.forEach((mesh) => {
+        this.applyQuizCandidateSelectionMaterial(mesh);
+      });
+    }
 
     // Store the current quiz candidate
     this.quizCandidate.set(countryName);

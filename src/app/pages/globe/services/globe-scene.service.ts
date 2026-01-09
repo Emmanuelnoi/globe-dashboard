@@ -1,7 +1,9 @@
 import { LoggerService } from '@/core/services/logger.service';
 import { MemoryManagementService } from '@/core/services/memory-management.service';
+import { PerformanceMonitorService } from '@/core/services/performance-monitor.service';
 import { ElementRef, inject, Injectable, signal } from '@angular/core';
 import { CountryIdTextureService } from '@lib/services/country-id-texture.service';
+import { TextureLoaderService } from '@lib/services/texture-loader.service';
 import { GlobeMigrationService } from './globe-migration.service';
 import { getFresnelMat, getStarfield } from '@lib/utils';
 import {
@@ -44,6 +46,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 export class GlobeSceneService {
   private readonly logger = inject(LoggerService);
   private readonly memoryManager = inject(MemoryManagementService);
+  private readonly performanceMonitor = inject(PerformanceMonitorService);
+  private readonly textureLoader = inject(TextureLoaderService);
   private readonly countryIdTextureService = inject(CountryIdTextureService);
   private readonly globeMigrationService = inject(GlobeMigrationService);
 
@@ -95,6 +99,38 @@ export class GlobeSceneService {
       this.logger.error('WebGL support check failed', e, 'GlobeSceneService');
       return false;
     }
+  }
+
+  /**
+   * Determine optimal sphere segments based on device capabilities
+   * Performance optimization: Reduces geometry complexity on mobile/low-end devices
+   *
+   * @returns Number of segments for sphere geometry
+   */
+  private getOptimalSphereSegments(): number {
+    // Detect device capabilities
+    const isMobile = /Mobile|Android|iOS|iPhone|iPad/.test(navigator.userAgent);
+    const memory =
+      (navigator as Navigator & { deviceMemory?: number }).deviceMemory || 4;
+    const cores = navigator.hardwareConcurrency || 2;
+
+    // Low-end mobile: minimal geometry
+    if (isMobile && (memory < 4 || cores < 4)) {
+      return 48; // 2,304 vertices (vs 16,384 at 128)
+    }
+
+    // Standard mobile or low-end desktop
+    if (isMobile || memory < 4) {
+      return 64; // 4,096 vertices
+    }
+
+    // Mid-range desktop
+    if (memory < 8 || cores < 8) {
+      return 96; // 9,216 vertices
+    }
+
+    // High-end desktop: full quality
+    return 128; // 16,384 vertices
   }
 
   /**
@@ -164,18 +200,32 @@ export class GlobeSceneService {
 
   /**
    * Setup Earth mesh with textures and GPU-optimized materials
+   * Performance optimized:
+   * - Uses adaptive geometry based on device capabilities
+   * - Supports KTX2 compressed textures with fallback
    */
   private async setupEarthMesh(): Promise<void> {
     // this.logger.debug('🌎 Setting up Earth mesh...', 'GlobeSceneService');
 
-    const geometry = new SphereGeometry(1.98, 128, 128);
+    // Use adaptive segments based on device capabilities
+    const segments = this.getOptimalSphereSegments();
+    const geometry = new SphereGeometry(1.98, segments, segments);
 
-    // Load texture
-    const earthBumpTexture = this.loader.load('/textures/earthbump1k.jpg');
-    earthBumpTexture.colorSpace = SRGBColorSpace;
+    // Load texture with KTX2 support and automatic fallback
+    // Will try /textures/earthbump1k.ktx2 first, then .jpg
+    const textureResult = await this.textureLoader.loadTexture(
+      '/textures/earthbump1k',
+      { colorSpace: 'srgb' },
+    );
+
+    // Log texture format for debugging
+    // this.logger.debug(
+    //   `Earth texture loaded: ${textureResult.format}, compressed: ${textureResult.compressed}, time: ${textureResult.loadTime.toFixed(1)}ms`,
+    //   'GlobeSceneService',
+    // );
 
     const material = new MeshStandardMaterial({
-      map: earthBumpTexture,
+      map: textureResult.texture,
       color: 0xffffff, // White base color
       emissive: 0x222222, // Slight emission for better visibility
       emissiveIntensity: 0.3,
@@ -279,12 +329,11 @@ export class GlobeSceneService {
     // Append canvas to container
     nativeElement.appendChild(this.renderer.domElement);
 
-    // Add ARIA attributes to canvas for accessibility
-    this.renderer.domElement.setAttribute(
-      'aria-label',
-      'Interactive 3D globe visualization showing countries and data',
-    );
-    this.renderer.domElement.setAttribute('role', 'img');
+    // Initialize performance monitoring
+    this.performanceMonitor.initialize(this.renderer);
+
+    // Initialize KTX2 texture loader for compressed textures
+    this.textureLoader.initializeKTX2(this.renderer);
 
     // this.logger.debug('✅ Renderer setup complete', 'GlobeSceneService');
   }
@@ -334,6 +383,7 @@ export class GlobeSceneService {
     if (this.isAnimating) return;
 
     this.isAnimating = true;
+    this.performanceMonitor.start();
     // this.logger.debug('▶️ Starting animation loop', 'GlobeSceneService');
     this.animate();
   }
@@ -346,8 +396,16 @@ export class GlobeSceneService {
       cancelAnimationFrame(this.animationId);
       this.animationId = undefined;
       this.isAnimating = false;
+      this.performanceMonitor.stop();
       this.logger.debug('⏸️ Animation loop stopped', 'GlobeSceneService');
     }
+  }
+
+  /**
+   * Get the performance monitor service for external access
+   */
+  getPerformanceMonitor(): PerformanceMonitorService {
+    return this.performanceMonitor;
   }
 
   /**
@@ -382,9 +440,14 @@ export class GlobeSceneService {
 
     // Only render when something changed OR migrations are animating
     if (this.needsRender || hasActiveMigrations) {
+      this.performanceMonitor.startTiming('render');
       this.renderer.render(this.scene, this.camera);
+      this.performanceMonitor.endTiming('render');
       this.needsRender = false;
     }
+
+    // Update performance metrics
+    this.performanceMonitor.update();
   }
 
   /**
