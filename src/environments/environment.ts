@@ -32,7 +32,7 @@ export const environment = {
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFscW9qc29pa3h4dWJkY2NvdnBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwODA5NjcsImV4cCI6MjA3NjY1Njk2N30.bQD23VZJwLrKW0bafU9UMjE_HxNorv_qxCcbdHNb_QU',
   version: '1.0.0-dev',
   cacheVersion: '1.0.0',
-  buildDate: '2025-12-31T21:55:22.640Z',
+  buildDate: '2026-01-09T05:27:18.649Z',
 } as const;
 
 export type Environment = typeof environment;

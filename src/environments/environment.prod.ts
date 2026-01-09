@@ -30,7 +30,7 @@ export const environment = {
   supabaseAnonKey: 'test-key-123',
   version: '1.0.0',
   cacheVersion: '1.0.0',
-  buildDate: '2025-12-30T18:02:27.482Z',
+  buildDate: '2026-01-04T01:16:58.807Z',
 } as const;
 
 export type Environment = typeof environment;

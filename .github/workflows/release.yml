@@ -119,7 +119,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://3d-global-dashboard.netlify.app
+      url: https://www.globeplay.world
     timeout-minutes: 20
 
     steps:
@@ -168,7 +168,7 @@ jobs:
           sleep 30
 
           echo "🔍 Verifying production deployment..."
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://3d-global-dashboard.netlify.app)
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://www.globeplay.world)
 
           if [ "$HTTP_CODE" -eq 200 ]; then
             echo "✅ Production deployment verified!"
@@ -195,10 +195,10 @@ jobs:
           cat << EOF > announcement.md
           # 🎉 Release v${{ needs.create-release.outputs.version }}
 
-          We're excited to announce the release of 3D Global Dashboard v${{ needs.create-release.outputs.version }}!
+          We're excited to announce the release of GlobePlay v${{ needs.create-release.outputs.version }}!
 
           ## 🔗 Links
-          - 🌍 [Live Site](https://3d-global-dashboard.netlify.app)
+          - 🌍 [Live Site](https://www.globeplay.world)
           - 📋 [Release Notes](https://github.com/${{ github.repository }}/releases/tag/v${{ needs.create-release.outputs.version }})
           - 📦 [Download Assets](https://github.com/${{ github.repository }}/releases/tag/v${{ needs.create-release.outputs.version }})
 

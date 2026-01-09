@@ -1,11 +1,11 @@
-# 3D Global Dashboard - Robots.txt
-# https://3d-global-dashboard.netlify.app/robots.txt
+# GlobePlay - Robots.txt
+# https://www.globeplay.world/robots.txt
 
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://3d-global-dashboard.netlify.app/sitemap.xml
+Sitemap: https://www.globeplay.world/sitemap.xml
 
 # Crawl delay (be nice to our servers)
 Crawl-delay: 1

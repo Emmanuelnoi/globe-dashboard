@@ -4,41 +4,41 @@
 
   <!-- Main Application -->
   <url>
-    <loc>https://3d-global-dashboard.netlify.app/</loc>
+    <loc>https://www.globeplay.world/</loc>
     <lastmod>2025-10-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://3d-global-dashboard.netlify.app/og-image.jpg</image:loc>
-      <image:title>3D Global Dashboard - Interactive Globe</image:title>
+      <image:loc>https://www.globeplay.world/og-image.jpg</image:loc>
+      <image:title>GlobePlay - Interactive Globe</image:title>
       <image:caption>Interactive 3D globe visualization with country data</image:caption>
     </image:image>
   </url>
 
   <!-- Feature Pages (SPA routes - for SEO purposes) -->
   <url>
-    <loc>https://3d-global-dashboard.netlify.app/?view=country-search</loc>
+    <loc>https://www.globeplay.world/?view=country-search</loc>
     <lastmod>2025-10-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://3d-global-dashboard.netlify.app/?view=bird-migration</loc>
+    <loc>https://www.globeplay.world/?view=bird-migration</loc>
     <lastmod>2025-10-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://3d-global-dashboard.netlify.app/?view=geography-quiz</loc>
+    <loc>https://www.globeplay.world/?view=geography-quiz</loc>
     <lastmod>2025-10-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://3d-global-dashboard.netlify.app/?view=country-comparison</loc>
+    <loc>https://www.globeplay.world/?view=country-comparison</loc>
     <lastmod>2025-10-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

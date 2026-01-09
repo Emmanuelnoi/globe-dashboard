@@ -1,4 +1,4 @@
-# 🌍 3D Global Dashboard
+# 🌍 GlobePlay
 
 <div align="center">
 
@@ -11,7 +11,7 @@ Real scientific data • 60fps WebGL performance • Enterprise-quality architec
 [![Coverage](https://img.shields.io/badge/coverage-86.4%25-brightgreen)](https://github.com/Emmanuelnoi/3d-global-dashboard)
 [![CI](https://img.shields.io/badge/CI-⭐⭐⭐⭐⭐_Enterprise-success)](https://github.com/Emmanuelnoi/3d-global-dashboard/actions)
 
-[**🎯 Live Demo**](https://globe-dashboard-zeta.vercel.app/) • [**📖 Docs**](docs/README.md) • [**🏗️ Architecture**](docs/ARCHITECTURE.md) • [**🤝 Contributing**](docs/community/CONTRIBUTING.md)
+[**🎯 Live Demo**](https://www.globeplay.world/) • [**📖 Docs**](docs/README.md) • [**🏗️ Architecture**](docs/architecture/overview.md) • [**🤝 Contributing**](docs/community/CONTRIBUTING.md)
 
 </div>
 
@@ -19,7 +19,7 @@ Real scientific data • 60fps WebGL performance • Enterprise-quality architec
 
 ## 📸 Preview
 
-![3D Global Dashboard](public/Globe-dashboard.gif)
+![GlobePlay](public/Globe-dashboard.gif)
 
 _Interactive WebGL globe with smooth 60fps rotation, country selection, 241+ bird species migration paths, real-time quizzes, and cloud-synced progress._
 
@@ -83,7 +83,7 @@ Most geographic tools are either **too simple** (static maps) or **too complex**
 
 **Key Patterns:** Local-First • Zoneless Signals • Render-on-Demand • Strict TypeScript (zero `any`)
 
-→ **Deep dives:** [Architecture](docs/ARCHITECTURE.md) • [Performance](docs/PERFORMANCE.md) • [Data Flow](docs/DATA_FLOW.md)
+→ **Deep dives:** [Architecture](docs/architecture/overview.md) • [Performance](docs/architecture/performance.md) • [Data Flow](docs/data/data-flow.md)
 
 ---
 
@@ -219,7 +219,7 @@ Most 3D/WebGL apps are completely inaccessible. This project proves visual richn
 **Data Layer:** Supabase (PostgreSQL + PostGIS) • IndexedDB (6-DB Local-First) • GBIF API
 **DevOps:** Vitest (604 tests) • Playwright (26 E2E) • GitHub Actions • Vercel
 
-→ **Full stack:** [Tech Details](docs/ARCHITECTURE.md#tech-stack)
+→ **Full stack:** [Tech Details](docs/architecture/overview.md)
 
 ---
 
@@ -237,7 +237,7 @@ pnpm run test:blocking    # 487 blocking tests (CI)
 pnpm run e2e              # 26 Playwright E2E tests
 ```
 
-→ **Full setup:** [Dev Guide](docs/DEVELOPMENT_GUIDE.md) • [Deployment](docs/DEPLOYMENT.md)
+→ **Full setup:** [Dev Guide](docs/development/setup.md) • [Deployment](docs/deployment/ci-cd.md)
 
 ---
 
@@ -253,9 +253,9 @@ This project demonstrates **senior-level full-stack engineering**:
 4. 🔒 **Enterprise CI/CD** – Built ⭐⭐⭐⭐⭐ pipeline with gradual enforcement
 5. ♿ **Accessibility** – Achieved WCAG 2.1 AA in complex 3D WebGL app
 
-**Engineering Philosophy:** "Pick the right tech, not the best tech" – Acknowledges trade-offs (IndexedDB complexity vs unlimited storage), plans mitigation (see [Trade-offs](docs/TRADE_OFFS.md)).
+**Engineering Philosophy:** "Pick the right tech, not the best tech" – Acknowledges trade-offs (IndexedDB complexity vs unlimited storage), plans mitigation (see [Trade-offs](docs/decisions/trade-offs.md)).
 
-→ **Deep dives:** [Architecture](docs/ARCHITECTURE.md) • [Performance](docs/PERFORMANCE.md) • [Testing](docs/TESTING.md)
+→ **Deep dives:** [Architecture](docs/architecture/overview.md) • [Performance](docs/architecture/performance.md) • [Testing](docs/testing/strategy.md)
 
 ---
 
@@ -286,6 +286,8 @@ MIT License – see [LICENSE](LICENSE)
 <div align="center">
 
 **🌍 Explore 241 countries • Track 241+ bird species • Unlock 14 achievements 🐦**
+
+[**www.globeplay.world**](https://www.globeplay.world/)
 
 **Made with TypeScript by [Emmanuel Noi](https://github.com/Emmanuelnoi)**
 
