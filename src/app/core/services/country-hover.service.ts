@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Raycaster, Vector2, Camera, Group, Object3D } from 'three';
+import { Raycaster, Vector2, Vector3, Camera, Group, Object3D } from 'three';
 import { LoggerService } from './logger.service';
 
 export interface CountryHoverResult {
@@ -23,6 +23,7 @@ export class CountryHoverService {
   /**
    * Detect country hover based on TopoJSON mesh structure
    * This service understands the specific mesh hierarchy created by geojson.utils.ts
+   * Only detects countries on the front-facing hemisphere (visible side of globe)
    *
    * Performance optimized: Uses cached selection meshes for O(1) lookup
    */
@@ -52,6 +53,12 @@ export class CountryHoverService {
         );
 
         for (const intersect of intersects) {
+          // Check if this intersection is on the front-facing side of the globe
+          // This prevents hovering over countries through the back of the sphere
+          if (!this.isPointFrontFacing(intersect.point, camera.position)) {
+            continue; // Skip back-facing countries
+          }
+
           const countryName = this.extractCountryNameFromSelectionMesh(
             intersect.object,
           );
@@ -74,6 +81,22 @@ export class CountryHoverService {
       );
       return null;
     }
+  }
+
+  /**
+   * Check if a point on the globe is facing the camera (front hemisphere)
+   * Uses dot product: positive = front-facing, negative = back-facing
+   */
+  private isPointFrontFacing(point: Vector3, cameraPosition: Vector3): boolean {
+    // Globe is centered at origin (0, 0, 0)
+    // Vector from globe center to the intersection point (normalized)
+    const pointDirection = point.clone().normalize();
+
+    // Vector from globe center to camera position (normalized)
+    const cameraDirection = cameraPosition.clone().normalize();
+
+    // Dot product > 0 means the point is on the same hemisphere as the camera
+    return pointDirection.dot(cameraDirection) > 0;
   }
 
   /**

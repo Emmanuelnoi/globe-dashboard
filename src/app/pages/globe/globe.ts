@@ -29,7 +29,7 @@ import {
   loadTopoJSON,
   type TopoJSONRenderOptions,
 } from '@lib/utils';
-import { Group, Mesh, Object3D } from 'three';
+import { Group, Mesh, Object3D, Vector3 } from 'three';
 import { CountryDataService } from '../../core/services/country-data.service';
 import { CountryHoverService } from '../../core/services/country-hover.service';
 import { InteractionModeService } from '../../core/services/interaction-mode';
@@ -1309,6 +1309,18 @@ export class Globe implements AfterViewInit, OnDestroy {
     );
 
     if (hoverResult?.countryName) {
+      // Check if the detected country is on the front-facing side of the globe
+      // This prevents selecting countries through the back of the sphere
+      if (hoverResult.object) {
+        const intersectionPoint = this.getIntersectionPoint(hoverResult.object);
+        if (
+          intersectionPoint &&
+          !this.isPointFrontFacing(intersectionPoint, camera.position)
+        ) {
+          return null; // Country is on the back side - don't select
+        }
+      }
+
       return {
         countryName: hoverResult.countryName,
         countryGroup: hoverResult.object,
@@ -1316,6 +1328,42 @@ export class Globe implements AfterViewInit, OnDestroy {
     }
 
     return null;
+  }
+
+  /**
+   * Get the center point of a country mesh for front-facing check
+   */
+  private getIntersectionPoint(object: Object3D): Vector3 | null {
+    if (object instanceof Mesh && object.geometry) {
+      // Use the geometry's bounding sphere center as a representative point
+      object.geometry.computeBoundingSphere();
+      if (object.geometry.boundingSphere) {
+        // Transform to world coordinates
+        const center = object.geometry.boundingSphere.center.clone();
+        object.localToWorld(center);
+        return center;
+      }
+    }
+    // Fallback: use the object's world position
+    const worldPos = new Vector3();
+    object.getWorldPosition(worldPos);
+    return worldPos;
+  }
+
+  /**
+   * Check if a point on the globe is facing the camera (front hemisphere)
+   * Uses dot product: positive = front-facing, negative = back-facing
+   */
+  private isPointFrontFacing(point: Vector3, cameraPosition: Vector3): boolean {
+    // Globe is centered at origin (0, 0, 0)
+    // Vector from globe center to the point (normalized)
+    const pointDirection = point.clone().normalize();
+
+    // Vector from globe center to camera position (normalized)
+    const cameraDirection = cameraPosition.clone().normalize();
+
+    // Dot product > 0 means the point is on the same hemisphere as the camera
+    return pointDirection.dot(cameraDirection) > 0;
   }
 
   private animate(_currentTime: number = 0): void {

@@ -7,6 +7,7 @@ import {
   Group,
   Raycaster,
   Vector2,
+  Vector3,
   PerspectiveCamera,
 } from 'three';
 import { LoggerService } from '@/core/services/logger.service';
@@ -53,6 +54,7 @@ export class GlobeInteractionService {
 
   /**
    * Handle country selection from mouse clicks (optimized)
+   * Only selects countries on the front-facing hemisphere of the globe
    * @param event Mouse click event
    * @param renderer WebGL renderer for canvas access
    * @param camera Perspective camera for raycasting
@@ -95,7 +97,7 @@ export class GlobeInteractionService {
     const intersects = raycaster.intersectObjects(countries.children, true);
 
     if (intersects.length > 0) {
-      // Find first valid country mesh (optimized loop)
+      // Find first valid country mesh that is front-facing
       let selectedCountryMesh: Mesh | null = null;
       let countryGroup: Object3D | null = null;
 
@@ -112,6 +114,11 @@ export class GlobeInteractionService {
 
         // Look for country selection meshes
         if (obj.name.startsWith('selection-mesh-') && obj.type === 'Mesh') {
+          // Check if this intersection is on the front-facing side of the globe
+          if (!this.isPointFrontFacing(intersect.point, camera)) {
+            continue; // Skip back-facing countries
+          }
+
           selectedCountryMesh = obj as Mesh;
           countryGroup = obj.parent;
           break; // Early exit for performance
@@ -133,6 +140,28 @@ export class GlobeInteractionService {
     }
 
     return null;
+  }
+
+  /**
+   * Check if a point on the globe is facing the camera (front hemisphere)
+   * Uses dot product: positive = front-facing, negative = back-facing
+   * @param point The intersection point on the globe surface
+   * @param camera The camera to check against
+   * @returns true if the point is on the camera-facing side
+   */
+  private isPointFrontFacing(
+    point: Vector3,
+    camera: PerspectiveCamera,
+  ): boolean {
+    // Globe is centered at origin (0, 0, 0)
+    // Vector from globe center to intersection point (normalized)
+    const pointDirection = point.clone().normalize();
+
+    // Vector from globe center to camera position (normalized)
+    const cameraDirection = camera.position.clone().normalize();
+
+    // Dot product > 0 means the point is on the same hemisphere as the camera
+    return pointDirection.dot(cameraDirection) > 0;
   }
 
   /**
