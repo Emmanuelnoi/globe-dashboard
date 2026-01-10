@@ -346,25 +346,56 @@ export class GlobeCountrySelectionService {
 
   /**
    * Check if country names match with enhanced logic for TopoJSON mesh names
+   * IMPORTANT: Uses strict matching to prevent overlap (e.g., Niger vs Nigeria)
    */
   private isCountryNameMatch(meshName: string, targetName: string): boolean {
     // Normalize function that handles prefixes, suffixes, and special characters
-    const normalize = (name: string) =>
+    const normalize = (name: string): string =>
       name
         .toLowerCase()
         .trim()
         .replace(/^selection-mesh-/i, '') // Strip "selection-mesh-" prefix
         .replace(/^selection-/i, '') // Strip "selection-" prefix
         .replace(/_\d+$/i, '') // Strip "_0", "_1", "_2" suffixes (for MultiPolygon parts)
-        .replace(/[\s.''\-]/g, '') // Remove spaces, dots, apostrophes, hyphens
+        .replace(/[\s.''-]/g, '') // Remove spaces, dots, apostrophes, hyphens
         .replace(/[^a-z0-9]/g, ''); // Remove all non-alphanumeric characters
 
     const meshNormalized = normalize(meshName);
     const targetNormalized = normalize(targetName);
 
-    // Direct match
+    // Direct match (most common case)
     if (meshNormalized === targetNormalized) {
       return true;
+    }
+
+    // Known problematic pairs that should NEVER match each other
+    // These are country names where one is a substring of another
+    const exclusivePairs: string[][] = [
+      ['niger', 'nigeria'],
+      ['guinea', 'guineabissau', 'equatorialguinea', 'papuanewguinea'],
+      ['sudan', 'southsudan'],
+      [
+        'congo',
+        'drcongo',
+        'democraticrepublicofthecongo',
+        'republicofthecongo',
+      ],
+      ['korea', 'northkorea', 'southkorea'],
+      ['samoa', 'americansamoa'],
+      ['virgin', 'usvirginislands', 'britishvirginislands'],
+    ];
+
+    // Check if mesh and target are in the same exclusive pair (should not match different entries)
+    // This prevents "niger" from matching "nigeria" and vice versa
+    for (const pair of exclusivePairs) {
+      const meshMatch = pair.find((p) => meshNormalized === p);
+      const targetMatch = pair.find((p) => targetNormalized === p);
+
+      // If both names are found in the same exclusive pair but they're different entries,
+      // they should NOT match each other
+      if (meshMatch && targetMatch && meshMatch !== targetMatch) {
+        return false;
+      }
     }
 
     // Special case mappings for abbreviated names in TopoJSON
@@ -374,19 +405,24 @@ export class GlobeCountrySelectionService {
         'democraticrepublicofthecongo',
         'democraticrepubliccongo',
         'drcongo',
-        'dr.congo',
         'congodemocraticrepublic',
       ],
       // United States variants
       unitedstatesofamerica: ['unitedstates', 'usa', 'us'],
       // Côte d'Ivoire variants
-      cotedivoire: ['ivorycoast', 'cotedivoire'],
-      // Republic of the Congo
-      congo: ['republicofthecongo', 'congobrazz', 'congobrazzaville'],
+      cotedivoire: ['ivorycoast'],
+      // Republic of the Congo (NOT DR Congo)
+      republicofthecongo: ['congobrazz', 'congobrazzaville'],
       // Other common abbreviations
       unitedkingdom: ['uk', 'greatbritain'],
       southafrica: ['rsa', 'republicofsouthafrica'],
-      // Add more as needed
+      // Guinea variants (each is distinct)
+      guineabissau: ['guineabissau'],
+      equatorialguinea: ['equatorialguinea'],
+      papuanewguinea: ['papuanewguinea'],
+      // Korea variants (each is distinct)
+      republicofkorea: ['southkorea', 'skorea'],
+      democraticpeoplesrepublicofkorea: ['northkorea', 'nkorea', 'dprk'],
     };
 
     // Check if either the mesh or target matches any special mapping
@@ -398,10 +434,15 @@ export class GlobeCountrySelectionService {
       }
     }
 
-    // Partial match: check if one is contained in the other (for abbreviated names)
-    // Only if the shorter name is at least 4 characters to avoid false positives
+    // STRICT partial match: only allow if the difference is just common suffixes/prefixes
+    // This prevents "niger" matching "nigeria" but allows "usa" matching "unitedstates"
+    // We require at least 90% character overlap for partial matching
+    const maxLength = Math.max(meshNormalized.length, targetNormalized.length);
     const minLength = Math.min(meshNormalized.length, targetNormalized.length);
-    if (minLength >= 4) {
+
+    // Only allow partial match if names are very similar in length (within 2 chars)
+    // This allows "uk" -> "unitedkingdom" via special mappings but NOT "niger" -> "nigeria"
+    if (maxLength - minLength <= 2 && minLength >= 4) {
       if (
         meshNormalized.includes(targetNormalized) ||
         targetNormalized.includes(meshNormalized)

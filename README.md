@@ -276,13 +276,6 @@ MIT License – see [LICENSE](LICENSE)
 
 ---
 
-## 📧 Contact
-
-**Emmanuel Noi** ([@Emmanuelnoi](https://github.com/Emmanuelnoi))
-📧 [emttechh@gmail.com](mailto:emttechh@gmail.com) • 🐛 [Issues](https://github.com/Emmanuelnoi/3d-global-dashboard/issues)
-
----
-
 <div align="center">
 
 **🌍 Explore 241 countries • Track 241+ bird species • Unlock 14 achievements 🐦**
