@@ -26,11 +26,11 @@ export const environment = {
   sentryEnabled: false,
   googleAnalyticsId: '',
   analyticsEnabled: false,
-  supabaseUrl: 'https://test.supabase.co',
-  supabaseAnonKey: 'test-key-123',
+  supabaseUrl: '',
+  supabaseAnonKey: '',
   version: '1.0.0',
   cacheVersion: '1.0.0',
-  buildDate: '2026-01-04T01:16:58.807Z',
+  buildDate: '2026-01-12T03:43:20.947Z',
 } as const;
 
 export type Environment = typeof environment;
