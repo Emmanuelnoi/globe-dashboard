@@ -9,7 +9,7 @@ export const environment = {
   gbifApiUrl: 'https://api.gbif.org/v1',
   enableDebugLogging: true,
   enablePerformanceMonitoring: true,
-  enableAnalytics: false,
+  enableAnalytics: true,
   cacheEnabled: true,
   cacheTTL: 7 * 24 * 60 * 60 * 1000,
   cacheMaxSize: 50 * 1024 * 1024,
