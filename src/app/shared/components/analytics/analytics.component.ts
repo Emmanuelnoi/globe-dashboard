@@ -1,11 +1,14 @@
 /**
  * Analytics Component for Vercel Web Analytics Integration
  *
- * This component wraps the Vercel Analytics component from @vercel/analytics/react
- * and makes it compatible with Angular. The component automatically handles:
+ * This component wraps the Vercel Web Analytics tracking for Angular applications.
+ * The component automatically handles:
  * - Initialization of the Vercel tracking script
  * - Route change tracking
  * - Custom event tracking
+ *
+ * The Vercel platform automatically enables the /_vercel/insights/* routes
+ * after your next deployment when Web Analytics is enabled in the dashboard.
  *
  * Usage:
  * Add this component to your root component (app.ts) template:
@@ -47,26 +50,31 @@ export class AnalyticsComponent implements OnInit {
    * - Tracks performance metrics
    * - Sends data to Vercel's analytics service
    *
-   * The Vercel platform automatically enables the /_vercel/insights/* routes
-   * after your next deployment when Web Analytics is enabled in the dashboard.
+   * The script will be available from /_vercel/insights/script.js after deployment
+   * when Web Analytics is enabled in the Vercel dashboard.
    */
   private initializeVercelAnalytics(): void {
     try {
-      // Create the global va function for tracking
+      // Create the global va function for tracking (queuing mechanism)
+      // This function queues tracking calls before the script loads
       if (!window.va) {
         window.va = (...args: unknown[]) => {
           (window.vaq = window.vaq || []).push(args);
         };
       }
 
-      // Add the Vercel Analytics tracking script
+      // Inject the Vercel Analytics tracking script
       // This script will be served from /_vercel/insights/script.js after deployment
       // The script is automatically added by Vercel when Web Analytics is enabled
+      const script = document.createElement('script');
+      script.src = '/_vercel/insights/script.js';
+      script.defer = true;
+      script.async = true;
 
-      // For development or non-deployed environments, you may need to ensure
-      // the script is available. In production on Vercel, this is handled automatically.
+      // Append the script to the document head
+      document.head.appendChild(script);
 
-      this.logger.debug('Vercel Analytics initialized');
+      this.logger.debug('Vercel Analytics script injected');
     } catch (error) {
       this.logger.error('Failed to initialize Vercel Analytics', error);
     }
