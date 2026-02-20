@@ -48,7 +48,9 @@ export class AnalyticsService {
   private initializeAnalytics(): void {
     // Only initialize if analytics is enabled in the environment
     if (!environment.enableAnalytics) {
-      this.logger.debug('Analytics initialization skipped: disabled in environment');
+      this.logger.debug(
+        'Analytics initialization skipped: disabled in environment',
+      );
       return;
     }
 

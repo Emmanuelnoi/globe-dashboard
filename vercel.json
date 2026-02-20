@@ -3,7 +3,7 @@
   "version": 2,
   "name": "3d-global-dashboard",
   "buildCommand": "pnpm run build",
-  "outputDirectory": "dist/global-dashboard/browser",
+  "outputDirectory": "dist/global-dashboard",
   "framework": "angular",
   "installCommand": "pnpm install --frozen-lockfile",
   "devCommand": "pnpm start",
