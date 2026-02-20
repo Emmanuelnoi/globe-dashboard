@@ -5,7 +5,7 @@
   "buildCommand": "pnpm run build",
   "outputDirectory": "dist/global-dashboard",
   "framework": "angular",
-  "installCommand": "pnpm install --frozen-lockfile",
+  "installCommand": "pnpm install --no-frozen-lockfile",
   "devCommand": "pnpm start",
   "regions": ["iad1"],
   "build": {
