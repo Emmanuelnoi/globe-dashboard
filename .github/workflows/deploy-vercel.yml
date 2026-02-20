@@ -110,8 +110,17 @@ jobs:
 
       - name: Check main page
         run: |
-          # Use production domain for main branch (no authentication required)
-          URL="https://www.globeplay.world"
+          URL="${{ needs.deploy.outputs.url }}"
+          if [ -z "$URL" ]; then
+            echo "⚠️ No deployment URL output found, falling back to custom domain"
+            URL="https://www.globeplay.world"
+          fi
+
+          # Ensure URL includes protocol.
+          if [[ "$URL" != http* ]]; then
+            URL="https://$URL"
+          fi
+
           echo "Checking URL: $URL"
 
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
@@ -155,4 +164,4 @@ jobs:
       - name: Summary
         run: |
           echo "🎉 Deployment successful and health checks passed!"
-          echo "🌐 Production URL: https://www.globeplay.world"
+          echo "🌐 Deployment URL: ${{ needs.deploy.outputs.url }}"
