@@ -145,6 +145,14 @@ export class SignupPromptModalComponent {
       this.passwordStrength().isValid && this.passwordsMatch() && !!this.email()
     );
   });
+  readonly passwordStrengthColor = computed(() => {
+    const score = this.passwordStrength().score;
+    const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e'];
+    return colors[score];
+  });
+  readonly passwordStrengthWidth = computed(
+    () => (this.passwordStrength().score / 4) * 100,
+  );
 
   constructor() {
     // Watch directMode and automatically skip to signup step
@@ -306,21 +314,5 @@ export class SignupPromptModalComponent {
     if (event.target === event.currentTarget) {
       this.onClose();
     }
-  }
-
-  /**
-   * Get password strength color
-   */
-  getPasswordStrengthColor(): string {
-    const score = this.passwordStrength().score;
-    const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e'];
-    return colors[score];
-  }
-
-  /**
-   * Get password strength width percentage
-   */
-  getPasswordStrengthWidth(): number {
-    return (this.passwordStrength().score / 4) * 100;
   }
 }

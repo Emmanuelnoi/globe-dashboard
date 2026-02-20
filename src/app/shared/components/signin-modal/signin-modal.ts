@@ -112,6 +112,14 @@ export class SigninModalComponent {
   readonly canSubmitNewPassword = computed<boolean>(() => {
     return this.passwordStrength().isValid && this.passwordsMatch();
   });
+  readonly passwordStrengthColor = computed(() => {
+    const score = this.passwordStrength().score;
+    const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e'];
+    return colors[score];
+  });
+  readonly passwordStrengthWidth = computed(
+    () => (this.passwordStrength().score / 4) * 100,
+  );
 
   constructor() {
     // Listen for password recovery events
@@ -392,21 +400,5 @@ export class SigninModalComponent {
    */
   toggleConfirmPasswordVisibility(): void {
     this.showConfirmPassword.update((show) => !show);
-  }
-
-  /**
-   * Get password strength color
-   */
-  getPasswordStrengthColor(): string {
-    const score = this.passwordStrength().score;
-    const colors = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e'];
-    return colors[score];
-  }
-
-  /**
-   * Get password strength width percentage
-   */
-  getPasswordStrengthWidth(): number {
-    return (this.passwordStrength().score / 4) * 100;
   }
 }

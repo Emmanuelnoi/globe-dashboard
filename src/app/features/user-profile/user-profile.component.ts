@@ -62,6 +62,21 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   readonly totalDiscoveredSignal = this.discoveryService.totalDiscovered;
   readonly achievements = this.achievementsService.getAllAchievements();
   readonly myRank = this.leaderboardService.myRank;
+  readonly modeDisplayNames: Record<string, string> = {
+    'find-country': 'Find Country',
+    'capital-match': 'Capital Match',
+    'flag-id': 'Flag ID',
+    'facts-guess': 'Facts Guess',
+    'explore-learn': 'Explore & Learn',
+  };
+  readonly tierColors: Record<string, string> = {
+    bronze: '#cd7f32',
+    silver: '#c0c0c0',
+    gold: '#ffd700',
+    platinum: '#e5e4e2',
+    diamond: '#b9f2ff',
+  };
+  readonly defaultTierColor = '#ffffff';
 
   // Computed signals
   readonly displayName = computed(() => {
@@ -233,51 +248,11 @@ export class UserProfileComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Format date for display
-   */
-  formatDate(date: Date | string): string {
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  }
-
-  /**
    * Format time duration
    */
   formatDuration(seconds: number): string {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
-  }
-
-  /**
-   * Get mode display name
-   */
-  getModeDisplayName(mode: string): string {
-    const modeNames: Record<string, string> = {
-      'find-country': 'Find Country',
-      'capital-match': 'Capital Match',
-      'flag-id': 'Flag ID',
-      'facts-guess': 'Facts Guess',
-      'explore-learn': 'Explore & Learn',
-    };
-    return modeNames[mode] || mode;
-  }
-
-  /**
-   * Get tier color
-   */
-  getTierColor(tier: string): string {
-    const colors: Record<string, string> = {
-      bronze: '#cd7f32',
-      silver: '#c0c0c0',
-      gold: '#ffd700',
-      platinum: '#e5e4e2',
-      diamond: '#b9f2ff',
-    };
-    return colors[tier] || '#ffffff';
   }
 }

@@ -60,3 +60,11 @@ pnpm-debug.log*
 Thumbs.db
 bundle-analysis.html
 docss
+
+# Local artifacts and env files not meant for commits
+playwright-report/index.html
+test-results/.last-run.json
+error.txt
+test-performance.html
+src/environments/environment.ts
+src/environments/environment.prod.ts

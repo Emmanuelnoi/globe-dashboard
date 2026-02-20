@@ -6,6 +6,7 @@ import {
 } from './mobile-touch.service';
 import { LoggerService } from './logger.service';
 import { vi } from 'vitest';
+import { MockProvider } from 'ng-mocks';
 
 /**
  * Unit Tests for MobileTouchService
@@ -44,7 +45,7 @@ describe('MobileTouchService', () => {
     TestBed.configureTestingModule({
       providers: [
         MobileTouchService,
-        { provide: LoggerService, useValue: mockLoggerService },
+        MockProvider(LoggerService, mockLoggerService),
       ],
     });
   });

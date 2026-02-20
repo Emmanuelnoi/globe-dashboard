@@ -7,6 +7,7 @@ import { AchievementsService } from './achievements.service';
 import { LoggerService } from './logger.service';
 import { signal } from '@angular/core';
 import { vi } from 'vitest';
+import { MockProvider } from 'ng-mocks';
 
 describe('LeaderboardService', () => {
   let service: LeaderboardService;
@@ -36,11 +37,11 @@ describe('LeaderboardService', () => {
     TestBed.configureTestingModule({
       providers: [
         LeaderboardService,
-        { provide: SupabaseService, useValue: supabaseSpy },
-        { provide: UserStatsService, useValue: userStatsSpy },
-        { provide: CountryDiscoveryService, useValue: discoverySpy },
-        { provide: AchievementsService, useValue: achievementsSpy },
-        { provide: LoggerService, useValue: loggerSpy },
+        MockProvider(SupabaseService, supabaseSpy),
+        MockProvider(UserStatsService, userStatsSpy),
+        MockProvider(CountryDiscoveryService, discoverySpy),
+        MockProvider(AchievementsService, achievementsSpy),
+        MockProvider(LoggerService, loggerSpy),
       ],
     });
 

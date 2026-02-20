@@ -98,35 +98,25 @@ export class Globe implements AfterViewInit, OnDestroy {
   private errorBoundary!: ElementRef<ErrorBoundaryComponent>;
 
   // Proxy signals from services (no duplication)
-  protected get isLoading(): typeof this.dataLoading.isLoading {
-    return this.dataLoading.isLoading;
-  }
-  protected get loadingProgress(): typeof this.dataLoading.loadingProgress {
-    return this.dataLoading.loadingProgress;
-  }
-  protected get loadingMessage(): typeof this.dataLoading.loadingMessage {
-    return this.dataLoading.loadingMessage;
-  }
-  protected get initError(): typeof this.dataLoading.initError {
-    return this.dataLoading.initError;
-  }
+  protected readonly isLoading = this.dataLoading.isLoading;
+  protected readonly loadingProgress = this.dataLoading.loadingProgress;
+  protected readonly loadingMessage = this.dataLoading.loadingMessage;
+  protected readonly initError = this.dataLoading.initError;
 
-  protected get countryNameTooltipVisible(): typeof this.tooltipService.countryNameTooltipVisible {
-    return this.tooltipService.countryNameTooltipVisible;
-  }
-  protected get hoveredCountryName(): typeof this.tooltipService.hoveredCountryName {
-    return this.tooltipService.hoveredCountryName;
-  }
-  protected get countryNameTooltipPosition(): typeof this.tooltipService.countryNameTooltipPosition {
-    return this.tooltipService.countryNameTooltipPosition;
-  }
-  protected get selectedCountry(): typeof this.tooltipService.selectedCountry {
-    return this.tooltipService.selectedCountry;
-  }
+  protected readonly countryNameTooltipVisible =
+    this.tooltipService.countryNameTooltipVisible;
+  protected readonly hoveredCountryName =
+    this.tooltipService.hoveredCountryName;
+  protected readonly countryNameTooltipPosition =
+    this.tooltipService.countryNameTooltipPosition;
+  protected readonly selectedCountry = this.tooltipService.selectedCountry;
 
-  protected get quizCandidate(): typeof this.quizIntegration.quizCandidate {
-    return this.quizIntegration.quizCandidate;
-  }
+  protected readonly quizCandidate = this.quizIntegration.quizCandidate;
+  protected readonly globeAriaDescription = computed(() =>
+    this.accessibility.getGlobeAriaDescription(),
+  );
+  protected readonly accessibilityCurrentCountry =
+    this.accessibility.currentCountry;
 
   // Migration info card data
   protected readonly migrationCardData = computed<readonly MigrationCardData[]>(

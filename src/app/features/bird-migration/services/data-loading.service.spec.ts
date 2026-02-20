@@ -13,6 +13,7 @@ import { LoggerService } from '@/core/services/logger.service';
 import type { DataLoadingRequest, LoadingStage } from './data-loading.service';
 import type { GbifSearchResponse } from './gbif-adapter.service';
 import type { SpeciesInfo, DateRange } from '../models/ui.models';
+import { MockProvider } from 'ng-mocks';
 
 // Mock the entire migration config to avoid environment import issues
 vi.mock('../config/migration.config', () => ({
@@ -169,8 +170,8 @@ describe('DataLoadingService', () => {
     TestBed.configureTestingModule({
       providers: [
         DataLoadingService,
-        { provide: GbifAdapterService, useValue: mockGbifAdapter },
-        { provide: LoggerService, useValue: mockLogger },
+        MockProvider(GbifAdapterService, mockGbifAdapter),
+        MockProvider(LoggerService, mockLogger),
       ],
     });
 

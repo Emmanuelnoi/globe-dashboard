@@ -38,6 +38,7 @@ export type PasswordStrength = {
 export class SupabaseService {
   private readonly logger = inject(LoggerService);
   private supabase: SupabaseClient;
+  private static authLockQueue: Promise<void> = Promise.resolve();
 
   // Auth state signals
   readonly currentUser = signal<User | null>(null);
@@ -45,6 +46,19 @@ export class SupabaseService {
   readonly isAuthenticated = signal<boolean>(false);
   readonly authLoading = signal<boolean>(true);
   readonly passwordRecoveryEvent = signal<boolean>(false);
+
+  private readonly authLock = async <R>(
+    _name: string,
+    _acquireTimeout: number,
+    fn: () => Promise<R>,
+  ): Promise<R> => {
+    const run = SupabaseService.authLockQueue.then(fn, fn);
+    SupabaseService.authLockQueue = run.then(
+      () => undefined,
+      () => undefined,
+    );
+    return run;
+  };
 
   constructor() {
     // Initialize Supabase client
@@ -56,6 +70,7 @@ export class SupabaseService {
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: true,
+          lock: this.authLock,
         },
       },
     );

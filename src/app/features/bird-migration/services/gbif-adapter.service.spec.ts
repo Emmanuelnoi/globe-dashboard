@@ -21,6 +21,13 @@ describe('GbifAdapterService', () => {
   const waitForCacheCheck = () =>
     new Promise((resolve) => setTimeout(resolve, 100));
 
+  const waitForInitialization = async () => {
+    const timeoutAt = Date.now() + 2000;
+    while (!service.isInitialized() && Date.now() < timeoutAt) {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+  };
+
   // Mock GBIF API response data
   const mockGbifOccurrence: GbifOccurrence = {
     key: 12345,
@@ -60,32 +67,7 @@ describe('GbifAdapterService', () => {
   };
 
   beforeEach(async () => {
-    // Reset TestBed first to close any open database connections
-    TestBed.resetTestingModule();
-
-    // Clear all IndexedDB databases before each test
-    const databases = await indexedDB.databases();
-    await Promise.all(
-      databases.map((db) => {
-        if (db.name) {
-          return new Promise<void>((resolve, reject) => {
-            const request = indexedDB.deleteDatabase(db.name!);
-            request.onsuccess = () => resolve();
-            request.onerror = () => resolve(); // Resolve even on error to continue
-            request.onblocked = () => {
-              // Force close by waiting a bit
-              setTimeout(() => resolve(), 100);
-            };
-          });
-        }
-        return Promise.resolve();
-      }),
-    );
-
-    // Wait for database deletion to complete
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       providers: [
         GbifAdapterService,
         provideHttpClient(),
@@ -96,18 +78,10 @@ describe('GbifAdapterService', () => {
     service = TestBed.inject(GbifAdapterService);
     httpTestingController = TestBed.inject(HttpTestingController);
 
-    // Wait for service cache initialization to complete
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await waitForInitialization();
   });
 
   afterEach(async () => {
-    // Clear cache and close database connection
-    try {
-      await service.clearCache();
-    } catch (error) {
-      // Ignore cleanup errors
-    }
-
     // Verify no outstanding HTTP requests
     try {
       httpTestingController.verify();
@@ -115,26 +89,14 @@ describe('GbifAdapterService', () => {
       // Ignore verification errors - some tests intentionally don't complete requests
     }
 
-    // Reset TestBed to clean up injector and close connections
-    TestBed.resetTestingModule();
+    // Clear cache best-effort without blocking teardown
+    try {
+      await service.clearCache();
+    } catch (error) {
+      // Ignore cleanup errors
+    }
 
-    // Force close all database connections
-    const databases = await indexedDB.databases();
-    await Promise.all(
-      databases.map((db) => {
-        if (db.name) {
-          return new Promise<void>((resolve) => {
-            const request = indexedDB.deleteDatabase(db.name!);
-            request.onsuccess = () => resolve();
-            request.onerror = () => resolve();
-            request.onblocked = () => {
-              setTimeout(() => resolve(), 50);
-            };
-          });
-        }
-        return Promise.resolve();
-      }),
-    );
+    TestBed.resetTestingModule();
   });
 
   describe('Service Initialization', () => {

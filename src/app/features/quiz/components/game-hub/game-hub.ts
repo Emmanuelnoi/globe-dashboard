@@ -73,7 +73,15 @@ export class GameHub {
 
   readonly questionCountOptions = [5, 10, 15, 20];
 
-  // Quiz state getters
+  // Quiz state signals
+  readonly gameState = this.quizStateService.gameState;
+  readonly score = this.quizStateService.score;
+  readonly streak = this.quizStateService.streak;
+  readonly timeLeft = this.quizStateService.timeLeft;
+  readonly currentQuestion = this.quizStateService.currentQuestion;
+  readonly selectedCandidate = this.quizStateService.selectedCandidate;
+
+  // Quiz state summaries
   readonly finalScore = computed(
     () => this.quizStateService.currentSession()?.finalScore || 0,
   );
@@ -82,6 +90,33 @@ export class GameHub {
     () => this.quizStateService.currentSession()?.bestStreak || 0,
   );
   readonly questions = computed(() => this.quizStateService.questions());
+  readonly questionPromptById = computed(() => {
+    const prompts: Record<string, string> = {};
+    for (const question of this.questions()) {
+      prompts[question.id] = question.prompt;
+    }
+    return prompts;
+  });
+  readonly questionTypeById = computed(() => {
+    const types: Record<string, string> = {};
+    for (const question of this.questions()) {
+      types[question.id] = question.type;
+    }
+    return types;
+  });
+  readonly countryNameByAnswer = computed(() => {
+    const names: Record<string, string> = {};
+    for (const question of this.questions()) {
+      if (
+        question.type === 'find-country' &&
+        question.correctAnswer &&
+        question.metadata?.['countryName']
+      ) {
+        names[question.correctAnswer] = question.metadata['countryName'];
+      }
+    }
+    return names;
+  });
 
   // Computed statistics
   readonly correctAnswers = computed(
@@ -122,6 +157,13 @@ export class GameHub {
     const totalMs = session.endTime.getTime() - session.startTime.getTime();
     return this.formatTime(totalMs);
   });
+  readonly formattedResultTimeByQuestionId = computed(() => {
+    const formattedTimes: Record<string, string> = {};
+    for (const result of this.results()) {
+      formattedTimes[result.questionId] = this.formatTime(result.timeSpent);
+    }
+    return formattedTimes;
+  });
 
   constructor() {
     // Register cleanup for timers on component destroy
@@ -161,13 +203,13 @@ export class GameHub {
   }
 
   // Form validation
-  get isFormValid(): boolean {
+  readonly isFormValid = computed(() => {
     const mode = this.selectedMode();
     const enabledMode = this.availableModes.find(
       (m) => m.value === mode,
     )?.enabled;
     return enabledMode === true;
-  }
+  });
 
   // Reset game
   resetGame(): void {
@@ -188,48 +230,7 @@ export class GameHub {
     this.questionCount.set(count);
   }
 
-  // Utility methods
-  getQuestionPrompt(questionId: string): string {
-    const question = this.questions().find((q) => q.id === questionId);
-    return question?.prompt || 'Question';
-  }
-
-  /**
-   * Get display-friendly answer text based on question type
-   * - For capital-match: returns the capital city name directly
-   * - For find-country: returns the country name from metadata
-   * - For flag-id/facts-guess: returns the answer directly (already country name)
-   */
-  getAnswerDisplay(answer: string, questionId: string): string {
-    const question = this.questions().find((q) => q.id === questionId);
-
-    if (!question) {
-      return answer;
-    }
-
-    // For capital-match, the answer IS the capital city name - display it directly
-    if (question.type === 'capital-match') {
-      return answer;
-    }
-
-    // For find-country, the answer is a country ID - get the country name from metadata
-    if (question.type === 'find-country') {
-      // If this answer matches the correct answer, use metadata.countryName
-      if (answer === question.correctAnswer) {
-        return question.metadata?.['countryName'] || answer;
-      }
-      // For incorrect answers, try to find the question where this was the correct answer
-      const matchingQuestion = this.questions().find(
-        (q) => q.correctAnswer === answer,
-      );
-      return matchingQuestion?.metadata?.['countryName'] || answer;
-    }
-
-    // For flag-id and facts-guess, the answer is already the country name
-    return answer;
-  }
-
-  formatTime(timeMs: number): string {
+  private formatTime(timeMs: number): string {
     const totalSeconds = Math.floor(timeMs / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
@@ -329,13 +330,12 @@ export class GameHub {
     this.quizStateService.resetToIdle();
   }
 
-  // Multiple choice methods
-  isMultipleChoiceMode(): boolean {
+  readonly isMultipleChoiceMode = computed(() => {
     const mode = this.quizStateService.configuration()?.mode;
     return (
       mode === 'capital-match' || mode === 'flag-id' || mode === 'facts-guess'
     );
-  }
+  });
 
   selectChoice(choice: string): void {
     if (!this.quizStateService.isConfirmLocked()) {
@@ -348,25 +348,5 @@ export class GameHub {
     img.src =
       'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iNjAiIGZpbGw9IiNmMGYwZjAiLz48dGV4dCB4PSI1MCIgeT0iMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RmxhZzwvdGV4dD48L3N2Zz4=';
     img.alt = 'Flag not available';
-  }
-
-  // Getters for template access to signals
-  get gameState(): typeof this.quizStateService.gameState {
-    return this.quizStateService.gameState;
-  }
-  get score(): typeof this.quizStateService.score {
-    return this.quizStateService.score;
-  }
-  get streak(): typeof this.quizStateService.streak {
-    return this.quizStateService.streak;
-  }
-  get timeLeft(): typeof this.quizStateService.timeLeft {
-    return this.quizStateService.timeLeft;
-  }
-  get currentQuestion(): typeof this.quizStateService.currentQuestion {
-    return this.quizStateService.currentQuestion;
-  }
-  get selectedCandidate(): typeof this.quizStateService.selectedCandidate {
-    return this.quizStateService.selectedCandidate;
   }
 }

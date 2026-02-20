@@ -50,6 +50,15 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
   readonly myRank = this.leaderboardService.myRank;
   readonly lastError = this.leaderboardService.lastError;
   readonly isAuthenticated = this.supabase.isAuthenticated;
+  readonly currentUserId = computed(() =>
+    this.isAuthenticated() ? this.supabase.getCurrentUserId() : null,
+  );
+  readonly rankBadgeClass: Record<number, string> = {
+    1: 'rank-badge-gold',
+    2: 'rank-badge-silver',
+    3: 'rank-badge-bronze',
+  };
+  readonly defaultRankBadgeClass = 'rank-badge-default';
 
   // Computed current entries based on selected tab
   readonly currentEntries = computed(() => {
@@ -103,32 +112,6 @@ export class LeaderboardComponent implements OnInit, OnDestroy {
    */
   async refresh(): Promise<void> {
     await this.leaderboardService.refreshAllLeaderboards();
-  }
-
-  /**
-   * Check if an entry is the current user
-   */
-  isCurrentUser(entry: LeaderboardEntry): boolean {
-    const userId = this.supabase.getCurrentUserId();
-    return !!userId && entry.userId === userId;
-  }
-
-  /**
-   * Get rank badge color based on position
-   */
-  getRankBadgeClass(rank: number): string {
-    if (rank === 1) return 'rank-badge-gold';
-    if (rank === 2) return 'rank-badge-silver';
-    if (rank === 3) return 'rank-badge-bronze';
-    return 'rank-badge-default';
-  }
-
-  /**
-   * Get percentile display text
-   */
-  getPercentileText(percentile: number | undefined): string {
-    if (!percentile) return '';
-    return `Top ${percentile.toFixed(1)}%`;
   }
 
   /**

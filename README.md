@@ -241,12 +241,6 @@ pnpm run e2e              # 26 Playwright E2E tests
 
 ---
 
-## 💼 For Hiring Managers
-
-This project demonstrates **senior-level full-stack engineering**:
-
-**What You Learn About Me:**
-
 1. ⚡ **Advanced 3D Graphics** – Solved Angular-Three.js zone pollution (30fps → 60fps)
 2. 🧠 **Memory Profiling** – Found/fixed 7,200+ timer leak using Chrome DevTools
 3. 📊 **Big Data** – Architected Local-First pipeline for 2.5B+ GBIF observations with PostGIS spatial indexing

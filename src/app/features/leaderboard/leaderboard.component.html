@@ -59,7 +59,7 @@
         <div class="rank-position">
           <span class="rank-number">{{ myRankInCurrent()!.rank }}</span>
           <span class="rank-percentile" *ngIf="myRankInCurrent()!.percentile">
-            {{ getPercentileText(myRankInCurrent()!.percentile) }}
+            Top {{ myRankInCurrent()!.percentile!.toFixed(1) }}%
           </span>
         </div>
         <div class="rank-stats">
@@ -121,19 +121,23 @@
         <div
           class="table-row"
           *ngFor="let entry of currentEntries(); trackBy: trackByUserId"
-          [class.current-user]="isCurrentUser(entry)"
+          [class.current-user]="entry.userId === currentUserId()"
         >
           <div class="cell-rank">
             <span
               class="rank-badge"
-              [ngClass]="getRankBadgeClass(entry.rank || 0)"
+              [ngClass]="
+                rankBadgeClass[entry.rank || 0] || defaultRankBadgeClass
+              "
             >
               {{ entry.rank }}
             </span>
           </div>
           <div class="cell-player">
             <span class="player-name">{{ entry.username || "Anonymous" }}</span>
-            <span class="player-badge" *ngIf="isCurrentUser(entry)">You</span>
+            <span class="player-badge" *ngIf="entry.userId === currentUserId()"
+              >You</span
+            >
           </div>
           <div class="cell-score">
             <span class="score-value">

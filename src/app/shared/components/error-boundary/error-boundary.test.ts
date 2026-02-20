@@ -64,6 +64,7 @@ describe('ErrorBoundaryComponent', () => {
   });
 
   it('should reset error state when retry is called', () => {
+    vi.useFakeTimers();
     const testError = new Error('Test error');
 
     component.handleError(testError);
@@ -71,11 +72,10 @@ describe('ErrorBoundaryComponent', () => {
 
     component.retry();
 
-    // Wait for the timeout in retry method
-    setTimeout(() => {
-      expect(component['hasError']()).toBeFalsy();
-      expect(component['errorInfo']()).toBeNull();
-    }, 1100);
+    vi.advanceTimersByTime(1100);
+    expect(component['hasError']()).toBeFalsy();
+    expect(component['errorInfo']()).toBeNull();
+    vi.useRealTimers();
   });
 
   it('should emit retry event when retry is called', () => {
@@ -166,17 +166,18 @@ describe('ErrorBoundaryComponent', () => {
   });
 
   it('should handle auto-retry when enabled', () => {
+    vi.useFakeTimers();
     component.autoRetry = true;
     component.retryDelay = 100; // Short delay for testing
 
-    vi.spyOn(component, 'retry');
+    const retrySpy = vi.spyOn(component, 'retry');
 
     const testError = new Error('Test error');
     component.handleError(testError);
 
-    setTimeout(() => {
-      expect(component.retry).toHaveBeenCalled();
-    }, 150);
+    vi.advanceTimersByTime(150);
+    expect(retrySpy).toHaveBeenCalled();
+    vi.useRealTimers();
   });
 
   it('should track retry count', () => {

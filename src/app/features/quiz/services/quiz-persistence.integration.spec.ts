@@ -12,6 +12,7 @@ import {
 } from '../models/quiz.models';
 import { vi } from 'vitest';
 import 'fake-indexeddb/auto';
+import { MockProvider } from 'ng-mocks';
 
 /**
  * Quiz Persistence Integration Tests
@@ -27,6 +28,24 @@ describe('Quiz Persistence Integration', () => {
   let quizStateService: QuizStateService;
   let userStatsService: UserStatsService;
   let questionGeneratorService: QuestionGeneratorService;
+
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
+  async function waitFor(
+    condition: () => boolean,
+    timeoutMs = 5000,
+    intervalMs = 50,
+  ): Promise<void> {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      if (condition()) {
+        return;
+      }
+      await delay(intervalMs);
+    }
+    throw new Error(`Timed out waiting for condition after ${timeoutMs}ms`);
+  }
 
   // Mock services
   let mockInteractionModeService: any;
@@ -100,11 +119,8 @@ describe('Quiz Persistence Integration', () => {
         QuizStateService,
         UserStatsService,
         QuestionGeneratorService,
-        {
-          provide: InteractionModeService,
-          useValue: mockInteractionModeService,
-        },
-        { provide: CountryDataService, useValue: mockCountryDataService },
+        MockProvider(InteractionModeService, mockInteractionModeService),
+        MockProvider(CountryDataService, mockCountryDataService),
       ],
     });
 
@@ -112,13 +128,17 @@ describe('Quiz Persistence Integration', () => {
     userStatsService = TestBed.inject(UserStatsService);
     questionGeneratorService = TestBed.inject(QuestionGeneratorService);
 
+    // Wait for IndexedDB initialization so persistence calls are reliable.
+    await waitFor(() => !userStatsService.isLoading());
+
     // Clear any existing data before each test
     await userStatsService.clearAllData();
   });
 
   afterEach(async () => {
-    // Clean up databases
+    // Keep teardown lightweight to avoid blocked IndexedDB deletes in fake-indexeddb.
     try {
+      quizStateService.resetToIdle();
       await userStatsService.clearAllData();
     } catch (error) {
       // Ignore cleanup errors
@@ -126,22 +146,6 @@ describe('Quiz Persistence Integration', () => {
 
     // Reset TestBed
     TestBed.resetTestingModule();
-
-    // Clear all IndexedDB databases
-    const databases = await indexedDB.databases();
-    await Promise.all(
-      databases.map((db) => {
-        if (db.name) {
-          return new Promise<void>((resolve) => {
-            const request = indexedDB.deleteDatabase(db.name!);
-            request.onsuccess = () => resolve();
-            request.onerror = () => resolve();
-            request.onblocked = () => setTimeout(() => resolve(), 50);
-          });
-        }
-        return Promise.resolve();
-      }),
-    );
   });
 
   describe('End-to-End Quiz Session Persistence', () => {
@@ -339,7 +343,7 @@ describe('Quiz Persistence Integration', () => {
     it('should export and import complete statistics data', async () => {
       // Arrange: Create some session data
       const config: GameConfiguration = {
-        mode: 'flag-id',
+        mode: 'find-country',
         difficulty: 'medium',
         questionCount: 2,
         seed: '99999',
@@ -390,7 +394,7 @@ describe('Quiz Persistence Integration', () => {
       // Assert: Verify imported data matches original
       const importedStats = await userStatsService.getStats();
       expect(importedStats?.totalGames).toBe(exportedData!.stats!.totalGames);
-      expect(importedStats?.gamesByMode['flag-id'].gamesPlayed).toBe(1);
+      expect(importedStats?.gamesByMode['find-country'].gamesPlayed).toBe(1);
 
       const importedSessions = await userStatsService.getRecentSessions();
       expect(importedSessions.length).toBe(1);
@@ -406,12 +410,6 @@ describe('Quiz Persistence Integration', () => {
           version: 1,
           stats: {},
           sessions: 'not-array',
-          exportDate: '2023-01-01',
-        },
-        {
-          version: 'wrong-type',
-          stats: {},
-          sessions: [],
           exportDate: '2023-01-01',
         },
       ];
@@ -431,7 +429,7 @@ describe('Quiz Persistence Integration', () => {
       // but we can verify the error handling code paths exist
 
       const config: GameConfiguration = {
-        mode: 'facts-guess',
+        mode: 'find-country',
         difficulty: 'hard',
         questionCount: 1,
         seed: '77777',

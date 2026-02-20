@@ -6,6 +6,7 @@ import { UserStatsService } from './user-stats.service';
 import { CountryDiscoveryService } from './country-discovery.service';
 import { LoggerService } from './logger.service';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { MockProvider } from 'ng-mocks';
 
 describe('AchievementsService', () => {
   let service: AchievementsService;
@@ -33,10 +34,10 @@ describe('AchievementsService', () => {
     TestBed.configureTestingModule({
       providers: [
         AchievementsService,
-        { provide: SupabaseService, useValue: supabaseSpy },
-        { provide: UserStatsService, useValue: userStatsSpy },
-        { provide: CountryDiscoveryService, useValue: discoverySpy },
-        { provide: LoggerService, useValue: loggerSpy },
+        MockProvider(SupabaseService, supabaseSpy),
+        MockProvider(UserStatsService, userStatsSpy),
+        MockProvider(CountryDiscoveryService, discoverySpy),
+        MockProvider(LoggerService, loggerSpy),
       ],
     });
 

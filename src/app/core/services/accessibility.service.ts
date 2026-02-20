@@ -458,9 +458,11 @@ export class AccessibilityService {
   private setupAudioContext(): void {
     if (this.audioEnabled && !this.audioContext) {
       try {
-        this.audioContext = new (window.AudioContext ||
+        this.audioContext = new (
+          window.AudioContext ||
           (window as Window & { webkitAudioContext?: typeof AudioContext })
-            .webkitAudioContext)();
+            .webkitAudioContext
+        )();
       } catch (error) {
         this.logger.warn(
           'Web Audio API not supported',

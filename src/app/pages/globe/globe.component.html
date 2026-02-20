@@ -18,7 +18,7 @@
     #rendererContainer
     class="scene-container"
     role="application"
-    [attr.aria-label]="accessibility.getGlobeAriaDescription()"
+    [attr.aria-label]="globeAriaDescription()"
     [attr.aria-describedby]="isLoading() ? 'loading-status' : 'globe-status'"
     tabindex="0"
     (keydown)="onKeyDown($event)"
@@ -42,7 +42,7 @@
     <!-- Status for screen readers -->
     <div id="globe-status" class="sr-only" aria-live="polite">
       @if (!isLoading() && !initError()) {
-        {{ accessibility.getGlobeAriaDescription() }}
+        {{ globeAriaDescription() }}
       }
     </div>
 
@@ -56,7 +56,7 @@
     <div id="keyboard-help" class="sr-only" aria-live="polite">
       @if (accessibility.isKeyboardMode()) {
         Current country:
-        {{ accessibility.currentCountry() || "None selected" }}. Use arrow keys
+        {{ accessibilityCurrentCountry() || "None selected" }}. Use arrow keys
         to rotate, Tab to navigate countries, Enter to select.
       }
     </div>
@@ -79,8 +79,8 @@
     migrationState.hoveredMarker()
   ) {
     <app-marker-tooltip
-      [position]="globeMigrationService.getMigrationTooltipPosition()"
-      [markerType]="globeMigrationService.getHoveredMarkerType()"
+      [position]="globeMigrationService.migrationTooltipPosition()"
+      [markerType]="globeMigrationService.hoveredMarkerType()"
     />
   }
 

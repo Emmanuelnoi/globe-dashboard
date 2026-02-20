@@ -8,6 +8,7 @@ import { BirdDataService } from './bird-data.service';
 import { LoggerService } from '@/core/services/logger.service';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { MigrationDataPoint } from '../models/ui.models';
+import { MockProvider } from 'ng-mocks';
 
 // Mock the migration config to avoid environment import issues
 vi.mock('../config/migration.config', () => ({
@@ -38,10 +39,7 @@ describe('BirdDataService', () => {
     };
 
     TestBed.configureTestingModule({
-      providers: [
-        BirdDataService,
-        { provide: LoggerService, useValue: mockLogger },
-      ],
+      providers: [BirdDataService, MockProvider(LoggerService, mockLogger)],
     });
 
     service = TestBed.inject(BirdDataService);

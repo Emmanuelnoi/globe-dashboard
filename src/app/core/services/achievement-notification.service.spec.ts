@@ -7,6 +7,7 @@ import { AchievementsService } from './achievements.service';
 import { LoggerService } from './logger.service';
 import { signal } from '@angular/core';
 import { vi } from 'vitest';
+import { MockProvider } from 'ng-mocks';
 
 /**
  * Unit Tests for AchievementNotificationService
@@ -50,8 +51,8 @@ describe('AchievementNotificationService', () => {
     TestBed.configureTestingModule({
       providers: [
         AchievementNotificationService,
-        { provide: AchievementsService, useValue: mockAchievementsService },
-        { provide: LoggerService, useValue: mockLoggerService },
+        MockProvider(AchievementsService, mockAchievementsService),
+        MockProvider(LoggerService, mockLoggerService),
       ],
     });
 
@@ -450,77 +451,70 @@ describe('AchievementNotificationService', () => {
   });
 
   describe('Achievement Detection', () => {
-    it.skip(
-      'should detect new achievement unlocks',
-      async () => {
-        service = TestBed.inject(AchievementNotificationService);
+    it('should detect new achievement unlocks', () => {
+      service = TestBed.inject(AchievementNotificationService);
 
-        const achievement = {
-          id: 'new-unlock',
-          name: 'New Achievement',
-          description: 'Newly unlocked',
-          category: 'quiz',
-          tier: 'bronze',
-        };
+      const achievement = {
+        id: 'new-unlock',
+        name: 'New Achievement',
+        description: 'Newly unlocked',
+        category: 'quiz',
+        tier: 'bronze',
+      };
 
-        // Update recent unlocks signal
-        recentUnlocksSignal.set([achievement]);
+      recentUnlocksSignal.set([achievement]);
+      TestBed.flushEffects();
 
-        // Allow effect to run - flush Angular effects multiple times
-        for (let i = 0; i < 5; i++) {
-          TestBed.flushEffects();
-          await new Promise((resolve) => setTimeout(resolve, 200));
-        }
+      expect(service['_queue']().length).toBe(1);
+      expect(service['_queue']()[0].achievementId).toBe('new-unlock');
+      expect(mockLoggerService.success).toHaveBeenCalledWith(
+        '🏆 Achievement Unlocked: New Achievement',
+        'Achievements',
+      );
+    });
 
-        expect(mockLoggerService.success).toHaveBeenCalled();
-      },
-      { timeout: 10000 },
-    );
+    it('should only process new unlocks', () => {
+      service = TestBed.inject(AchievementNotificationService);
 
-    it.skip(
-      'should only process new unlocks',
-      async () => {
-        service = TestBed.inject(AchievementNotificationService);
+      const achievement1 = {
+        id: 'unlock-1',
+        name: 'Achievement 1',
+        description: 'First unlock',
+        category: 'quiz',
+        tier: 'bronze',
+      };
 
-        const achievement1 = {
-          id: 'unlock-1',
-          name: 'Achievement 1',
-          description: 'First unlock',
-          category: 'quiz',
-          tier: 'bronze',
-        };
+      const achievement2 = {
+        id: 'unlock-2',
+        name: 'Achievement 2',
+        description: 'Second unlock',
+        category: 'quiz',
+        tier: 'silver',
+      };
 
-        const achievement2 = {
-          id: 'unlock-2',
-          name: 'Achievement 2',
-          description: 'Second unlock',
-          category: 'quiz',
-          tier: 'silver',
-        };
+      recentUnlocksSignal.set([achievement1]);
+      TestBed.flushEffects();
+      expect(service['_queue']().length).toBe(1);
 
-        // Set initial unlock
-        recentUnlocksSignal.set([achievement1]);
-        for (let i = 0; i < 3; i++) {
-          TestBed.flushEffects();
-          await new Promise((resolve) => setTimeout(resolve, 200));
-        }
+      const callCountAfterFirstUnlock =
+        mockLoggerService.success.mock.calls.length;
 
-        const callCount1 = mockLoggerService.success.mock.calls.length;
+      // Same unlock list should not produce additional notifications.
+      recentUnlocksSignal.set([achievement1]);
+      TestBed.flushEffects();
+      expect(mockLoggerService.success.mock.calls.length).toBe(
+        callCountAfterFirstUnlock,
+      );
 
-        // Add second unlock
-        recentUnlocksSignal.set([achievement1, achievement2]);
-        for (let i = 0; i < 3; i++) {
-          TestBed.flushEffects();
-          await new Promise((resolve) => setTimeout(resolve, 200));
-        }
+      recentUnlocksSignal.set([achievement1, achievement2]);
+      TestBed.flushEffects();
 
-        const callCount2 = mockLoggerService.success.mock.calls.length;
-
-        // Should only have processed the new achievement
-        expect(callCount2).toBe(callCount1 + 1);
-      },
-      { timeout: 10000 },
-    );
+      expect(service['_queue']().length).toBe(2);
+      expect(mockLoggerService.success.mock.calls.length).toBe(
+        callCountAfterFirstUnlock + 1,
+      );
+      expect(service['_queue']()[1].achievementId).toBe('unlock-2');
+    });
   });
 
   describe('Notification Structure', () => {

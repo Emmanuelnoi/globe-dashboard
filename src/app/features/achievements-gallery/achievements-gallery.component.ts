@@ -34,6 +34,22 @@ export class AchievementsGalleryComponent implements OnInit {
   // Service signals
   readonly allAchievements = this.achievementsService.getAllAchievements();
   readonly isAuthenticated = this.supabase.isAuthenticated();
+  readonly tierColors: Record<string, string> = {
+    bronze: '#cd7f32',
+    silver: '#c0c0c0',
+    gold: '#ffd700',
+    platinum: '#e5e4e2',
+    diamond: '#b9f2ff',
+  };
+  readonly categoryIcons: Record<string, string> = {
+    quiz: '🎯',
+    discovery: '🗺️',
+    exploration: '🔍',
+    social: '👥',
+    milestone: '⭐',
+  };
+  readonly defaultTierColor = '#10b981';
+  readonly defaultCategoryIcon = '🏆';
 
   // Computed signals
   readonly filteredAchievements = computed(() => {
@@ -83,54 +99,5 @@ export class AchievementsGalleryComponent implements OnInit {
    */
   selectCategory(category: string): void {
     this.selectedCategory.set(category);
-  }
-
-  /**
-   * Get tier color
-   */
-  getTierColor(tier: string): string {
-    const colors: Record<string, string> = {
-      bronze: '#cd7f32',
-      silver: '#c0c0c0',
-      gold: '#ffd700',
-      platinum: '#e5e4e2',
-      diamond: '#b9f2ff',
-    };
-    return colors[tier] || '#10b981';
-  }
-
-  /**
-   * Get category icon
-   */
-  getCategoryIcon(category: string): string {
-    const icons: Record<string, string> = {
-      quiz: '🎯',
-      discovery: '🗺️',
-      exploration: '🔍',
-      social: '👥',
-      milestone: '⭐',
-    };
-    return icons[category] || '🏆';
-  }
-
-  /**
-   * Get progress percentage
-   */
-  getProgressPercentage(achievement: any): number {
-    if (achievement.isUnlocked) return 100;
-    return Math.round((achievement.progress / achievement.progressMax) * 100);
-  }
-
-  /**
-   * Format unlocked date
-   */
-  formatDate(date: Date | string | null): string {
-    if (!date) return '';
-    const d = typeof date === 'string' ? new Date(date) : date;
-    return d.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
   }
 }

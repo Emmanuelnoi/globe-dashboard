@@ -14,6 +14,7 @@ import {
   PerspectiveCamera,
 } from 'three';
 import { vi } from 'vitest';
+import { MockProvider } from 'ng-mocks';
 
 /**
  * Unit Tests for CountryHoverService
@@ -47,7 +48,7 @@ describe('CountryHoverService', () => {
     TestBed.configureTestingModule({
       providers: [
         CountryHoverService,
-        { provide: LoggerService, useValue: mockLoggerService },
+        MockProvider(LoggerService, mockLoggerService),
       ],
     });
 

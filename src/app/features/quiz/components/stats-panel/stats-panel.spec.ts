@@ -3,6 +3,7 @@ import { StatsPanelComponent } from './stats-panel';
 import { UserStatsService } from '../../../../core/services/user-stats.service';
 import { signal } from '@angular/core';
 import { vi } from 'vitest';
+import { MockProvider } from 'ng-mocks';
 
 describe('StatsPanelComponent', () => {
   let component: StatsPanelComponent;
@@ -35,9 +36,7 @@ describe('StatsPanelComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [StatsPanelComponent],
-      providers: [
-        { provide: UserStatsService, useValue: mockUserStatsService },
-      ],
+      providers: [MockProvider(UserStatsService, mockUserStatsService)],
     }).compileComponents();
 
     fixture = TestBed.createComponent(StatsPanelComponent);

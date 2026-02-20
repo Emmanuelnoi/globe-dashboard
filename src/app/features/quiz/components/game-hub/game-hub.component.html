@@ -128,7 +128,7 @@
             <button
               type="submit"
               class="start-game-btn"
-              [disabled]="!isFormValid || isStarting()"
+              [disabled]="!isFormValid() || isStarting()"
               [attr.aria-busy]="isStarting()"
             >
               @if (isStarting()) {
@@ -468,7 +468,9 @@
                   </div>
                   <div class="result-content">
                     <div class="result-question">
-                      {{ getQuestionPrompt(result.questionId) }}
+                      {{
+                        questionPromptById()[result.questionId] || "Question"
+                      }}
                     </div>
                     <div class="result-details">
                       @if (result.selectedAnswer === "SKIPPED") {
@@ -479,12 +481,17 @@
                           [class.correct]="result.isCorrect"
                           [class.incorrect]="!result.isCorrect"
                         >
-                          {{
-                            getAnswerDisplay(
-                              result.selectedAnswer,
-                              result.questionId
-                            )
-                          }}
+                          @if (
+                            questionTypeById()[result.questionId] ===
+                            "find-country"
+                          ) {
+                            {{
+                              countryNameByAnswer()[result.selectedAnswer] ||
+                                result.selectedAnswer
+                            }}
+                          } @else {
+                            {{ result.selectedAnswer }}
+                          }
                         </span>
                       }
                       @if (
@@ -492,12 +499,17 @@
                       ) {
                         <span class="correct-answer">
                           Correct:
-                          {{
-                            getAnswerDisplay(
-                              result.correctAnswer,
-                              result.questionId
-                            )
-                          }}
+                          @if (
+                            questionTypeById()[result.questionId] ===
+                            "find-country"
+                          ) {
+                            {{
+                              countryNameByAnswer()[result.correctAnswer] ||
+                                result.correctAnswer
+                            }}
+                          } @else {
+                            {{ result.correctAnswer }}
+                          }
                         </span>
                       }
                     </div>
@@ -505,7 +517,7 @@
                   <div class="result-stats">
                     <div class="result-points">+{{ result.pointsEarned }}</div>
                     <div class="result-time">
-                      {{ formatTime(result.timeSpent) }}
+                      {{ formattedResultTimeByQuestionId()[result.questionId] }}
                     </div>
                   </div>
                 </div>

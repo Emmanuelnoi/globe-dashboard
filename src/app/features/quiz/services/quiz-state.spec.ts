@@ -11,6 +11,7 @@ import {
   QuestionResult,
 } from '../models/quiz.models';
 import { CountryDataRecord } from '../../../core/types/country-data.types';
+import { MockProvider } from 'ng-mocks';
 
 describe('QuizStateService', () => {
   let service: QuizStateService;
@@ -131,11 +132,8 @@ describe('QuizStateService', () => {
     await TestBed.configureTestingModule({
       providers: [
         QuizStateService,
-        {
-          provide: InteractionModeService,
-          useValue: mockInteractionModeService,
-        },
-        { provide: CountryDataService, useValue: mockCountryDataService },
+        MockProvider(InteractionModeService, mockInteractionModeService),
+        MockProvider(CountryDataService, mockCountryDataService),
       ],
     });
 

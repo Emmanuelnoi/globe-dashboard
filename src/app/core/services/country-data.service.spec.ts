@@ -7,6 +7,7 @@ import type {
   CountryRegion,
 } from '../types/country-data.types';
 import { vi } from 'vitest';
+import { MockProvider } from 'ng-mocks';
 
 /**
  * Unit Tests for CountryDataService
@@ -38,7 +39,7 @@ describe('CountryDataService', () => {
     TestBed.configureTestingModule({
       providers: [
         CountryDataService,
-        { provide: LoggerService, useValue: mockLoggerService },
+        MockProvider(LoggerService, mockLoggerService),
       ],
     });
 

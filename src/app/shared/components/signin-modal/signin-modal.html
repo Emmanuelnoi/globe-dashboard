@@ -291,12 +291,12 @@
             <div class="password-strength-bar">
               <div
                 class="password-strength-fill"
-                [style.width.%]="getPasswordStrengthWidth()"
-                [style.background-color]="getPasswordStrengthColor()"
+                [style.width.%]="passwordStrengthWidth()"
+                [style.background-color]="passwordStrengthColor()"
               ></div>
             </div>
             <div class="password-strength-label">
-              <span [style.color]="getPasswordStrengthColor()">
+              <span [style.color]="passwordStrengthColor()">
                 {{ passwordStrength().label }}
               </span>
             </div>

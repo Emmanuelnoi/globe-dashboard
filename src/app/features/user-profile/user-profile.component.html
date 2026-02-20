@@ -189,7 +189,9 @@
         >
           <div
             class="badge-icon"
-            [style.background]="getTierColor(achievement.tier)"
+            [style.background]="
+              tierColors[achievement.tier] || defaultTierColor
+            "
           >
             {{
               achievement.category === "quiz"
@@ -214,11 +216,14 @@
       <div class="sessions-list">
         <div class="session-item" *ngFor="let session of recentSessions()">
           <div class="session-mode">
-            {{ getModeDisplayName(session.configuration.mode) }}
+            {{
+              modeDisplayNames[session.configuration.mode] ||
+                session.configuration.mode
+            }}
           </div>
           <div class="session-score">{{ session.finalScore }} pts</div>
           <div class="session-date">
-            {{ formatDate(session.startTime) }}
+            {{ session.startTime | date: "MMM d, y" }}
           </div>
         </div>
       </div>

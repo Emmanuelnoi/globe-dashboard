@@ -4,6 +4,21 @@ import { CountryDiscoveryService } from './country-discovery.service';
 import { SupabaseService } from './supabase.service';
 import { LoggerService } from './logger.service';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { MockProvider } from 'ng-mocks';
+
+const waitFor = async (
+  predicate: () => boolean,
+  timeoutMs = 2000,
+  intervalMs = 50,
+): Promise<void> => {
+  const start = Date.now();
+  while (!predicate()) {
+    if (Date.now() - start >= timeoutMs) {
+      throw new Error('Timed out waiting for condition');
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+};
 
 describe('CountryDiscoveryService', () => {
   let service: CountryDiscoveryService;
@@ -11,22 +26,6 @@ describe('CountryDiscoveryService', () => {
   let loggerService: any;
 
   beforeEach(async () => {
-    // Clear all IndexedDB databases before each test
-    const databases = await indexedDB.databases();
-    await Promise.all(
-      databases.map((db) => {
-        if (db.name) {
-          return new Promise<void>((resolve) => {
-            const request = indexedDB.deleteDatabase(db.name!);
-            request.onsuccess = () => resolve();
-            request.onerror = () => resolve();
-            request.onblocked = () => setTimeout(() => resolve(), 50);
-          });
-        }
-        return Promise.resolve();
-      }),
-    );
-
     const supabaseSpy = {
       isUserAuthenticated: vi.fn(),
       getCurrentUserId: vi.fn(),
@@ -41,8 +40,8 @@ describe('CountryDiscoveryService', () => {
     TestBed.configureTestingModule({
       providers: [
         CountryDiscoveryService,
-        { provide: SupabaseService, useValue: supabaseSpy },
-        { provide: LoggerService, useValue: loggerSpy },
+        MockProvider(SupabaseService, supabaseSpy),
+        MockProvider(LoggerService, loggerSpy),
       ],
     });
 
@@ -50,8 +49,8 @@ describe('CountryDiscoveryService', () => {
     supabaseService = TestBed.inject(SupabaseService);
     loggerService = TestBed.inject(LoggerService);
 
-    // Wait for service initialization
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    await waitFor(() => !service.isLoading());
+    await service.clearAllDiscoveries();
   });
 
   it('should be created', () => {
@@ -59,7 +58,6 @@ describe('CountryDiscoveryService', () => {
   });
 
   it('should initialize with zero discoveries', async () => {
-    await new Promise((resolve) => setTimeout(resolve, 100));
     expect(service.totalDiscovered()).toBe(0);
     expect(service.percentageExplored()).toBe(0);
   });
@@ -67,28 +65,13 @@ describe('CountryDiscoveryService', () => {
   it('should track a new discovery', async () => {
     await service.trackDiscovery('US', 'United States', 'click');
 
-    // Wait for IndexedDB write to complete
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await waitFor(() => service.totalDiscovered() === 1);
     expect(service.totalDiscovered()).toBe(1);
     expect(service.percentageExplored()).toBeGreaterThan(0);
   });
 
   afterEach(async () => {
-    // Clean up IndexedDB
-    const databases = await indexedDB.databases();
-    await Promise.all(
-      databases.map((db) => {
-        if (db.name) {
-          return new Promise<void>((resolve) => {
-            const request = indexedDB.deleteDatabase(db.name!);
-            request.onsuccess = () => resolve();
-            request.onerror = () => resolve();
-            request.onblocked = () => setTimeout(() => resolve(), 50);
-          });
-        }
-        return Promise.resolve();
-      }),
-    );
+    await service.clearAllDiscoveries();
     TestBed.resetTestingModule();
   });
 });
