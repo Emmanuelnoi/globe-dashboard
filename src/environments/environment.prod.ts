@@ -26,11 +26,12 @@ export const environment = {
   sentryEnabled: false,
   googleAnalyticsId: '',
   analyticsEnabled: false,
-  supabaseUrl: '',
-  supabaseAnonKey: '',
+  supabaseUrl: 'https://alqojsoikxxubdccovpp.supabase.co',
+  supabaseAnonKey:
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFscW9qc29pa3h4dWJkY2NvdnBwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwODA5NjcsImV4cCI6MjA3NjY1Njk2N30.bQD23VZJwLrKW0bafU9UMjE_HxNorv_qxCcbdHNb_QU',
   version: '1.0.0',
   cacheVersion: '1.0.0',
-  buildDate: '2026-01-12T03:43:20.947Z',
+  buildDate: '2026-02-20T05:02:57.232Z',
 } as const;
 
 export type Environment = typeof environment;
