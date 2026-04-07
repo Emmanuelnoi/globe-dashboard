@@ -11,7 +11,7 @@ Real scientific data • 60fps WebGL performance • Enterprise-quality architec
 [![Coverage](https://img.shields.io/badge/coverage-86.4%25-brightgreen)](https://github.com/Emmanuelnoi/3d-global-dashboard)
 [![CI](https://img.shields.io/badge/CI-⭐⭐⭐⭐⭐_Enterprise-success)](https://github.com/Emmanuelnoi/3d-global-dashboard/actions)
 
-[**🎯 Live Demo**](https://www.globeplay.world/) • [**📖 Docs**](docs/README.md) • [**🏗️ Architecture**](docs/architecture/overview.md) • [**🤝 Contributing**](docs/community/CONTRIBUTING.md)
+[**🎯 Live Demo**](https://www.globeplay.world/) • [**📚 Case Study**](https://www.emmanuelnoi.dev/case-study/globeplay) • [**📖 Docs**](docs/README.md) • [**🏗️ Architecture**](docs/architecture/overview.md) • [**🤝 Contributing**](docs/community/CONTRIBUTING.md)
 
 </div>
 
@@ -28,6 +28,10 @@ _Interactive WebGL globe with smooth 60fps rotation, country selection, 241+ bir
 ## 🎯 Executive Summary
 
 Most geographic tools are either **too simple** (static maps) or **too complex** (GIS software). This project bridges that gap by combining interactive education with production-grade engineering.
+
+## 👨‍💻 Role & Ownership
+
+Built as a solo product engineering project. I owned frontend architecture, the Angular + Three.js integration layer, data reliability strategy, performance profiling, quality gates, and deployment workflow.
 
 **What It Does:**
 
