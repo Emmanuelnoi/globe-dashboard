@@ -10,10 +10,12 @@ import { test, expect } from '@playwright/test';
 test.describe('GlobePlay - Basic Functionality', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    // Wait for Angular app to bootstrap and render
-    await page.waitForSelector('app-root', { timeout: 15000 });
-    // Wait for scene container which indicates Three.js has initialized
-    await page.waitForSelector('.scene-container', { timeout: 10000 });
+    // Wait for Angular app to bootstrap and render.
+    await expect(page.locator('app-root')).toBeVisible({ timeout: 15000 });
+    // Wait for scene container which indicates Three.js has initialized.
+    await expect(page.locator('.scene-container')).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('should load the main page', async ({ page }) => {

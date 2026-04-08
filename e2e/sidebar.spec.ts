@@ -10,14 +10,15 @@ import { test, expect } from '@playwright/test';
 test.describe('Sidebar Navigation', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    // Wait for Angular app to bootstrap
-    await page.waitForSelector('app-root', { timeout: 15000 });
-    // Wait for scene container (indicates app is fully rendered)
-    await page.waitForSelector('.scene-container', { timeout: 10000 });
-    // Wait for sidebar's visible content (nav element with glass-card class)
-    await page.waitForSelector('app-sidebar nav.glass-card', {
+    // Wait for Angular app to bootstrap.
+    await expect(page.locator('app-root')).toBeVisible({ timeout: 15000 });
+    // Wait for scene container (indicates app is fully rendered).
+    await expect(page.locator('.scene-container')).toBeVisible({
       timeout: 10000,
-      state: 'visible',
+    });
+    // Wait for sidebar's visible content (nav element with glass-card class).
+    await expect(page.locator('app-sidebar nav.glass-card')).toBeVisible({
+      timeout: 10000,
     });
   });
 

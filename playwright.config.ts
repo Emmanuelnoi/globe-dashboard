@@ -11,6 +11,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 
 const isCI = !!process.env['CI'];
+const baseUrl = 'http://127.0.0.1:4200';
 
 export default defineConfig({
   testDir: './e2e',
@@ -40,7 +41,7 @@ export default defineConfig({
 
   use: {
     // Base URL for all tests
-    baseURL: 'http://localhost:4200',
+    baseURL: baseUrl,
 
     // Debugging features
     trace: isCI ? 'on-first-retry' : 'retain-on-failure',
@@ -110,8 +111,9 @@ export default defineConfig({
 
   // Dev server configuration
   webServer: {
-    command: 'pnpm run start',
-    url: 'http://localhost:4200',
+    command:
+      'node scripts/inject-env-dev.mjs && ng serve --host 127.0.0.1 --port 4200',
+    url: baseUrl,
     reuseExistingServer: !isCI,
     timeout: isCI ? 120_000 : 180_000, // CI: 2 min, Local: 3 min for dev server
     stdout: isCI ? 'ignore' : 'pipe',
