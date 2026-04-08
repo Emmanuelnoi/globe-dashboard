@@ -151,10 +151,12 @@ export class LeaderboardService {
         query = query.eq('game_mode', 'all');
       }
 
-      // Filter by time period for weekly/monthly
+      // Filter to the currently active weekly/monthly period.
+      // Using the current timestamp avoids timezone mismatches between
+      // SQL-seeded rows and client-computed period starts.
       if (type === 'weekly' || type === 'monthly') {
-        const periodStart = this.getPeriodStart(type);
-        query = query.gte('period_start', periodStart.toISOString());
+        const nowIso = new Date().toISOString();
+        query = query.lte('period_start', nowIso).gte('period_end', nowIso);
       }
 
       const { data, error } = await query;
@@ -534,15 +536,16 @@ export class LeaderboardService {
     const now = new Date();
 
     switch (type) {
-      case 'weekly':
+      case 'weekly': {
         // Start of current week (Monday)
         const day = now.getDay();
         const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-        return new Date(now.setDate(diff));
+        return new Date(now.getFullYear(), now.getMonth(), diff, 0, 0, 0, 0);
+      }
 
       case 'monthly':
         // Start of current month
-        return new Date(now.getFullYear(), now.getMonth(), 1);
+        return new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
 
       default:
         return new Date(0); // Beginning of time for global
@@ -559,11 +562,19 @@ export class LeaderboardService {
       case 'weekly':
         // End of current week (Sunday)
         const start = this.getPeriodStart(type);
-        return new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
+        return new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000 - 1);
 
       case 'monthly':
         // End of current month
-        return new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        return new Date(
+          now.getFullYear(),
+          now.getMonth() + 1,
+          0,
+          23,
+          59,
+          59,
+          999,
+        );
 
       default:
         return new Date(8640000000000000); // Max date for global
