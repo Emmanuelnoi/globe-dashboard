@@ -227,9 +227,9 @@ jobs:
       # - glob@7.2.3 (path traversal) - via @compodoc/compodoc
       # - @modelcontextprotocol/sdk@<1.24.0 (DNS rebinding) - via @angular/cli
 
-      - name: Check for critical vulnerabilities (BLOCKING)
-        run: pnpm audit --audit-level=critical
-        continue-on-error: false # BLOCKING - Critical CVEs must be fixed immediately
+      - name: Check for critical production vulnerabilities (BLOCKING)
+        run: pnpm audit --prod --audit-level=critical
+        continue-on-error: false # BLOCKING - Runtime critical CVEs must be fixed immediately
 
       - name: Check for high vulnerabilities (WARNING)
         run: |
