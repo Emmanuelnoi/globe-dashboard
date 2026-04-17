@@ -243,16 +243,31 @@
             <!-- Flag Display for Flag ID Mode -->
             @if (
               currentQuestion()?.type === "flag-id" &&
-              currentQuestion()?.metadata?.flagUrl
+              (currentQuestion()?.metadata?.flagAssetPath ||
+                currentQuestion()?.metadata?.flagEmoji)
             ) {
               <div class="flag-display">
-                <img
-                  [src]="currentQuestion()?.metadata?.flagUrl"
-                  [alt]="'Flag to identify'"
-                  class="question-flag"
-                  loading="eager"
-                  (error)="onFlagError($event)"
-                />
+                @if (
+                  currentQuestion()?.metadata?.flagAssetPath &&
+                  !flagImageLoadFailed()
+                ) {
+                  <img
+                    [src]="currentQuestion()?.metadata?.flagAssetPath"
+                    [alt]="'Flag to identify'"
+                    class="question-flag"
+                    loading="eager"
+                    (load)="onFlagAssetLoad()"
+                    (error)="onFlagAssetError()"
+                  />
+                } @else if (currentQuestion()?.metadata?.flagEmoji) {
+                  <div
+                    class="question-flag-emoji"
+                    role="img"
+                    [attr.aria-label]="'Flag to identify'"
+                  >
+                    {{ currentQuestion()?.metadata?.flagEmoji }}
+                  </div>
+                }
               </div>
             }
           </div>

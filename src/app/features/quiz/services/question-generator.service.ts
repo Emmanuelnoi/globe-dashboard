@@ -351,7 +351,8 @@ export class QuestionGeneratorService {
 
       // Generate flag URL from country code - convert 3-letter to 2-letter ISO codes
       const twoLetterCode = this.convertToTwoLetterCode(country.code);
-      const flagUrl = `https://flagcdn.com/w320/${twoLetterCode.toLowerCase()}.png`;
+      const flagEmoji = this.convertToFlagEmoji(twoLetterCode);
+      const flagAssetPath = `/flags/${twoLetterCode.toLowerCase()}.svg`;
 
       return {
         id: `flag_id_${index + 1}`,
@@ -362,7 +363,9 @@ export class QuestionGeneratorService {
         metadata: {
           countryId: country.id,
           countryName: country.name,
-          flagUrl: flagUrl,
+          flagAssetPath,
+          flagCode: twoLetterCode,
+          flagEmoji,
           region: country.region,
           difficulty,
         },
@@ -1501,6 +1504,19 @@ export class QuestionGeneratorService {
       KNA: 'kn',
       MKD: 'mk',
       MNP: 'mp',
+      MAF: 'mf',
+      GIB: 'gi',
+      MYT: 'yt',
+      UNK: 'xk',
+      REU: 're',
+      TKL: 'tk',
+      VIR: 'vi',
+      BES: 'bq',
+      CCK: 'cc',
+      GLP: 'gp',
+      MTQ: 'mq',
+      CXR: 'cx',
+      SJM: 'sj',
       NFK: 'nf',
       PCN: 'pn',
       PRI: 'pr',
@@ -1520,6 +1536,23 @@ export class QuestionGeneratorService {
     return (
       codeMap[threeLetterCode.toUpperCase()] ||
       threeLetterCode.toLowerCase().slice(0, 2)
+    );
+  }
+
+  /**
+   * Convert a 2-letter country code to a Unicode flag emoji.
+   * This gives the quiz a local, zero-network flag rendering path.
+   */
+  private convertToFlagEmoji(twoLetterCode: string): string {
+    const normalizedCode = twoLetterCode.trim().toUpperCase();
+
+    if (!/^[A-Z]{2}$/.test(normalizedCode)) {
+      return '🏳️';
+    }
+
+    const OFFSET = 127397;
+    return String.fromCodePoint(
+      ...normalizedCode.split('').map((char) => char.charCodeAt(0) + OFFSET),
     );
   }
 

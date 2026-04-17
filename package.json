@@ -63,6 +63,7 @@
     "prepare": "husky install || true",
     "data:fetch": "npx tsx scripts/fetch-country-data-robust.ts",
     "data:update": "pnpm run data:fetch && pnpm run format",
+    "flags:generate": "node scripts/generate-local-flag-svgs.mjs",
     "geo:convert": "node scripts/geo/convert-geojson-to-topo.mjs",
     "geo:convert:verbose": "node scripts/geo/convert-geojson-to-topo.mjs --verbose"
   },
@@ -88,6 +89,7 @@
     "@tailwindcss/postcss": "^4.1.13",
     "@vercel/analytics": "^1.6.1",
     "earcut": "^3.0.0",
+    "flag-icons": "^7.5.0",
     "idb": "^8.0.3",
     "lucide-angular": "^0.552.0",
     "postcss": "^8.5.6",

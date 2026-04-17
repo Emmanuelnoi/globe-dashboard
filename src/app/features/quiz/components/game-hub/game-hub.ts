@@ -5,6 +5,7 @@ import {
   signal,
   computed,
   DestroyRef,
+  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -40,6 +41,7 @@ export class GameHub {
   readonly questionCount = signal<number>(10);
   readonly isStarting = signal<boolean>(false);
   readonly showStats = signal<boolean>(false);
+  readonly flagImageLoadFailed = signal<boolean>(false);
 
   // Collapse state
   private readonly _isCollapsed = signal<boolean>(false);
@@ -166,6 +168,11 @@ export class GameHub {
   });
 
   constructor() {
+    effect(() => {
+      this.quizStateService.currentQuestion()?.id;
+      this.flagImageLoadFailed.set(false);
+    });
+
     // Register cleanup for timers on component destroy
     this.destroyRef.onDestroy(() => {
       if (this.startingTimer) clearTimeout(this.startingTimer);
@@ -192,6 +199,7 @@ export class GameHub {
         questionCount: this.questionCount(),
       };
 
+      this.flagImageLoadFailed.set(false);
       this.quizStateService.startGame(config);
     } catch (error) {
       this.logger.error('Failed to start game:', error, 'GameHub');
@@ -213,6 +221,7 @@ export class GameHub {
 
   // Reset game
   resetGame(): void {
+    this.flagImageLoadFailed.set(false);
     this.quizStateService.resetToIdle();
     this.isStarting.set(false);
   }
@@ -327,6 +336,7 @@ export class GameHub {
   }
 
   returnToExplore(): void {
+    this.flagImageLoadFailed.set(false);
     this.quizStateService.resetToIdle();
   }
 
@@ -343,10 +353,11 @@ export class GameHub {
     }
   }
 
-  onFlagError(event: Event): void {
-    const img = event.target as HTMLImageElement;
-    img.src =
-      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAiIGhlaWdodD0iNjAiIGZpbGw9IiNmMGYwZjAiLz48dGV4dCB4PSI1MCIgeT0iMzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RmxhZzwvdGV4dD48L3N2Zz4=';
-    img.alt = 'Flag not available';
+  onFlagAssetLoad(): void {
+    this.flagImageLoadFailed.set(false);
+  }
+
+  onFlagAssetError(): void {
+    this.flagImageLoadFailed.set(true);
   }
 }

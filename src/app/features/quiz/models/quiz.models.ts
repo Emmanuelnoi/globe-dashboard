@@ -31,7 +31,9 @@ export interface Question {
   metadata?: {
     countryId?: string;
     factType?: string;
-    flagUrl?: string;
+    flagAssetPath?: string;
+    flagCode?: string;
+    flagEmoji?: string;
     [key: string]: any;
   };
 }
