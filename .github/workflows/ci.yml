@@ -228,25 +228,25 @@ jobs:
       # - @modelcontextprotocol/sdk@<1.24.0 (DNS rebinding) - via @angular/cli
 
       - name: Check for critical production vulnerabilities (BLOCKING)
-        run: pnpm audit --prod --audit-level=critical
+        run: npm audit --omit=dev --audit-level=critical
         continue-on-error: false # BLOCKING - Runtime critical CVEs must be fixed immediately
 
       - name: Check for high vulnerabilities (WARNING)
         run: |
           echo "🔍 Checking for high-severity vulnerabilities..."
-          pnpm audit --audit-level=high || echo "⚠️ High vulnerabilities found (see report below)"
+          npm audit --audit-level=high || echo "⚠️ High vulnerabilities found (see report below)"
         continue-on-error: true # Non-blocking - 3 known dev-dependency issues
 
       - name: Check for moderate vulnerabilities (MONITORING)
         run: |
           echo "📊 Checking for moderate/low vulnerabilities..."
-          pnpm audit --audit-level=moderate || echo "ℹ️ Moderate vulnerabilities found - review recommended"
+          npm audit --audit-level=moderate || echo "ℹ️ Moderate vulnerabilities found - review recommended"
         continue-on-error: true # Non-blocking - for awareness only
 
       - name: Generate security report
         run: |
           echo "📄 Generating detailed security audit report..."
-          pnpm audit --json > audit-results.json || true
+          npm audit --json > audit-results.json || true
           if [ -f audit-results.json ]; then
             echo "✅ Security audit results saved to artifacts"
           fi
