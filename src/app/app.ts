@@ -29,7 +29,6 @@ import { AchievementNotificationComponent } from './shared/components/achievemen
 import { AchievementsGalleryComponent } from './features/achievements-gallery/achievements-gallery.component';
 import { CacheVersionService } from './core/services/cache-version.service';
 import { AnalyticsService } from './core/services/analytics.service';
-import { AnalyticsComponent } from './shared/components/analytics/analytics.component';
 import type {
   MigrationResult,
   DatabaseConfig,
@@ -61,7 +60,6 @@ declare global {
     UserProfileComponent,
     AchievementNotificationComponent,
     AchievementsGalleryComponent,
-    AnalyticsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -106,9 +104,6 @@ declare global {
 
       <!-- Achievement Notifications -->
       <app-achievement-notification />
-
-      <!-- Vercel Web Analytics -->
-      <app-analytics />
 
       <!-- Auth Button (Top-Right Corner, moves left in Game Quiz mode) -->
       @if (supabase.isAuthenticated()) {
