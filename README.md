@@ -9,7 +9,8 @@ Real scientific data • 60fps WebGL performance • Enterprise-quality architec
 [![Angular](<https://img.shields.io/badge/Angular-20_(Zoneless)-red?logo=angular>)](https://angular.io)
 [![Tests](https://img.shields.io/badge/tests-604_total-brightgreen)](https://github.com/Emmanuelnoi/3d-global-dashboard)
 [![Coverage](https://img.shields.io/badge/coverage-86.4%25-brightgreen)](https://github.com/Emmanuelnoi/3d-global-dashboard)
-[![CI](https://img.shields.io/badge/CI-⭐⭐⭐⭐⭐_Enterprise-success)](https://github.com/Emmanuelnoi/3d-global-dashboard/actions)
+[![CI/CD Pipeline](https://github.com/Emmanuelnoi/globe-dashboard/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Emmanuelnoi/globe-dashboard/actions/workflows/ci.yml)
+[![Dependency Updates](https://github.com/Emmanuelnoi/globe-dashboard/actions/workflows/dependency-update.yml/badge.svg?branch=main)](https://github.com/Emmanuelnoi/globe-dashboard/actions/workflows/dependency-update.yml)
 
 [**🎯 Live Demo**](https://www.globeplay.world/) • [**📚 Case Study**](https://www.emmanuelnoi.dev/case-study/globeplay) • [**📖 Docs**](docs/README.md) • [**🏗️ Architecture**](docs/architecture/overview.md) • [**🤝 Contributing**](docs/community/CONTRIBUTING.md)
 
