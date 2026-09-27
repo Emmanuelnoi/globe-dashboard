@@ -60,8 +60,7 @@ jobs:
         continue-on-error: false
 
       - name: Run build after update
-        # Validate compilation without rewriting the tracked production environment.
-        run: pnpm run build:local
+        run: pnpm run build
         continue-on-error: false
 
       - name: Create Pull Request
