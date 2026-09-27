@@ -56,7 +56,7 @@ jobs:
           pnpm update --recursive --ignore-scripts
 
       - name: Synchronize npm lockfile
-        run: npm install --package-lock-only --ignore-scripts --legacy-peer-deps
+        run: npm install --package-lock-only --ignore-scripts
 
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=critical
