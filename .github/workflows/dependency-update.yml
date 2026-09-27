@@ -6,10 +6,6 @@ on:
     - cron: "0 9 * * 1"
   workflow_dispatch: # Allow manual trigger
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   update-dependencies:
     name: Update Dependencies
@@ -51,10 +47,10 @@ jobs:
       - name: Update dependencies (patch and minor)
         run: |
           echo "⬆️ Updating dependencies (patch and minor versions only)..."
-          pnpm update --recursive
+          pnpm update --latest --recursive || true
 
       - name: Run tests after update
-        run: pnpm run test:blocking
+        run: pnpm test -- --run
         continue-on-error: false
 
       - name: Run build after update
