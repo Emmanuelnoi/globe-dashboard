@@ -51,7 +51,9 @@ jobs:
       - name: Update dependencies (patch and minor)
         run: |
           echo "⬆️ Updating dependencies (patch and minor versions only)..."
-          pnpm update --recursive
+          # Lifecycle scripts can exceed Linux's process environment limit during a
+          # bulk update (E2BIG). CI already installs the required platform packages.
+          pnpm update --recursive --ignore-scripts
 
       - name: Run tests after update
         run: pnpm run test:blocking
