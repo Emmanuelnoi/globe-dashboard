@@ -55,6 +55,12 @@ jobs:
           # bulk update (E2BIG). CI already installs the required platform packages.
           pnpm update --recursive --ignore-scripts
 
+      - name: Synchronize npm lockfile
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=critical
+
       - name: Run tests after update
         run: pnpm run test:blocking
         continue-on-error: false
